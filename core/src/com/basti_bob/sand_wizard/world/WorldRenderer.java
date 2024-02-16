@@ -2,14 +2,13 @@ package com.basti_bob.sand_wizard.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.basti_bob.sand_wizard.Player;
 import com.basti_bob.sand_wizard.cells.Cell;
-import com.basti_bob.sand_wizard.cells.solids.Empty;
-import com.basti_bob.sand_wizard.coordinateSystems.CellPos;
-import com.basti_bob.sand_wizard.coordinateSystems.ChunkPos;
 import com.basti_bob.sand_wizard.util.Array2D;
 
+import java.awt.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -30,8 +29,6 @@ public class WorldRenderer {
         this.cols = WorldConstants.CHUNK_SIZE * (WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y * 2 + 1);
 
         int numCells = rows * cols;
-
-        System.out.println("ROWS, COLS: " + rows + ", " + cols);
 
         vertices = new float[numCells * 5];
 
@@ -78,14 +75,16 @@ public class WorldRenderer {
                 Chunk chunk = chunks.get(finalChunkI, finalChunkJ);
                 if(chunk == null) continue;
 
-                ChunkPos chunkPos = chunk.getChunkPos();
-                int chunkX = chunkPos.getX();
-                int chunkY = chunkPos.getY();
+                int chunkX = chunk.posX;
+                int chunkY = chunk.posY;
+
+                Array2D<Cell> chunkGrid = chunk.getGrid();
 
                 executor.submit(() -> {
 
                     for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
                         for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
+
 
                             int cellIndexX = finalChunkI * WorldConstants.CHUNK_SIZE + i;
                             int cellIndexY = finalChunkJ * WorldConstants.CHUNK_SIZE + j;
@@ -93,12 +92,10 @@ public class WorldRenderer {
                             int cellIndex = cellIndexY * rows + cellIndexX;
                             int vertexI = cellIndex * 5;
 
-                            Array2D<Cell> chunkGrid = chunk.getGrid();
-
                             Color color = chunkGrid.get(i, j).color;
 
-                            int xOff = (chunkX * WorldConstants.CHUNK_SIZE + i) * WorldConstants.CELL_SIZE;
-                            int yOff = (chunkY * WorldConstants.CHUNK_SIZE + j) * WorldConstants.CELL_SIZE;
+                            float xOff = (chunkX * WorldConstants.CHUNK_SIZE + i) * WorldConstants.CELL_SIZE;
+                            float yOff = (chunkY * WorldConstants.CHUNK_SIZE + j) * WorldConstants.CELL_SIZE;
 
                             vertices[vertexI] = xOff;
                             vertices[vertexI + 1] = yOff;
@@ -107,7 +104,7 @@ public class WorldRenderer {
                             vertices[vertexI + 4] = color.b;
                         }
                     }
-                });
+               });
 
             }
         }
@@ -119,7 +116,7 @@ public class WorldRenderer {
             System.err.println("Executor interrupted");
         }
 
-        System.out.println("setting Colors took: " + (System.nanoTime() - start) / 1e6 + " ms");
+        //System.out.println("setting Colors took: " + (System.nanoTime() - start) / 1e6 + " ms");
 
         start = System.nanoTime();
         mesh.setVertices(vertices); // send our array of vertex information to the mesh
@@ -127,6 +124,6 @@ public class WorldRenderer {
         shader.setUniformMatrix("u_proj", camera.combined); // use the camera's perspective when drawing
         mesh.render(shader, GL20.GL_POINTS); // draw the points in the mesh
 
-        System.out.println("transfer and render took: " + (System.nanoTime() - start) / 1e6 + " ms");
+        //System.out.println("transfer and render took: " + (System.nanoTime() - start) / 1e6 + " ms");
     }
 }

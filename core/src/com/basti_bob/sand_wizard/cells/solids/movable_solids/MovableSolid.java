@@ -1,9 +1,10 @@
 package com.basti_bob.sand_wizard.cells.solids.movable_solids;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.basti_bob.sand_wizard.coordinateSystems.CellPos;
-import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
+import com.basti_bob.sand_wizard.world.Chunk;
+import com.basti_bob.sand_wizard.world.ChunkAccessor;
+import com.basti_bob.sand_wizard.world.World;
 
 public abstract class MovableSolid extends Solid {
 
@@ -22,23 +23,18 @@ public abstract class MovableSolid extends Solid {
     }
 
     @Override
-    public void update() {
-        super.update();
-
-        boolean spaceBelow = canMoveToOrSwap(x, y+1);
-
-        if (spaceBelow) {
-            //this.velocity.add(this.getGravity());
-
-            this.moveTo(below); // + (int) this.velocity.y);
+    public void update(ChunkAccessor chunkAccessor, int inChunkX, int inChunkY, boolean updateDirection) {
+        super.update(chunkAccessor, inChunkX, inChunkY, updateDirection);
+//
+//
+        if (chunkAccessor.moveToIfEmpty(this, posX, posY - 1)) return;
+        if (updateDirection) {
+            if (chunkAccessor.moveToIfEmpty(this, posX + 1, posY - 1)) return;
+            chunkAccessor.moveToIfEmpty(this, posX - 1, posY - 1);
         } else {
-            this.velocity.y = -1;
+            if (chunkAccessor.moveToIfEmpty(this, posX - 1, posY - 1)) return;
+            chunkAccessor.moveToIfEmpty(this, posX + 1, posY - 1);
 
-            if (canMoveToOrSwap(new CellPos(x + 1, y - 1))) {
-                this.moveTo(new CellPos(x + 1, y - 1));
-            } else if (canMoveToOrSwap(new CellPos(x - 1, y - 1))) {
-                this.moveTo(new CellPos(x - 1, y - 1));
-            }
         }
     }
 

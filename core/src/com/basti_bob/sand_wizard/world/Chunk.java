@@ -3,9 +3,6 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
-import com.basti_bob.sand_wizard.coordinateSystems.CellPos;
-import com.basti_bob.sand_wizard.coordinateSystems.ChunkPos;
-import com.basti_bob.sand_wizard.coordinateSystems.InChunkPos;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.UseWithCare;
 
@@ -14,13 +11,14 @@ public class Chunk {
 
     private final Array2D<Cell> grid;
     private final World world;
-    private final ChunkPos chunkPos;
+    public final int posX, posY;
 
     private boolean active = true;
 
-    private Chunk(World world, ChunkPos chunkPos) {
+    public Chunk(World world, int posX, int posY) {
         this.world = world;
-        this.chunkPos = chunkPos;
+        this.posX = posX;
+        this.posY = posY;
         this.grid = new Array2D<>(Cell.class, WorldConstants.CHUNK_SIZE, WorldConstants.CHUNK_SIZE);
     }
 
@@ -29,81 +27,88 @@ public class Chunk {
         return grid;
     }
 
-    public ChunkPos getChunkPos() {
-        return chunkPos;
+    public void setCell(CellType cellType, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
+        grid.set(inChunkPosX, inChunkPosY, cellType.createCell(world, cellPosX, cellPosY));
     }
 
-    public void setCell(CellType cellType, CellPos cellPos, InChunkPos inChunkPos) {
-        grid.set(inChunkPos.getX(), inChunkPos.getY(), cellType.createCell(world, cellPos.getX(), cellPos.getY()));
+    public void setCell(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
+        cell.posX = cellPosX;
+        cell.posY = cellPosY;
+
+        grid.set(inChunkPosX, inChunkPosY, cell);
     }
 
-    public void setCell(Cell cell, CellPos cellPos, InChunkPos inChunkPos) {
-        cell.x = cellPos.getX();
-        cell.y = cellPos.getY();
-
-        grid.set(inChunkPos.getX(), inChunkPos.getY(), cell);
+    public void setCell(Cell cell, int cellPosX, int cellPosY) {
+        setCell(cell, cellPosX, cellPosY, World.getInChunkPos(cellPosX), World.getInChunkPos(cellPosY));
     }
 
-    public void setCell(Cell cell, CellPos cellPos) {
-        setCell(cell, cellPos, cellPos.getInChunkPos());
+    public void setCell(CellType cellType, int cellPosX, int cellPosY) {
+        setCell(cellType, cellPosX, cellPosY, World.getInChunkPos(cellPosX), World.getInChunkPos(cellPosY));
     }
 
-    public void setCell(CellType cellType, CellPos cellPos) {
-        setCell(cellType, cellPos, cellPos.getInChunkPos());
+    private void setCellWithChunkPos(CellType cellType, int inChunkPosX, int inChunkPosY) {
+        setCell(cellType, getCellPosX(inChunkPosX), getCellPosY(inChunkPosY), inChunkPosX, inChunkPosY);
     }
 
-    private void setCell(CellType cellType, InChunkPos inChunkPos) {
-        setCell(cellType, getCellPos(inChunkPos), inChunkPos);
+    public int getCellPosX(int inChunkPosX) {
+        return inChunkPosX + WorldConstants.CHUNK_SIZE * this.posX;
     }
 
-
-    public CellPos getCellPos(InChunkPos inChunkPos) {
-        int cellX = inChunkPos.getX() + WorldConstants.CHUNK_SIZE * this.chunkPos.getX();
-        int cellY = inChunkPos.getY() + WorldConstants.CHUNK_SIZE * this.chunkPos.getY();
-
-        return new CellPos(cellX, cellY);
+    public int getCellPosY(int inChunkPosY) {
+        return inChunkPosY + WorldConstants.CHUNK_SIZE * this.posY;
     }
 
-    public Cell getCell(InChunkPos inChunkPos) {
-        return grid.get(inChunkPos.getX(), inChunkPos.getY());
+    public Cell getCellFromInChunkPos(int inChunkPosX, int inChunkPosY) {
+        return grid.get(inChunkPosX, inChunkPosY);
     }
 
     public void update(boolean updateDirection) {
+        Chunk[][] neighborChunks = new Chunk[3][3];
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (i == 1 && j == 1) {
+                    neighborChunks[i][j] = this;
+                } else {
+                    neighborChunks[i][j] = world.getChunkFromChunkPos(this.posX + i - 1, this.posY + j - 1);
+                }
+            }
+        }
 
-        for (int y = 0; y < WorldConstants.CHUNK_SIZE; y++) {
-            for (int x = 0; x < WorldConstants.CHUNK_SIZE; x++) {
+        ChunkAccessor chunkAccessor = new ChunkAccessor(neighborChunks);
 
-                int xIndex = updateDirection ? x : WorldConstants.CHUNK_SIZE - x - 1;
+        for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
+            for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {
 
-                Cell cell = grid.get(xIndex, y);
+
+                int xIndex = updateDirection ? inChunkX : WorldConstants.CHUNK_SIZE - inChunkX - 1;
+
+                Cell cell = grid.get(xIndex, inChunkY);
 
                 if (cell.hasMoved || cell instanceof Empty) continue;
 
-                cell.update();
+                cell.update(chunkAccessor, xIndex, inChunkY, updateDirection);
             }
         }
     }
 
-    public static Chunk loadOrCreate(World world, ChunkPos chunkPos) {
-        return generateNew(world, chunkPos);
+    public static Chunk loadOrCreate(World world, int chunkPosX, int chunkPosY) {
+        return generateNew(world, chunkPosX, chunkPosY);
     }
 
-    public static Chunk generateNew(World world, ChunkPos chunkPos) {
-        Chunk chunk = new Chunk(world, chunkPos);
+    public static Chunk generateNew(World world, int chunkPosX, int chunkPosY) {
+        Chunk chunk = new Chunk(world, chunkPosX, chunkPosY);
 
         for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
             for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
-                chunk.setCell(CellType.SAND, new InChunkPos(i, j));
+                chunk.setCellWithChunkPos(CellType.EMPTY, i, j);
             }
         }
 
-        for(int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
-            chunk.setCell(CellType.STONE, new InChunkPos(i, 0));
-            chunk.setCell(CellType.STONE, new InChunkPos(i, 31));
-            chunk.setCell(CellType.STONE, new InChunkPos(0, i));
-            chunk.setCell(CellType.STONE, new InChunkPos(31, i));
-        }
-        //chunk.setCell(CellType.SAND, new InChunkPos(WorldConstants.CHUNK_SIZE / 2, WorldConstants.CHUNK_SIZE / 2));
+//        for (int i = 4; i < WorldConstants.CHUNK_SIZE - 4; i++) {
+//            chunk.setCellWithChunkPos(CellType.SAND, i, 16);
+//        }
+
+       //chunk.setCellWithChunkPos(CellType.STONE, 0, 0);
 
         return chunk;
     }

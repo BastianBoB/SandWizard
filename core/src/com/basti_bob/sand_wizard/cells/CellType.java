@@ -3,6 +3,7 @@ package com.basti_bob.sand_wizard.cells;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.basti_bob.sand_wizard.cells.solids.immovable_solids.Stone;
+import com.basti_bob.sand_wizard.cells.solids.movable_solids.Dirt;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.Sand;
@@ -22,7 +23,7 @@ public enum CellType {
 
     SAND("Sand",PhysicalState.SOLID, Sand::new, true, hC(0xB8860C), hC(0xE7B744), hC(0xF1D581)),
 
-//    DIRT("Dirt",PhysicalState.SOLID, Dirt::new, true, hC(0xA0522D), hC(0x8B4513), hC(0xD2691E)),
+    DIRT("Dirt",PhysicalState.SOLID, Dirt::new, true, hC(0xFF0000)), //hC(0xA0522D), hC(0x8B4513), hC(0xD2691E)),
 //
 //    COAL("Coal",PhysicalState.SOLID, Coal::new, true, hC(0x363232), hC(0x292929), hC(0x393939)),
 //
