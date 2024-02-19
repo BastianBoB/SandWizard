@@ -100,13 +100,13 @@ public class Chunk {
 
         for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
             for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
-                chunk.setCellWithChunkPos(CellType.EMPTY, i, j);
+                chunk.setCellWithChunkPos(CellType.SAND, i, j);
             }
         }
 
-//        for (int i = 4; i < WorldConstants.CHUNK_SIZE - 4; i++) {
-//            chunk.setCellWithChunkPos(CellType.SAND, i, 16);
-//        }
+        for (int i = 4; i < WorldConstants.CHUNK_SIZE - 4; i++) {
+            chunk.setCellWithChunkPos(CellType.SAND, i, 16);
+        }
 
        //chunk.setCellWithChunkPos(CellType.STONE, 0, 0);
 

@@ -56,7 +56,7 @@ public class Player {
 
         for (int i = -loadX; i <= loadX; i++) {
             for (int j = -loadY; j <= loadY; j++) {
-                //world.loadOrCreateChunk(chunkPosX + i, chunkPosY + j);
+                world.loadOrCreateChunk(chunkPosX + i, chunkPosY + j);
             }
         }
     }

@@ -5,14 +5,9 @@ import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
-
-//MULTIHREADING CHUNKS VON UNTEN NACH OBEN (LEIDER)
-//ALSO VLLT LISTE (3 getrennte) VON ARRAYLIST (X) VON ARRAYLIST (Y)
-HAHA DU MUSST DAS HIER LESEN MUHAHAH
+import java.util.stream.Stream;
 
 
 public class World {
@@ -22,24 +17,22 @@ public class World {
     private boolean updateDirection;
 
     private final ArrayList<Chunk> chunks = new ArrayList<>();
-    private final ArrayList<Chunk>[] chunkUpdatingGrid = new ArrayList[9];
+    private final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingGrid = new TreeMap<>();
+
     private final ArrayList<Long> chunksToLoad = new ArrayList<>();
     private final HashMap<Long, Chunk> chunkLUT = new HashMap<>();
 
     public World() {
-        for (int i = 0; i < 9; i++) {
-            chunkUpdatingGrid[i] = new ArrayList<>();
-        }
 
 //        for(int i = 0; i <= 0; i++) {
 //            loadOrCreateChunk(0, i);
 //        }
-        loadOrCreateChunk(0, 0);
-        loadOrCreateChunk(0, -1);
-        setCell(CellType.SAND, 1, 20);
-        setCell(CellType.SAND, 1, 21);
-        setCell(CellType.SAND, 1, 22);
-        setCell(CellType.SAND, 1, 23);
+//        loadOrCreateChunk(0, 0);
+//        loadOrCreateChunk(0, -1);
+//        setCell(CellType.SAND, 1, 20);
+//        setCell(CellType.SAND, 1, 21);
+//        setCell(CellType.SAND, 1, 22);
+//        setCell(CellType.SAND, 1, 23);
 
 
 //        int r = 5;
@@ -74,25 +67,28 @@ public class World {
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
-        for (int i = 0; i < 9; i++) {
-            ArrayList<Chunk> distancedChunks = chunkUpdatingGrid[i];
-            List<Future<?>> futures = new ArrayList<>(); // List to hold futures of submitted tasks
+        for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkUpdatingGrid.values()) {
+            System.out.println(worldUpdatingChunkRow.chunkPosY);
 
+            for (int i = 0; i < 3; i++) {
+                ArrayList<Chunk> seperatedChunks = worldUpdatingChunkRow.separateChunksList[i];
 
-            for (Chunk chunk : distancedChunks) {
+                List<Future<?>> futures = new ArrayList<>(); // List to hold futures of submitted tasks
 
-                futures.add(executor.submit(() -> {
-                    chunk.update(updateDirection);
-                }));
-            }
+                for (Chunk chunk : seperatedChunks) {
 
-            // Wait for all tasks submitted in this iteration to complete
-            for (Future<?> future : futures) {
-                try {
-                    future.get(); // Wait for completion of each task
-                } catch (InterruptedException | ExecutionException e) {
-                    // Handle exceptions if necessary
-                    e.printStackTrace();
+                    futures.add(executor.submit(() -> {
+                        chunk.update(updateDirection);
+                    }));
+                }
+
+                //Wait for all tasks submitted in this iteration to complete
+                for (Future<?> future : futures) {
+                    try {
+                        future.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -152,20 +148,26 @@ public class World {
         chunks.add(chunk);
         chunkLUT.put(getChunkKey(chunk.posX, chunk.posY), chunk);
 
-        int i = Math.floorMod(chunk.posX, 3);
-        int j = Math.floorMod(chunk.posY, 3);
-        int index = i * 3 + j;
-        chunkUpdatingGrid[index].add(chunk);
+        WorldUpdatingChunkRow chunkRow = chunkUpdatingGrid.get(chunk.posY);
+
+        if (chunkRow == null) {
+            chunkRow = new WorldUpdatingChunkRow(chunk.posY);
+            chunkUpdatingGrid.put(chunk.posY, chunkRow);
+        }
+        chunkRow.addChunk(chunk);
     }
 
     public void removeChunk(Chunk chunk) {
         chunks.remove(chunk);
         chunkLUT.remove(getChunkKey(chunk.posX, chunk.posY));
 
-        int i = chunk.posX % 3;
-        int j = chunk.posY % 3;
-        int index = i * 3 + j;
-        chunkUpdatingGrid[index].remove(chunk);
+        WorldUpdatingChunkRow chunkRow = chunkUpdatingGrid.get(chunk.posY);
+
+        chunkRow.removeChunk(chunk);
+
+        if (chunkRow.isEmpty()) {
+            chunkUpdatingGrid.remove(chunk.posY);
+        }
     }
 
 

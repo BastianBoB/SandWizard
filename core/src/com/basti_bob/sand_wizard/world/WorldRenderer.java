@@ -66,14 +66,14 @@ public class WorldRenderer {
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
-        for(int chunkI = 0; chunkI < chunks.rows; chunkI++) {
-            for(int chunkJ = 0; chunkJ < chunks.cols; chunkJ++) {
+        for (int chunkI = 0; chunkI < chunks.rows; chunkI++) {
+            for (int chunkJ = 0; chunkJ < chunks.cols; chunkJ++) {
 
                 int finalChunkI = chunkI;
                 int finalChunkJ = chunkJ;
 
                 Chunk chunk = chunks.get(finalChunkI, finalChunkJ);
-                if(chunk == null) continue;
+                if (chunk == null) continue;
 
                 int chunkX = chunk.posX;
                 int chunkY = chunk.posY;
@@ -104,7 +104,7 @@ public class WorldRenderer {
                             vertices[vertexI + 4] = color.b;
                         }
                     }
-               });
+                });
 
             }
         }

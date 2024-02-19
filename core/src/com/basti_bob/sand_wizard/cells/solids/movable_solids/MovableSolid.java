@@ -25,8 +25,7 @@ public abstract class MovableSolid extends Solid {
     @Override
     public void update(ChunkAccessor chunkAccessor, int inChunkX, int inChunkY, boolean updateDirection) {
         super.update(chunkAccessor, inChunkX, inChunkY, updateDirection);
-//
-//
+
         if (chunkAccessor.moveToIfEmpty(this, posX, posY - 1)) return;
         if (updateDirection) {
             if (chunkAccessor.moveToIfEmpty(this, posX + 1, posY - 1)) return;
@@ -34,7 +33,6 @@ public abstract class MovableSolid extends Solid {
         } else {
             if (chunkAccessor.moveToIfEmpty(this, posX - 1, posY - 1)) return;
             chunkAccessor.moveToIfEmpty(this, posX + 1, posY - 1);
-
         }
     }
 
