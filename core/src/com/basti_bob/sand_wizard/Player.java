@@ -31,8 +31,8 @@ public class Player {
         int chunkPosX = World.getChunkPos((int) x);
         int chunkPosY = World.getChunkPos((int) y);
 
-        int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
-        int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
+        int loadX = WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X;
+        int loadY = WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_Y;
 
         Array2D<Chunk> chunks = new Array2D<>(Chunk.class, loadX * 2 + 1, loadY * 2 + 1);
 

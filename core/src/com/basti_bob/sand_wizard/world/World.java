@@ -49,18 +49,18 @@ public class World {
 
     public void update() {
 
-        for (Chunk chunk : chunks) {
-            Array2D<Cell> grid = chunk.getGrid();
-
-            for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
-                for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
-                    grid.get(i, j).hasMoved = false;
-                }
-            }
-        }
-
-
         long start = System.nanoTime();
+
+//        for (Chunk chunk : chunks) {
+//            Array2D<Cell> grid = chunk.getGrid();
+//
+//            for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
+//                for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
+//                    grid.get(i, j).hasMoved = false;
+//                }
+//            }
+//        }
+
 
         updateDirection = !updateDirection;
 
@@ -68,14 +68,13 @@ public class World {
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
         for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkUpdatingGrid.values()) {
-            System.out.println(worldUpdatingChunkRow.chunkPosY);
 
             for (int i = 0; i < 3; i++) {
-                ArrayList<Chunk> seperatedChunks = worldUpdatingChunkRow.separateChunksList[i];
+                ArrayList<Chunk> separatedChunks = worldUpdatingChunkRow.separateChunksList[i];
 
                 List<Future<?>> futures = new ArrayList<>();
 
-                for (Chunk chunk : seperatedChunks) {
+                for (Chunk chunk : separatedChunks) {
 
                     futures.add(executor.submit(() -> {
                         chunk.update(updateDirection);
@@ -155,6 +154,18 @@ public class World {
             chunkUpdatingGrid.put(chunk.posY, chunkRow);
         }
         chunkRow.addChunk(chunk);
+
+        for(int i = -1; i <= 1; i++) {
+            for(int j = -1; j <= 1; j++) {
+                if(i == 0 && j == 0) continue;
+
+                Chunk neighbourChunk = getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
+
+                if(neighbourChunk == null) continue;
+
+                neighbourChunk.chunkAccessor.setSurroundingChunk(chunk);
+            }
+        }
     }
 
     public void removeChunk(Chunk chunk) {

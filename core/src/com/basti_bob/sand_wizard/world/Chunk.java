@@ -4,7 +4,6 @@ import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.util.Array2D;
-import com.basti_bob.sand_wizard.util.UseWithCare;
 
 public class Chunk {
 
@@ -12,17 +11,17 @@ public class Chunk {
     private final Array2D<Cell> grid;
     private final World world;
     public final int posX, posY;
-
     private boolean active = true;
+    public final ChunkAccessor chunkAccessor;
 
     public Chunk(World world, int posX, int posY) {
         this.world = world;
         this.posX = posX;
         this.posY = posY;
         this.grid = new Array2D<>(Cell.class, WorldConstants.CHUNK_SIZE, WorldConstants.CHUNK_SIZE);
+        this.chunkAccessor = new ChunkAccessor(this);
     }
 
-    @UseWithCare("Only for access in WorldRenderer")
     public Array2D<Cell> getGrid() {
         return grid;
     }
@@ -63,18 +62,18 @@ public class Chunk {
     }
 
     public void update(boolean updateDirection) {
-        Chunk[][] neighborChunks = new Chunk[3][3];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (i == 1 && j == 1) {
-                    neighborChunks[i][j] = this;
-                } else {
-                    neighborChunks[i][j] = world.getChunkFromChunkPos(this.posX + i - 1, this.posY + j - 1);
-                }
-            }
-        }
-
-        ChunkAccessor chunkAccessor = new ChunkAccessor(neighborChunks);
+//        Chunk[][] neighborChunks = new Chunk[3][3];
+//        for (int i = 0; i < 3; i++) {
+//            for (int j = 0; j < 3; j++) {
+//                if (i == 1 && j == 1) {
+//                    neighborChunks[i][j] = this;
+//                } else {
+//                    neighborChunks[i][j] = world.getChunkFromChunkPos(this.posX + i - 1, this.posY + j - 1);
+//                }
+//            }
+//        }
+//
+//        ChunkAccessor chunkAccessor = new ChunkAccessor(neighborChunks);
 
         for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
             for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {

@@ -25,8 +25,8 @@ public class WorldRenderer {
     public WorldRenderer(World world, Camera camera) {
         this.world = world;
         this.camera = camera;
-        this.rows = WorldConstants.CHUNK_SIZE * (WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X * 2 + 1);
-        this.cols = WorldConstants.CHUNK_SIZE * (WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y * 2 + 1);
+        this.rows = WorldConstants.CHUNK_SIZE * (WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1);
+        this.cols = WorldConstants.CHUNK_SIZE * (WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_Y * 2 + 1);
 
         int numCells = rows * cols;
 
@@ -77,25 +77,26 @@ public class WorldRenderer {
 
                 int chunkX = chunk.posX;
                 int chunkY = chunk.posY;
+                final int chunkSize = WorldConstants.CHUNK_SIZE;
 
                 Array2D<Cell> chunkGrid = chunk.getGrid();
 
                 executor.submit(() -> {
 
-                    for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
-                        for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
+                    for (int i = 0; i < chunkSize; i++) {
+                        for (int j = 0; j < chunkSize; j++) {
 
 
-                            int cellIndexX = finalChunkI * WorldConstants.CHUNK_SIZE + i;
-                            int cellIndexY = finalChunkJ * WorldConstants.CHUNK_SIZE + j;
+                            int cellIndexX = finalChunkI * chunkSize + i;
+                            int cellIndexY = finalChunkJ * chunkSize + j;
 
                             int cellIndex = cellIndexY * rows + cellIndexX;
                             int vertexI = cellIndex * 5;
 
                             Color color = chunkGrid.get(i, j).color;
 
-                            float xOff = (chunkX * WorldConstants.CHUNK_SIZE + i) * WorldConstants.CELL_SIZE;
-                            float yOff = (chunkY * WorldConstants.CHUNK_SIZE + j) * WorldConstants.CELL_SIZE;
+                            float xOff = (chunkX * chunkSize - chunkSize / 2f + i) * WorldConstants.CELL_SIZE;
+                            float yOff = (chunkY * chunkSize - chunkSize / 2f + j) * WorldConstants.CELL_SIZE;
 
                             vertices[vertexI] = xOff;
                             vertices[vertexI + 1] = yOff;

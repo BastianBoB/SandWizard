@@ -9,13 +9,19 @@ public class ChunkAccessor {
     private final Chunk[][] surroundingChunks;
     private final int centerChunkX, centerChunkY;
 
-    public ChunkAccessor(Chunk[][] surroundingChunks) {
-        this.surroundingChunks = surroundingChunks;
-
-        Chunk centerChunk = surroundingChunks[1][1];
+    public ChunkAccessor(Chunk centerChunk) {
+        this.surroundingChunks = new Chunk[3][3];
+        this.surroundingChunks[1][1] = centerChunk;
 
         this.centerChunkX = centerChunk.posX;
         this.centerChunkY = centerChunk.posY;
+    }
+
+    public void setSurroundingChunk(Chunk chunk) {
+        int gridX = chunk.posX - centerChunkX + 1;
+        int gridY = chunk.posY - centerChunkY + 1;
+
+        surroundingChunks[gridX][gridY] = chunk;
     }
 
     private Cell getCell(int targetX, int targetY) {

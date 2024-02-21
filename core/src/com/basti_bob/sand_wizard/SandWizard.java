@@ -31,10 +31,8 @@ public class SandWizard extends ApplicationAdapter {
     public void render() {
         System.out.println("fps: " + Gdx.graphics.getFramesPerSecond());
 
-
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
 
         //player.x += 0.9;
         //player.y += 0.9;
@@ -44,9 +42,16 @@ public class SandWizard extends ApplicationAdapter {
         camera.update();
 
         player.update();
-            world.update();
+
+
+
+        world.update();
+
+        long start = System.nanoTime();
 
         worldRenderer.render(player);
+
+        System.out.println("rendering world took: " + (System.nanoTime() - start) / 1e6 + " ms");
     }
 
 
