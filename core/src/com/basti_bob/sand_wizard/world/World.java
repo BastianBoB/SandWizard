@@ -73,7 +73,7 @@ public class World {
             for (int i = 0; i < 3; i++) {
                 ArrayList<Chunk> seperatedChunks = worldUpdatingChunkRow.separateChunksList[i];
 
-                List<Future<?>> futures = new ArrayList<>(); // List to hold futures of submitted tasks
+                List<Future<?>> futures = new ArrayList<>();
 
                 for (Chunk chunk : seperatedChunks) {
 
