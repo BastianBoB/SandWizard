@@ -8,8 +8,8 @@ public class WorldConstants {
     public static final int PLAYER_CHUNK_RENDER_RADIUS_X = 11;
     public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = 6;
 
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = 11;
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = 7;
+    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = 4;
+    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = 2;
 
     public static final boolean USE_MULTITHREADING = false;
 }

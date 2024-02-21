@@ -62,18 +62,6 @@ public class Chunk {
     }
 
     public void update(boolean updateDirection) {
-//        Chunk[][] neighborChunks = new Chunk[3][3];
-//        for (int i = 0; i < 3; i++) {
-//            for (int j = 0; j < 3; j++) {
-//                if (i == 1 && j == 1) {
-//                    neighborChunks[i][j] = this;
-//                } else {
-//                    neighborChunks[i][j] = world.getChunkFromChunkPos(this.posX + i - 1, this.posY + j - 1);
-//                }
-//            }
-//        }
-//
-//        ChunkAccessor chunkAccessor = new ChunkAccessor(neighborChunks);
 
         for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
             for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {

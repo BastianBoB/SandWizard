@@ -49,7 +49,6 @@ public class World {
 
     public void update() {
 
-        long start = System.nanoTime();
 
 //        for (Chunk chunk : chunks) {
 //            Array2D<Cell> grid = chunk.getGrid();
@@ -100,7 +99,6 @@ public class World {
             System.err.println("Executor interrupted");
         }
 
-        System.out.println("updating " + chunks.size() + " chunks took:" + (System.nanoTime() - start) / 1e6 + " ms");
     }
 
     public static int getChunkPos(int cellPos) {
@@ -135,6 +133,23 @@ public class World {
         return chunkLUT.get(getChunkKey(chunkPosX, chunkPosY));
     }
 
+    public void unloadChunk(int chunkPosX, int chunkPosY) {
+        if (!this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) {
+            System.out.println("NO CHUNK: " + chunkPosX + ", " + chunkPosY);
+            return;
+        }
+
+        Chunk chunk = this.getChunkFromChunkPos(chunkPosX, chunkPosY);
+
+        if(chunk == null) {
+            System.out.println("NO CHUNK: " + chunkPosX + ", " + chunkPosY);
+        }
+
+        this.removeChunk(chunk);
+        System.out.println("FINISHED " + chunkPosX + ", " + chunkPosY);
+
+    }
+
     public void loadOrCreateChunk(int chunkPosX, int chunkPosY) {
         if (this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
@@ -155,13 +170,13 @@ public class World {
         }
         chunkRow.addChunk(chunk);
 
-        for(int i = -1; i <= 1; i++) {
-            for(int j = -1; j <= 1; j++) {
-                if(i == 0 && j == 0) continue;
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) continue;
 
                 Chunk neighbourChunk = getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
 
-                if(neighbourChunk == null) continue;
+                if (neighbourChunk == null) continue;
 
                 neighbourChunk.chunkAccessor.setSurroundingChunk(chunk);
             }
@@ -180,33 +195,33 @@ public class World {
             chunkUpdatingGrid.remove(chunk.posY);
         }
     }
-
-
-    public Cell getCell(int cellPosX, int cellPosY) {
-        return getCell(cellPosX, cellPosY, getChunkPos(cellPosX), getChunkPos(cellPosY));
-    }
-
-    public Cell getCell(int cellPosX, int cellPosY, int chunkPosX, int chunkPosY) {
-        return getChunkFromChunkPos(chunkPosX, chunkPosY).getCellFromInChunkPos(getInChunkPos(cellPosX), getInChunkPos(cellPosY));
-    }
-
-    public void setCell(CellType cellType, int cellPosX, int cellPosY) {
-        getChunkFromCellPos(cellPosX, cellPosY).setCell(cellType, cellPosX, cellPosY);
-    }
-
-    public void setCell(Cell cell, int cellPosX, int cellPosY) {
-        getChunkFromCellPos(cellPosX, cellPosY).setCell(cell, cellPosX, cellPosY);
-    }
-
-    public boolean isEmpty(int cellPosX, int cellPosY) {
-        int chunkPosX = getChunkPos(cellPosX);
-        int chunkPosY = getChunkPos(cellPosY);
-
-        if (!hasChunkFromChunkPos(chunkPosX, chunkPosY)) return false;
-
-        return false;
-
-        //return getCell(cellPosX, cellPosY, chunkPosX, chunkPosY) instanceof Empty;
-    }
+//
+//
+//    public Cell getCell(int cellPosX, int cellPosY) {
+//        return getCell(cellPosX, cellPosY, getChunkPos(cellPosX), getChunkPos(cellPosY));
+//    }
+//
+//    public Cell getCell(int cellPosX, int cellPosY, int chunkPosX, int chunkPosY) {
+//        return getChunkFromChunkPos(chunkPosX, chunkPosY).getCellFromInChunkPos(getInChunkPos(cellPosX), getInChunkPos(cellPosY));
+//    }
+//
+//    public void setCell(CellType cellType, int cellPosX, int cellPosY) {
+//        getChunkFromCellPos(cellPosX, cellPosY).setCell(cellType, cellPosX, cellPosY);
+//    }
+//
+//    public void setCell(Cell cell, int cellPosX, int cellPosY) {
+//        getChunkFromCellPos(cellPosX, cellPosY).setCell(cell, cellPosX, cellPosY);
+//    }
+//
+//    public boolean isEmpty(int cellPosX, int cellPosY) {
+//        int chunkPosX = getChunkPos(cellPosX);
+//        int chunkPosY = getChunkPos(cellPosY);
+//
+//        if (!hasChunkFromChunkPos(chunkPosX, chunkPosY)) return false;
+//
+//        return false;
+//
+//        //return getCell(cellPosX, cellPosY, chunkPosX, chunkPosY) instanceof Empty;
+//    }
 
 }
