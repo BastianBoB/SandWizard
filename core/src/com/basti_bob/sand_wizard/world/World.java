@@ -51,8 +51,9 @@ public class World {
 
     public void update() {
         int height = 100;
+        ++updateTimes;
 
-        if(++updateTimes >= 100) {
+        if (updateTimes >= 100) {
             setCell(CellType.SAND, -1, height + 1);
             setCell(CellType.STONE, -1, height + 3);
             setCell(CellType.WATER, -1, height + 5);
@@ -96,11 +97,9 @@ public class World {
 
                 for (Chunk chunk : separatedChunks) {
 
-                    if(!chunk.isActive()) continue;
+                    if (!chunk.isActive()) continue;
 
-                    //futures.add(executor.submit(() -> {
-                    chunk.update(updateDirection);
-                    //}));
+                    futures.add(executor.submit(() -> chunk.update(updateDirection)));
                 }
 
                 //Wait for all tasks submitted in this iteration to complete

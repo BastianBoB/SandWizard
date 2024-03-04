@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.Player;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.util.Array2D;
@@ -22,7 +23,12 @@ public class WorldRenderer {
     private final float[] vertices;
     private final int rows, cols;
 
+    private final ShapeRenderer shapeRenderer;
+
+
     public WorldRenderer(World world, Camera camera) {
+        this.shapeRenderer = new ShapeRenderer();
+
         this.world = world;
         this.camera = camera;
         this.rows = WorldConstants.CHUNK_SIZE * (WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1);
@@ -58,13 +64,11 @@ public class WorldRenderer {
     public void render(Player player) {
         long start = System.nanoTime();
 
-//        CellPos offset = new CellPos(player.getChunkPos().getX() * WorldConstants.CHUNK_SIZE,
-//                player.getChunkPos().getY() * WorldConstants.CHUNK_SIZE);
-
         Array2D<Chunk> chunks = player.getRenderingChunks();
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        final int chunkSize = WorldConstants.CHUNK_SIZE;
 
         for (int chunkI = 0; chunkI < chunks.rows; chunkI++) {
             for (int chunkJ = 0; chunkJ < chunks.cols; chunkJ++) {
@@ -75,17 +79,14 @@ public class WorldRenderer {
                 Chunk chunk = chunks.get(finalChunkI, finalChunkJ);
                 if (chunk == null) continue;
 
-                int chunkX = chunk.posX;
-                int chunkY = chunk.posY;
-                final int chunkSize = WorldConstants.CHUNK_SIZE;
+                float chunkRenderX = (chunk.posX * chunkSize - chunkSize / 2f) * WorldConstants.CELL_SIZE;
+                float chunkRenderY = (chunk.posY * chunkSize - chunkSize / 2f) * WorldConstants.CELL_SIZE;
 
-                Array2D<Cell> chunkGrid = chunk.getGrid();
+                final Array2D<Cell> chunkGrid = chunk.getGrid();
 
                 executor.submit(() -> {
-
                     for (int i = 0; i < chunkSize; i++) {
                         for (int j = 0; j < chunkSize; j++) {
-
 
                             int cellIndexX = finalChunkI * chunkSize + i;
                             int cellIndexY = finalChunkJ * chunkSize + j;
@@ -95,18 +96,14 @@ public class WorldRenderer {
 
                             Color color = chunkGrid.get(i, j).getColor();
 
-                            float xOff = (chunkX * chunkSize - chunkSize / 2f + i) * WorldConstants.CELL_SIZE;
-                            float yOff = (chunkY * chunkSize - chunkSize / 2f + j) * WorldConstants.CELL_SIZE;
-
-                            vertices[vertexI] = xOff;
-                            vertices[vertexI + 1] = yOff;
+                            vertices[vertexI] = chunkRenderX + i * WorldConstants.CELL_SIZE;
+                            vertices[vertexI + 1] = chunkRenderY + j * WorldConstants.CELL_SIZE;
                             vertices[vertexI + 2] = color.r;
                             vertices[vertexI + 3] = color.g;
                             vertices[vertexI + 4] = color.b;
                         }
                     }
                 });
-
             }
         }
 
@@ -120,11 +117,41 @@ public class WorldRenderer {
         //System.out.println("setting Colors took: " + (System.nanoTime() - start) / 1e6 + " ms");
 
         start = System.nanoTime();
-        mesh.setVertices(vertices); // send our array of vertex information to the mesh
+        mesh.setVertices(vertices);
         shader.bind();
-        shader.setUniformMatrix("u_proj", camera.combined); // use the camera's perspective when drawing
-        mesh.render(shader, GL20.GL_POINTS); // draw the points in the mesh
+        shader.setUniformMatrix("u_proj", camera.combined);
+        mesh.render(shader, GL20.GL_POINTS);
+
+
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        for (int chunkI = 0; chunkI < chunks.rows; chunkI++) {
+            for (int chunkJ = 0; chunkJ < chunks.cols; chunkJ++) {
+
+                Chunk chunk = chunks.get(chunkI, chunkJ);
+                if (chunk == null) continue;
+
+                float chunkRenderX = (chunk.posX * chunkSize - chunkSize / 2f) * WorldConstants.CELL_SIZE;
+                float chunkRenderY = (chunk.posY * chunkSize - chunkSize / 2f) * WorldConstants.CELL_SIZE;
+
+                renderChunkActiveDebugSquare(chunk, chunkRenderX, chunkRenderY);
+            }
+        }
+        shapeRenderer.end();
+
 
         //System.out.println("transfer and render took: " + (System.nanoTime() - start) / 1e6 + " ms");
+    }
+
+    private void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
+        if (chunk.isActive()) {
+            shapeRenderer.setColor(Color.GREEN);
+        } else {
+            shapeRenderer.setColor(Color.RED);
+        }
+
+        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 2;
+        shapeRenderer.rect(chunkRenderX, chunkRenderY, rectSize, rectSize);
     }
 }

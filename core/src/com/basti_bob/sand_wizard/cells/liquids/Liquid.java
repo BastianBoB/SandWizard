@@ -13,6 +13,7 @@ public class Liquid extends Cell implements MovingCell {
 
     private float dispersionRate;
     private float density;
+    private boolean moving;
 
     public Liquid(CellType cellType, World world, int posX, int posY) {
         super(cellType, world, posX, posY);
@@ -51,18 +52,26 @@ public class Liquid extends Cell implements MovingCell {
 
         boolean spaceBelow = canMoveToOrSwap(cellBelow);
 
-        velocity.x *= 0.95;
-
         if (spaceBelow) {
             this.velocity.add(this.getGravity());
+            this.moving = true;
         } else {
+
             this.velocity.y = -1;
 
             // if (Math.abs(velocity.x) < 1) {
             boolean spaceRight = canMoveToOrSwap(chunkAccessor.getCell(this.posX + 1, this.posY));
             boolean spaceLeft = canMoveToOrSwap(chunkAccessor.getCell(this.posX - 1, this.posY));
 
+            if(!spaceLeft && !spaceRight) {
+                this.moving = false;
+                this.velocity.x = 0;
+                return;
+            }
+            this.moving = true;
+
             int velocityModifier = 1;
+
             if (spaceLeft && spaceRight) {
                 if (velocity.x == 0) {
                     velocityModifier = updateDirection ? 1 : -1;
@@ -76,6 +85,8 @@ public class Liquid extends Cell implements MovingCell {
             this.velocity.x = velocityModifier * this.getDispersionRate();
             //}
         }
+
+        if (!moving) return;
 
         if (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1) {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
@@ -172,8 +183,8 @@ public class Liquid extends Cell implements MovingCell {
         protected float dispersionRate = 5f;
         protected float density = 1f;
 
-        public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(5f).density(1f);
-        public static final LiquidProperty OIL = new LiquidProperty().dispersionRate(2f).density(0.5f);
+        public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(6f).density(1f);
+        public static final LiquidProperty OIL = new LiquidProperty().dispersionRate(4f).density(0.5f);
 
         public LiquidProperty dispersionRate(float dispersionRate) {
             this.dispersionRate = dispersionRate;
