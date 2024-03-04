@@ -67,13 +67,7 @@ public class MovableSolid extends Solid implements MovingCell {
 
         if (!moving) return;
 
-        if (updateDirection) {
-            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return;
-            chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
-        } else {
-            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return;
-            chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
-        }
+        moveOrSwapDownLeftRight(chunkAccessor, updateDirection);
 
         trySetStationary();
     }
@@ -124,7 +118,7 @@ public class MovableSolid extends Solid implements MovingCell {
         }
 
         if (lastValidX != posX || lastValidY != posY) {
-            chunkAccessor.moveToIfEmpty(this, lastValidX, lastValidY);
+            chunkAccessor.moveToOrSwap(this, lastValidX, lastValidY);
             return true;
         }
 
@@ -150,8 +144,10 @@ public class MovableSolid extends Solid implements MovingCell {
         }
 
         if(targetCell instanceof Liquid) {
+            this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
+
             if(this.posX != lastValidX || this.posY != lastValidY) {
-                chunkAccessor.moveTo(this, lastValidX, lastValidY);
+                chunkAccessor.moveToIfEmpty(this, lastValidX, lastValidY);
             }
 
             swapWith(chunkAccessor, targetCell);

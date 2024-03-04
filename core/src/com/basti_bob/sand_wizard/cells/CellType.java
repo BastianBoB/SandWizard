@@ -31,7 +31,7 @@ public enum CellType {
 
     WATER("Water",PhysicalState.LIQUID, Liquid.LiquidProperty.WATER, Liquid::new, true, hC(0x2389da), hC(0x1ca3ec)),
 
-//    OIL("Oil",PhysicalState.LIQUID, Oil::new, true, hC(0x0E0F0E), hC(0x0B0C0B), hC(0x121312)),
+    OIL("Oil",PhysicalState.LIQUID, Liquid.LiquidProperty.OIL, Liquid::new, true, hC(0x0E0F0E), hC(0x0B0C0B), hC(0x121312)),
 //
 //    ACID("Acid",PhysicalState.LIQUID, Acid::new, true, hC(0x9BE60F), hC(0xBFFF28), hC(0xAffA19)),
 //

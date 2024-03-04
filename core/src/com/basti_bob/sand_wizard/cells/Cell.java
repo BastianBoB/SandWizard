@@ -87,7 +87,18 @@ public abstract class Cell {
         else if (velocity.y < -WorldConstants.CHUNK_SIZE) velocity.y = -WorldConstants.CHUNK_SIZE;
     }
 
-    public CellType getCellType(){
+    public void moveOrSwapDownLeftRight(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        if (updateDirection) {
+            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return;
+            chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
+        } else {
+            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return;
+            chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
+        }
+    }
+
+
+   public CellType getCellType(){
         return this.cellType;
     }
 

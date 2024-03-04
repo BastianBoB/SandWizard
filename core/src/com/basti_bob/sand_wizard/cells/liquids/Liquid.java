@@ -81,13 +81,7 @@ public class Liquid extends Cell implements MovingCell {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
         }
 
-        if (updateDirection) {
-            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return;
-            chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
-        } else {
-            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return;
-            chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
-        }
+        moveOrSwapDownLeftRight(chunkAccessor, updateDirection);
     }
 
     @Override
@@ -106,6 +100,9 @@ public class Liquid extends Cell implements MovingCell {
         int lastValidX = posX;
         int lastValidY = posY;
 
+        int startPosX = posX;
+        int startPosY = posY;
+
         for (int i = 1; i <= steps; i++) {
             xDistance = Math.abs(velocity.x);
             yDistance = Math.abs(velocity.y);
@@ -120,8 +117,8 @@ public class Liquid extends Cell implements MovingCell {
                 y = positiveY ? i : -i;
             }
 
-            int targetX = this.posX + (int) x;
-            int targetY = this.posY + (int) y;
+            int targetX = startPosX + (int) x;
+            int targetY = startPosY + (int) y;
             Cell targetCell = chunkAccessor.getCell(targetX, targetY);
 
             if (moveAlong(chunkAccessor, targetCell, lastValidX, lastValidY, updateDirection)) {
@@ -133,7 +130,7 @@ public class Liquid extends Cell implements MovingCell {
         }
 
         if (lastValidX != posX || lastValidY != posY) {
-            chunkAccessor.moveToIfEmpty(this, lastValidX, lastValidY);
+            chunkAccessor.moveToOrSwap(this, lastValidX, lastValidY);
             return true;
         }
 
@@ -151,7 +148,6 @@ public class Liquid extends Cell implements MovingCell {
             if (Math.abs(velocity.y) > Math.abs(velocity.x)) {
                 velocity.y = -1;
             }
-
             return false;
         }
 
@@ -177,6 +173,7 @@ public class Liquid extends Cell implements MovingCell {
         protected float density = 1f;
 
         public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(5f).density(1f);
+        public static final LiquidProperty OIL = new LiquidProperty().dispersionRate(2f).density(0.5f);
 
         public LiquidProperty dispersionRate(float dispersionRate) {
             this.dispersionRate = dispersionRate;
