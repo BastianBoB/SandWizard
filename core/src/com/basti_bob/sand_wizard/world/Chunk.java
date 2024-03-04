@@ -11,7 +11,7 @@ public class Chunk {
     private final Array2D<Cell> grid;
     private final World world;
     public final int posX, posY;
-    private boolean active = true;
+    private boolean active, activeNextFrame;
     public final ChunkAccessor chunkAccessor;
 
     public Chunk(World world, int posX, int posY) {
@@ -27,31 +27,32 @@ public class Chunk {
     }
 
     public void setCell(CellType cellType, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
-        if(inChunkPosX >= 32 || inChunkPosX < 0 || inChunkPosY >= 32 || inChunkPosY < 0) System.out.println("EROOROORORORORORO");
-
-        int cellChunkX = World.getChunkPos(cellPosX);
-        int cellChunkY = World.getChunkPos(cellPosY);
-
-        if(cellChunkX != this.posX || cellChunkY != this.posY) {
-            System.out.println("______________CELL POS NOT MATCH CHUNK1");
-        }
+//        if(inChunkPosX >= 32 || inChunkPosX < 0 || inChunkPosY >= 32 || inChunkPosY < 0) System.out.println("EROOROORORORORORO");
+/////*
+////        int cellChunkX = World.getChunkPos(cellPosX);
+////        int cellChunkY = World.getChunkPos(cellPosY);
+////
+////        if(cellChunkX != this.posX || cellChunkY != this.posY) {
+////            System.out.println("______________CELL POS NOT MATCH CHUNK1");
+////        }*/
 
         grid.set(inChunkPosX, inChunkPosY, cellType.createCell(world, cellPosX, cellPosY));
+        this.activateChunk();
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
-        if(inChunkPosX >= 32 || inChunkPosX < 0 || inChunkPosY >= 32 || inChunkPosY < 0) System.out.println("EROOROORORORORORO");
-
-        int cellChunkX = World.getChunkPos(cellPosX);
-        int cellChunkY = World.getChunkPos(cellPosY);
-
-        if(cellChunkX != this.posX || cellChunkY != this.posY) {
-            System.out.println(cell.getCellType() + ": CELL POS NOT MATCH CHUNK2");
-        }
-
+//        if(inChunkPosX >= 32 || inChunkPosX < 0 || inChunkPosY >= 32 || inChunkPosY < 0) System.out.println("EROOROORORORORORO");
+//
+//        int cellChunkX = World.getChunkPos(cellPosX);
+//        int cellChunkY = World.getChunkPos(cellPosY);
+//
+//        if(cellChunkX != this.posX || cellChunkY != this.posY) {
+//            System.out.println(cell.getCellType() + ": CELL POS NOT MATCH CHUNK2");
+//        }
+//
         cell.setPosition(cellPosX, cellPosY);
-
         grid.set(inChunkPosX, inChunkPosY, cell);
+        this.activateChunk();
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY) {
@@ -139,11 +140,16 @@ public class Chunk {
 //
 //    }
 
+    public void activateChunk() {
+        this.activeNextFrame = true;
+    }
+
     public boolean isActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void updateActive() {
+        this.active = activeNextFrame;
+        this.activeNextFrame = false;
     }
 }

@@ -73,8 +73,6 @@ public class World {
         for (Chunk chunk : chunks) {
             chunk.updateActive();
 
-//            if(!chunk.isActive()) continue;
-
             Array2D<Cell> grid = chunk.getGrid();
 
             for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
@@ -98,8 +96,10 @@ public class World {
 
                 for (Chunk chunk : separatedChunks) {
 
+                    if(!chunk.isActive()) continue;
+
                     //futures.add(executor.submit(() -> {
-                        chunk.update(updateDirection);
+                    chunk.update(updateDirection);
                     //}));
                 }
 
