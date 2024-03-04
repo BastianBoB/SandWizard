@@ -1,38 +1,197 @@
 package com.basti_bob.sand_wizard.cells.solids.movable_solids;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.MovingCell;
+import com.basti_bob.sand_wizard.cells.liquids.Liquid;
+import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
-import com.basti_bob.sand_wizard.world.Chunk;
 import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
-public abstract class MovableSolid extends Solid {
+public class MovableSolid extends Solid implements MovingCell {
 
     private boolean moving;
+    private float movingResistance;
+    private float sprayFactor;
 
-    public MovableSolid(World world, int x, int y) {
-        super(world, x, y);
+    public MovableSolid(CellType cellType, World world, int x, int y) {
+        super(cellType, world, x, y);
+        this.velocity.y = -1;
+
+        MovableSolidProperty cellProperty = (MovableSolidProperty) cellType.getCellProperty();
+
+        this.movingResistance = cellProperty.movingResistance;
+        this.sprayFactor = cellProperty.sprayFactor;
     }
 
     public float getMovingResistance() {
-        return 0;
+        return movingResistance;
     }
-
-    public void setMoving() {
+    public float getSprayFactor() {
+        return sprayFactor;
+    }
+    public void trySetMoving() {
         this.moving = this.moving || MathUtils.random() > this.getMovingResistance();
+    }
+    public void trySetStationary() {
+        this.moving = MathUtils.random() < this.getMovingResistance();
     }
 
     @Override
-    public void update(ChunkAccessor chunkAccessor, int inChunkX, int inChunkY, boolean updateDirection) {
-        super.update(chunkAccessor, inChunkX, inChunkY, updateDirection);
+    public boolean canSwapWith(Cell target) {
+        return target instanceof Liquid;
+    }
 
-        if (chunkAccessor.moveToIfEmpty(this, posX, posY - 1)) return;
+    @Override
+    public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        super.update(chunkAccessor, updateDirection);
+
+        clampVelocity();
+
+        Cell cellBelow = chunkAccessor.getCell(this.posX, this.posY - 1);
+
+        velocity.x *= cellBelow.getFriction();
+
+        boolean spaceBelow = canMoveToOrSwap(cellBelow);
+
+        if (spaceBelow) {
+            this.moving = true;
+            this.velocity.add(this.getGravity());
+        }
+
+        if (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1) {
+            if (moveWithVelocity(chunkAccessor, updateDirection)) return;
+        }
+
+        if (!moving) return;
+
         if (updateDirection) {
-            if (chunkAccessor.moveToIfEmpty(this, posX + 1, posY - 1)) return;
-            chunkAccessor.moveToIfEmpty(this, posX - 1, posY - 1);
+            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return;
+            chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
         } else {
-            if (chunkAccessor.moveToIfEmpty(this, posX - 1, posY - 1)) return;
-            chunkAccessor.moveToIfEmpty(this, posX + 1, posY - 1);
+            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return;
+            chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
+        }
+
+        trySetStationary();
+    }
+
+    @Override
+    public boolean moveWithVelocity(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        float xDistance = Math.abs(velocity.x);
+        float yDistance = Math.abs(velocity.y);
+
+        boolean positiveX = velocity.x > 0;
+        boolean positiveY = velocity.y > 0;
+
+        float xSlope = Math.abs(velocity.y / velocity.x);
+        float ySlope = Math.abs(velocity.x / velocity.y);
+
+        int steps = (int) Math.max(xDistance, yDistance);
+
+        int lastValidX = posX;
+        int lastValidY = posY;
+
+        int startPosX = posX;
+        int startPosY = posY;
+
+        for (int i = 1; i <= steps; i++) {
+            xDistance = Math.abs(velocity.x);
+            yDistance = Math.abs(velocity.y);
+
+            float x, y;
+
+            if (xDistance > yDistance) {
+                x = positiveX ? i : -i;
+                y = positiveY ? i * xSlope : -i * xSlope;
+            } else {
+                x = positiveX ? i * ySlope : -i * ySlope;
+                y = positiveY ? i : -i;
+            }
+
+            int targetX = startPosX + (int) x;
+            int targetY = startPosY + (int) y;
+            Cell targetCell = chunkAccessor.getCell(targetX, targetY);
+
+            if (moveAlong(chunkAccessor, targetCell, lastValidX, lastValidY, updateDirection)) {
+                lastValidX = targetX;
+                lastValidY = targetY;
+            } else {
+                break;
+            }
+        }
+
+        if (lastValidX != posX || lastValidY != posY) {
+            chunkAccessor.moveToIfEmpty(this, lastValidX, lastValidY);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean moveAlong(ChunkAccessor chunkAccessor, Cell targetCell, int lastValidX, int lastValidY, boolean updateDirection) {
+
+        if (targetCell instanceof Empty) {
+            this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
+            return true;
+        }
+
+        if (targetCell instanceof Solid) {
+            if (targetCell.posY < this.posY) {
+                velocity.x = getSidewaysVelocity(targetCell, updateDirection);
+                velocity.y = -1;
+            } else {
+                velocity.x = 0;
+            }
+            return false;
+        }
+
+        if(targetCell instanceof Liquid) {
+            if(this.posX != lastValidX || this.posY != lastValidY) {
+                chunkAccessor.moveTo(this, lastValidX, lastValidY);
+            }
+
+            swapWith(chunkAccessor, targetCell);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public float getSidewaysVelocity(Cell hitCell, boolean updateDirection) {
+        float sprayFactor = getSprayFactor();
+
+        if (sprayFactor == 0 || Math.abs(velocity.y) < 1.5) return 0;
+//####################################################################################
+        float strength = (float) (Math.random() + Math.pow(hitCell.getFriction(), 8) / 2f) * Math.abs(this.velocity.y) * sprayFactor;
+
+        if (velocity.x < 0 || (velocity.x == 0 && updateDirection)) {
+            strength *= -1;
+        }
+
+        return strength;
+    }
+
+    public static class MovableSolidProperty extends CellProperty {
+
+        protected float movingResistance = 0f;
+        protected float sprayFactor = 0f;
+
+        public static final MovableSolidProperty SAND = new MovableSolidProperty().movingResistance(0.2f).sprayFactor(0.5f);
+        public static final MovableSolidProperty DIRT = new MovableSolidProperty().movingResistance(0.5f).sprayFactor(0.2f);
+
+        public MovableSolidProperty movingResistance(float movingResistance) {
+            this.movingResistance = movingResistance;
+            return this;
+        }
+
+        public MovableSolidProperty sprayFactor(float sprayFactor) {
+            this.sprayFactor = sprayFactor;
+            return this;
         }
     }
 

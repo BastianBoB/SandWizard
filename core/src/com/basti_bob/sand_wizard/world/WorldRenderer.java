@@ -93,7 +93,7 @@ public class WorldRenderer {
                             int cellIndex = cellIndexY * rows + cellIndexX;
                             int vertexI = cellIndex * 5;
 
-                            Color color = chunkGrid.get(i, j).color;
+                            Color color = chunkGrid.get(i, j).getColor();
 
                             float xOff = (chunkX * chunkSize - chunkSize / 2f + i) * WorldConstants.CELL_SIZE;
                             float yOff = (chunkY * chunkSize - chunkSize / 2f + j) * WorldConstants.CELL_SIZE;

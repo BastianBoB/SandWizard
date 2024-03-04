@@ -27,8 +27,8 @@ public class WorldUpdatingChunkRow {
 
     public boolean isEmpty() {
         for (int i = 0; i < 3; i++)
-            if (separateChunksList[i].isEmpty()) return true;
+            if (!separateChunksList[i].isEmpty()) return false;
 
-        return false;
+        return true;
     }
 }

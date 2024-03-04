@@ -61,10 +61,6 @@ public class Player {
 
     private void enteredNewChunk(int oldChunkX, int oldChunkY, int newChunkX, int newChunkY) {
 
-        System.out.println("ENTERED NEW CHUNK");
-
-        setRenderingChunks(newChunkX, newChunkY);
-
         int chunkXDiff = newChunkX - oldChunkX;
         int chunkYDiff = newChunkY - oldChunkY;
 
@@ -89,6 +85,8 @@ public class Player {
                 world.loadOrCreateChunk(newChunkX + i, newChunkY + yOff);
             }
         }
+
+        setRenderingChunks(newChunkX, newChunkY);
 
 
         //TO DO: MOVE MORE THEN 1 CHUNK (RECTANGLE INTERSECTION APPROACH)
