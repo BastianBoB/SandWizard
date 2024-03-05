@@ -44,7 +44,7 @@ public class World {
             setCell(CellType.STONE, 20, i);
         }
 
-        //setCell(CellType.SAND, 1, 100 + 1);
+        setCell(CellType.SAND, 1, 100 + 1);
     }
 
     private int updateTimes = 0;
@@ -60,33 +60,37 @@ public class World {
             setCell(CellType.OIL, 0, height);
             setCell(CellType.OIL, -2, height);
         }
+
         if (updateTimes <= 40) {
             setCell(CellType.WATER, -3, height + 5);
             setCell(CellType.WATER, -2, height + 5);
             setCell(CellType.WATER, -1, height + 5);
         }
-//        setCell(CellType.SAND, 1, height);
-//        setCell(CellType.SAND, 0, height + 1);
-//        setCell(CellType.SAND, -1, height);
-//        setCell(CellType.SAND, -2, height + 1);
 
+        setCell(CellType.SAND, 1, height);
+        setCell(CellType.SAND, 0, height + 1);
+        setCell(CellType.SAND, -1, height);
+        setCell(CellType.SAND, -2, height + 1);
+
+
+        int numThreads = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
         for (Chunk chunk : chunks) {
             chunk.updateActive();
 
-            Array2D<Cell> grid = chunk.getGrid();
+            final Array2D<Cell> grid = chunk.getGrid();
 
-            for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
-                for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {
-                    grid.get(inChunkX, inChunkY).gotUpdated = false;
+            executor.submit(() -> {
+                for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
+                    for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {
+                        grid.get(inChunkX, inChunkY).gotUpdated = false;
+                    }
                 }
-            }
+            });
         }
 
         updateDirection = !updateDirection;
-
-        int numThreads = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
         for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkUpdatingGrid.values()) {
 
@@ -113,13 +117,12 @@ public class World {
             }
         }
 
-
         executor.shutdown();
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            System.err.println("Executor interrupted");
-        }
+//        try {
+//            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        } catch (InterruptedException e) {
+//            System.err.println("Executor interrupted");
+//        }
 
     }
 

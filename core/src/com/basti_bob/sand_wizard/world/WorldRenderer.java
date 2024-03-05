@@ -108,11 +108,11 @@ public class WorldRenderer {
         }
 
         executor.shutdown();
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            System.err.println("Executor interrupted");
-        }
+//        try {
+//            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        } catch (InterruptedException e) {
+//            System.err.println("Executor interrupted");
+//        }
 
         //System.out.println("setting Colors took: " + (System.nanoTime() - start) / 1e6 + " ms");
 
@@ -121,7 +121,6 @@ public class WorldRenderer {
         shader.bind();
         shader.setUniformMatrix("u_proj", camera.combined);
         mesh.render(shader, GL20.GL_POINTS);
-
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);

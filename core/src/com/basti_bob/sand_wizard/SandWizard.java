@@ -51,16 +51,14 @@ public class SandWizard extends ApplicationAdapter {
         long time = (System.nanoTime() - start);
         totalUpdateTime += time;
 
-        //System.out.println("updating " +  world.chunks.size() + " chunks took:" + time / 1e6 + " ms" + "    avg: " + totalUpdateTime / updateCount / 1e6 + " ms");
+        System.out.println("updating " +  world.chunks.size() + " chunks took:" + time / 1e6 + " ms" + "    avg: " + totalUpdateTime / updateCount / 1e6 + " ms");
 
 
         start = System.nanoTime();
 
-
-
         worldRenderer.render(player);
 
-        //System.out.println("rendering world took: " + (System.nanoTime() - start) / 1e6 + " ms");
+        System.out.println("rendering world took: " + (System.nanoTime() - start) / 1e6 + " ms");
 
         if(Gdx.input.isKeyPressed(Input.Keys.A)) player.moveBy(-2, 0);
         if(Gdx.input.isKeyPressed(Input.Keys.D)) player.moveBy(2, 0);

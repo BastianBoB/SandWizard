@@ -35,8 +35,8 @@ public class Liquid extends Cell implements MovingCell {
 
     @Override
     public boolean canSwapWith(Cell target) {
-        if (target instanceof Liquid) {
-            return ((Liquid) target).density < this.density;
+        if (target instanceof Liquid liquidTarget) {
+            return liquidTarget.density < this.density;
         }
         return false;
     }
