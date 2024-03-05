@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.world;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.ChunkBoarderState;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
 
 public class ChunkAccessor {
@@ -44,7 +45,7 @@ public class ChunkAccessor {
         int targetInChunkY = World.getInChunkPos(targetY);
 
         Cell targetCell = targetChunk.getCellFromInChunkPos(targetInChunkX, targetInChunkY);
-        Chunk cellChunk = getNeighbourChunk(cell.posX, cell.posY);
+        Chunk cellChunk = getNeighbourChunk(cell.chunkBoarderState);
 
         if (targetCell instanceof Empty) {
 
@@ -71,6 +72,24 @@ public class ChunkAccessor {
         return surroundingChunks[gridX][gridY];
     }
 
+    public Chunk getNeighbourChunk(ChunkBoarderState chunkBoarderState) {
+
+        return switch (chunkBoarderState) {
+            case CENTER -> surroundingChunks[1][1];
+
+            case TOP_LEFT -> surroundingChunks[0][0];
+            case TOP -> surroundingChunks[1][0];
+            case TOP_RIGHT -> surroundingChunks[2][0];
+
+            case BOTTOM_LEFT -> surroundingChunks[0][2];
+            case BOTTOM -> surroundingChunks[1][2];
+            case BOTTOM_RIGHT -> surroundingChunks[2][2];
+
+            case LEFT -> surroundingChunks[0][1];
+            case RIGHT -> surroundingChunks[2][1];
+        };
+    }
+
     public boolean moveToIfEmpty(Cell cell, int targetX, int targetY) {
 
         Chunk targetChunk = getNeighbourChunk(targetX, targetY);
@@ -81,7 +100,7 @@ public class ChunkAccessor {
 
         if (!(targetChunk.getCellFromInChunkPos(targetInChunkX, targetInChunkY) instanceof Empty)) return false;
 
-        Chunk cellChunk = getNeighbourChunk(cell.posX, cell.posY);
+        Chunk cellChunk = getNeighbourChunk(cell.chunkBoarderState);
 
         cellChunk.setCell(CellType.EMPTY, cell.posX, cell.posY, cell.inChunkX, cell.inChunkY);
         targetChunk.setCell(cell, targetX, targetY, targetInChunkX, targetInChunkY);

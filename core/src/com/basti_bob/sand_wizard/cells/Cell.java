@@ -17,6 +17,8 @@ public abstract class Cell {
 
     public int posX, posY;
     public int inChunkX, inChunkY;
+    public ChunkBoarderState chunkBoarderState;
+
     public Vector2 velocity = new Vector2();
     public boolean gotUpdated;
 
@@ -60,6 +62,8 @@ public abstract class Cell {
 
         this.inChunkX = World.getInChunkPos(posX);
         this.inChunkY = World.getInChunkPos(posY);
+
+        this.chunkBoarderState = ChunkBoarderState.getStateWithInChunkPos(inChunkX, inChunkY);
     }
 
     public void swapWith(ChunkAccessor chunkAccessor, Cell target) {
@@ -67,6 +71,20 @@ public abstract class Cell {
     }
 
     public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
+        ChunkBoarderState boarderState = this.chunkBoarderState;
+
+        switch (boarderState) {
+            case CENTER -> null;
+            case TOP_LEFT -> null;
+            case TOP -> null;
+            case TOP_RIGHT -> null;
+            case BOTTOM_LEFT -> null;
+            case BOTTOM -> null;
+            case BOTTOM_RIGHT -> null;
+            case LEFT -> null;
+            case RIGHT -> null;
+        }
+
         for(int i = -1; i <= 1; i++) {
             for(int j = -1; j <= 1; j++) {
                 if(i == 0 || i == j) continue;

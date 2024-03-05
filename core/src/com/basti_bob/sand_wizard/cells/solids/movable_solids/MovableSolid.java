@@ -92,11 +92,8 @@ public class MovableSolid extends Solid implements MovingCell {
         int startPosY = posY;
 
         for (int i = 1; i <= steps; i++) {
-            xDistance = Math.abs(velocity.x);
-            yDistance = Math.abs(velocity.y);
 
             float x, y;
-
             if (xDistance > yDistance) {
                 x = positiveX ? i : -i;
                 y = positiveY ? i * xSlope : -i * xSlope;
