@@ -49,6 +49,8 @@ public class World {
 
     private int updateTimes = 0;
 
+    public int numActiveChunks;
+
     public void update() {
         int height = 100;
         ++updateTimes;
@@ -71,6 +73,8 @@ public class World {
         setCell(CellType.DIRT, 0, height);
         setCell(CellType.COAL, 100, height);
 
+        setCell(CellType.WATER, 5, height + 25);
+
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
@@ -91,6 +95,8 @@ public class World {
 
         updateDirection = !updateDirection;
 
+        numActiveChunks = 0;
+
         for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkUpdatingGrid.values()) {
 
             for (int i = 0; i < 3; i++) {
@@ -102,7 +108,7 @@ public class World {
 
                     if (!chunk.isActive()) continue;
 
-                    //chunk.update(updateDirection);
+                    numActiveChunks++;
 
                     futures.add(executor.submit(() -> chunk.update(updateDirection)));
                 }
@@ -157,8 +163,6 @@ public class World {
     }
 
     public void unloadChunk(int chunkPosX, int chunkPosY) {
-        System.out.print("UNLOAD: " + chunkPosX + ", " + chunkPosY + "          ");
-
         if (!this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
         Chunk chunk = this.getChunkFromChunkPos(chunkPosX, chunkPosY);
@@ -166,8 +170,6 @@ public class World {
     }
 
     public void loadOrCreateChunk(int chunkPosX, int chunkPosY) {
-        System.out.println("LOAD: " + chunkPosX + ", " + chunkPosY);
-
         if (this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
         Chunk chunk = Chunk.loadOrCreate(this, chunkPosX, chunkPosY);

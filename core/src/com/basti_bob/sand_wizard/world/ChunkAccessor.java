@@ -19,7 +19,7 @@ public class ChunkAccessor {
 
     public void setSurroundingChunk(Chunk chunk) {
         int gridX = chunk.posX - centerChunkX + 1;
-        int gridY = centerChunkY - chunk.posY + 1;
+        int gridY = chunk.posY - centerChunkY + 1;
 
         surroundingChunks[gridX][gridY] = chunk;
     }
@@ -64,7 +64,7 @@ public class ChunkAccessor {
         int targetChunkY = World.getChunkPos(targetY);
 
         int gridX = targetChunkX - centerChunkX + 1;
-        int gridY = centerChunkY - targetChunkY + 1;
+        int gridY = targetChunkY - centerChunkY + 1;
 
         return surroundingChunks[gridX][gridY];
     }

@@ -41,28 +41,36 @@ public class WorldRenderer {
         mesh = new Mesh(true, numCells, 0, new VertexAttribute(VertexAttributes.Usage.Position, 2, "a_position"),
                 new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_color"));
 
-        final String vertex_shader = "attribute vec2 a_position;\n" +
-                "attribute vec3 a_color;\n" +
-                "varying vec3 v_color;\n" +
-                "uniform mat4 u_proj;\n" +
-                "void main() {\n" +
-                "   v_color = a_color;\n" +
-                "   gl_Position = u_proj * vec4(a_position, 0.0, 1.0);\n" +
-                "   gl_PointSize = " + WorldConstants.CELL_SIZE + ";\n" +
-                "}\n";
-
-        final String fragment_shader = "varying vec3 v_color;" +
-                "void main() {\n" +
-                "   gl_FragColor = vec4(v_color, 1.0);\n" +
-                "}";
-
         ShaderProgram.pedantic = true;
-        shader = new ShaderProgram(vertex_shader, fragment_shader);
         Gdx.gl.glEnable(GL32.GL_VERTEX_PROGRAM_POINT_SIZE);
+        shader = generateShader();
+    }
+
+    private ShaderProgram generateShader() {
+
+        final String vertex_shader = String.format("""
+                attribute vec2 a_position;
+                attribute vec3 a_color;
+                varying vec3 v_color;
+                uniform mat4 u_proj;
+                void main() {
+                    v_color = a_color;
+                    gl_Position = u_proj * vec4(a_position, 0.0, 1.0);
+                    gl_PointSize = %d;
+                }
+                """, WorldConstants.CELL_SIZE);
+
+        final String fragment_shader = """
+                varying vec3 v_color;
+                void main() {
+                    gl_FragColor = vec4(v_color, 1.0);
+                }
+                """;
+
+        return new ShaderProgram(vertex_shader, fragment_shader);
     }
 
     public void render(Player player) {
-        long start = System.nanoTime();
 
         Array2D<Chunk> chunks = player.getRenderingChunks();
 
@@ -108,19 +116,17 @@ public class WorldRenderer {
         }
 
         executor.shutdown();
-//        try {
-//            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-//        } catch (InterruptedException e) {
-//            System.err.println("Executor interrupted");
-//        }
 
-        //System.out.println("setting Colors took: " + (System.nanoTime() - start) / 1e6 + " ms");
-
-        start = System.nanoTime();
         mesh.setVertices(vertices);
         shader.bind();
         shader.setUniformMatrix("u_proj", camera.combined);
         mesh.render(shader, GL20.GL_POINTS);
+
+
+        //chunkActiveDebugSquares(chunks, chunkSize);
+    }
+
+    private void chunkActiveDebugSquares(Array2D<Chunk> chunks, int chunkSize) {
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -138,9 +144,6 @@ public class WorldRenderer {
             }
         }
         shapeRenderer.end();
-
-
-        //System.out.println("transfer and render took: " + (System.nanoTime() - start) / 1e6 + " ms");
     }
 
     private void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
