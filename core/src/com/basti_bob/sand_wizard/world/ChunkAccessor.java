@@ -7,7 +7,7 @@ import com.basti_bob.sand_wizard.cells.solids.Empty;
 public class ChunkAccessor {
 
     private final Chunk[][] surroundingChunks;
-    private final int centerChunkX, centerChunkY;
+    public final int centerChunkX, centerChunkY;
 
     public ChunkAccessor(Chunk centerChunk) {
         this.surroundingChunks = new Chunk[3][3];
@@ -67,6 +67,10 @@ public class ChunkAccessor {
         int gridY = centerChunkY - targetChunkY + 1;
 
         return surroundingChunks[gridX][gridY];
+    }
+
+    public Chunk getNeighbourChunkWithOffset(int offsetX, int offsetY) {
+        return surroundingChunks[offsetX + 1][offsetY + 1];
     }
 
 //    public Chunk getNeighbourChunk(ChunkBoarderState chunkBoarderState) {

@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.world;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.ChunkBoarderState;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.util.Array2D;
 
@@ -37,7 +38,7 @@ public class Chunk {
 ////        }*/
 
         grid.set(inChunkPosX, inChunkPosY, cellType.createCell(world, cellPosX, cellPosY));
-        this.activateChunk();
+        this.cellActivatesChunk(inChunkPosX, inChunkPosY);
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
@@ -52,7 +53,7 @@ public class Chunk {
 //
         cell.setPosition(cellPosX, cellPosY);
         grid.set(inChunkPosX, inChunkPosY, cell);
-        this.activateChunk();
+        this.cellActivatesChunk(inChunkPosX, inChunkPosY);
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY) {
@@ -140,8 +141,51 @@ public class Chunk {
 //
 //    }
 
+
     public void activateChunk() {
         this.activeNextFrame = true;
+    }
+
+    public void activateNeighbourChunk(int offsetX, int offsetY) {
+        Chunk neighbourChunk = chunkAccessor.getNeighbourChunkWithOffset(offsetX, offsetY);
+
+        if(neighbourChunk == null) return;
+
+        neighbourChunk.activateChunk();
+    }
+
+    public void cellActivatesChunk(int inChunkPosX, int inChunkPosY) {
+        this.activateChunk();
+
+        ChunkBoarderState chunkBoarderState = ChunkBoarderState.getStateWithInChunkPos(inChunkPosX, inChunkPosY);
+
+        switch (chunkBoarderState) {
+            case TOP_LEFT -> {
+                activateNeighbourChunk(0, 1);
+                activateNeighbourChunk(-1, 0);
+                activateNeighbourChunk(-1, 1);
+            }
+            case TOP_RIGHT -> {
+                activateNeighbourChunk(0, 1);
+                activateNeighbourChunk(1, 0);
+                activateNeighbourChunk(1, 1);
+            }
+            case BOTTOM_LEFT -> {
+                activateNeighbourChunk(0, -1);
+                activateNeighbourChunk(-1, 0);
+                activateNeighbourChunk(-1, -1);
+            }
+            case BOTTOM_RIGHT -> {
+                activateNeighbourChunk(0, -1);
+                activateNeighbourChunk(1, 0);
+                activateNeighbourChunk(1, -1);
+            }
+            case TOP -> activateNeighbourChunk(0, 1);
+            case BOTTOM -> activateNeighbourChunk(0, -1);
+            case LEFT -> activateNeighbourChunk(-1, 0);
+            case RIGHT -> activateNeighbourChunk(1, 0);
+        }
+
     }
 
     public boolean isActive() {

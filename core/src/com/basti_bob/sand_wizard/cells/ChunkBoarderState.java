@@ -6,13 +6,12 @@ public enum ChunkBoarderState {
     CENTER,
 
     TOP_LEFT,
-    TOP,
     TOP_RIGHT,
-
     BOTTOM_LEFT,
-    BOTTOM,
     BOTTOM_RIGHT,
 
+    TOP,
+    BOTTOM,
     LEFT,
     RIGHT;
 

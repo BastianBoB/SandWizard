@@ -25,7 +25,7 @@ public enum CellType {
     SAND("Sand",PhysicalState.SOLID, MovableSolid.MovableSolidProperty.SAND, MovableSolid::new, true, hC(0xB8860C), hC(0xE7B744), hC(0xF1D581)),
     DIRT("Dirt",PhysicalState.SOLID, MovableSolid.MovableSolidProperty.DIRT, MovableSolid::new, true, hC(0xA0522D), hC(0x8B4513), hC(0xD2691E)),
 //
-//    COAL("Coal",PhysicalState.SOLID, Coal::new, true, hC(0x363232), hC(0x292929), hC(0x393939)),
+   COAL("Coal",PhysicalState.SOLID, MovableSolid.MovableSolidProperty.COAL, MovableSolid::new, true, hC(0x363232), hC(0x292929), hC(0x393939)),
 //
 //    GUNPOWDER("Gunpowder", Gunpowder::new, PhysicalState.SOLID, true, hC(0x18181a), hC(0x1e1e21), hC(0x131315)),
 

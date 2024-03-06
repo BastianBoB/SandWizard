@@ -36,7 +36,7 @@ public class MovableSolid extends Solid implements MovingCell {
         this.moving = this.moving || MathUtils.random() > this.getMovingResistance();
     }
     public void trySetStationary() {
-        this.moving = MathUtils.random() < this.getMovingResistance();
+        this.moving = !(MathUtils.random() < this.getMovingResistance());
     }
 
     @Override
@@ -176,6 +176,7 @@ public class MovableSolid extends Solid implements MovingCell {
 
         public static final MovableSolidProperty SAND = new MovableSolidProperty().movingResistance(0.2f).sprayFactor(0.5f);
         public static final MovableSolidProperty DIRT = new MovableSolidProperty().movingResistance(0.5f).sprayFactor(0.2f);
+        public static final MovableSolidProperty COAL = new MovableSolidProperty().movingResistance(0.9f).sprayFactor(0.1f);
 
         public MovableSolidProperty movingResistance(float movingResistance) {
             this.movingResistance = movingResistance;

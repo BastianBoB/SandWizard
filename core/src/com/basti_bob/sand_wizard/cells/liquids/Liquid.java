@@ -1,5 +1,6 @@
 package com.basti_bob.sand_wizard.cells.liquids;
 
+import com.badlogic.gdx.graphics.Color;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;
@@ -48,6 +49,9 @@ public class Liquid extends Cell implements MovingCell {
 
         clampVelocity();
 
+        this.color = !moving ? Color.RED : Color.GREEN;
+
+
         Cell cellBelow = chunkAccessor.getCell(this.posX, this.posY - 1);
 
         boolean spaceBelow = canMoveToOrSwap(cellBelow);
@@ -56,7 +60,6 @@ public class Liquid extends Cell implements MovingCell {
             this.velocity.add(this.getGravity());
             this.moving = true;
         } else {
-
             this.velocity.y = -1;
 
             // if (Math.abs(velocity.x) < 1) {

@@ -10,6 +10,9 @@ import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Cell {
 
     public final World world;
@@ -68,34 +71,190 @@ public abstract class Cell {
         chunkAccessor.swapCells(this, target);
     }
 
+    //Very fucking large but hopefully more efficient than other approach (here for each chunkboardering state there have to be retrieved less chunks and not repeatedly)
     public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
+        final int boarderPos = WorldConstants.CHUNK_SIZE - 1;
 
-        Chunk chunk = chunkAccessor.getNeighbourChunk(posX, posY);
+        int inChunkX = World.getInChunkPos(posX);
+        int inChunkY = World.getInChunkPos(posY);
 
-//        switch (boarderState) {
-//            case CENTER -> null;
-//            case TOP_LEFT -> null;
-//            case TOP -> null;
-//            case TOP_RIGHT -> null;
-//            case BOTTOM_LEFT -> null;
-//            case BOTTOM -> null;
-//            case BOTTOM_RIGHT -> null;
-//            case LEFT -> null;
-//            case RIGHT -> null;
-//        }
+        ChunkBoarderState chunkBoarderState = ChunkBoarderState.getStateWithInChunkPos(inChunkX, inChunkY);
 
-        for(int i = -1; i <= 1; i++) {
-            for(int j = -1; j <= 1; j++) {
-                if(i == 0 || i == j) continue;
+        int targetChunkX = World.getChunkPos(posX);
+        int targetChunkY = World.getChunkPos(posY);
 
-                Cell cell = chunkAccessor.getCell(posX + i, posY + j);
+        int chunkOffsetX = targetChunkX - chunkAccessor.centerChunkX;
+        int chunkOffsetY = targetChunkY - chunkAccessor.centerChunkY;
 
-                if(cell instanceof MovableSolid) {
-                    ((MovableSolid) cell).trySetMoving();
+        Chunk cellChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY);
+
+        switch (chunkBoarderState) {
+
+            case CENTER -> {
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        if (i == 0 && j == 0) continue;
+                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                    }
                 }
+            }
+            case TOP_LEFT -> {
+                trySetMoving(cellChunk.getCellFromInChunkPos(0, boarderPos - 1));
+                trySetMoving(cellChunk.getCellFromInChunkPos(1, boarderPos - 1));
+                trySetMoving(cellChunk.getCellFromInChunkPos(1, boarderPos));
+
+                Chunk topLeftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY + 1);
+                if (topLeftChunk != null) {
+                    trySetMoving(topLeftChunk.getCellFromInChunkPos(boarderPos, 0));
+                }
+                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                if (topChunk != null) {
+                    trySetMoving(topChunk.getCellFromInChunkPos(0, 0));
+                    trySetMoving(topChunk.getCellFromInChunkPos(1, 0));
+                }
+                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                if (leftChunk != null) {
+                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, boarderPos));
+                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, boarderPos - 1));
+                }
+            }
+            case TOP_RIGHT -> {
+                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos, boarderPos - 1));
+                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos - 1));
+                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos));
+
+                Chunk topRightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY + 1);
+                if (topRightChunk != null) {
+                    trySetMoving(topRightChunk.getCellFromInChunkPos(0, 0));
+                }
+                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                if (topChunk != null) {
+                    trySetMoving(topChunk.getCellFromInChunkPos(boarderPos, 0));
+                    trySetMoving(topChunk.getCellFromInChunkPos(boarderPos - 1, 0));
+                }
+                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                if (rightChunk != null) {
+                    trySetMoving(rightChunk.getCellFromInChunkPos(0, boarderPos));
+                    trySetMoving(rightChunk.getCellFromInChunkPos(0, boarderPos - 1));
+                }
+            }
+
+            case BOTTOM_LEFT -> {
+                trySetMoving(cellChunk.getCellFromInChunkPos(0, 1));
+                trySetMoving(cellChunk.getCellFromInChunkPos(1, 1));
+                trySetMoving(cellChunk.getCellFromInChunkPos(1, 0));
+
+                Chunk bottomLeftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY - 1);
+                if (bottomLeftChunk != null) {
+                    trySetMoving(bottomLeftChunk.getCellFromInChunkPos(boarderPos, boarderPos));
+                }
+                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                if (bottomChunk != null) {
+                    trySetMoving(bottomChunk.getCellFromInChunkPos(0, boarderPos));
+                    trySetMoving(bottomChunk.getCellFromInChunkPos(1, boarderPos));
+                }
+                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                if (leftChunk != null) {
+                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, 0));
+                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, 1));
+                }
+            }
+
+            case BOTTOM_RIGHT -> {
+                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos, 1));
+                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos - 1, 1));
+                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos - 1, 0));
+
+                Chunk bottomRightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY - 1);
+                if (bottomRightChunk != null) {
+                    trySetMoving(bottomRightChunk.getCellFromInChunkPos(0, boarderPos));
+                }
+                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                if (bottomChunk != null) {
+                    trySetMoving(bottomChunk.getCellFromInChunkPos(boarderPos, boarderPos));
+                    trySetMoving(bottomChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos));
+                }
+                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                if (rightChunk != null) {
+                    trySetMoving(rightChunk.getCellFromInChunkPos(0, 0));
+                    trySetMoving(rightChunk.getCellFromInChunkPos(0, 1));
+                }
+            }
+            case LEFT -> {
+                for (int i = 0; i <= 1; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        if (i == 0 && j == 0) continue;
+                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                    }
+                }
+                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                if (leftChunk == null) return;
+
+                for (int j = -1; j <= 1; j++)
+                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, inChunkY + j));
+            }
+            case TOP -> {
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = -1; j <= 0; j++) {
+                        if (i == 0 && j == 0) continue;
+                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                    }
+                }
+                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                if (topChunk == null) return;
+
+                for (int i = -1; i <= 1; i++)
+                    trySetMoving(topChunk.getCellFromInChunkPos(inChunkX + i, 0));
+
+            }
+            case BOTTOM -> {
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = 0; j <= 1; j++) {
+                        if (i == 0 && j == 0) continue;
+                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                    }
+                }
+
+                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                if (bottomChunk == null) return;
+
+                for (int i = -1; i <= 1; i++)
+                    trySetMoving(bottomChunk.getCellFromInChunkPos(inChunkX + i, boarderPos));
+            }
+            case RIGHT -> {
+                for (int i = -1; i <= 0; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        if (i == 0 && j == 0) continue;
+                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                    }
+                }
+                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                if (rightChunk == null) return;
+
+                for (int j = -1; j <= 1; j++)
+                    trySetMoving(rightChunk.getCellFromInChunkPos(0, inChunkY + j));
+
             }
         }
     }
+
+    private void trySetMoving(Cell cell) {
+        if (cell instanceof MovableSolid movableSolidCell) {
+            movableSolidCell.trySetMoving();
+        }
+    }
+
+    public void trySetNeighboursMoving2(ChunkAccessor chunkAccessor, int posX, int posY) {
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) continue;
+
+                trySetMoving(chunkAccessor.getCell(posX + i, posY + j));
+            }
+        }
+    }
+
     public void clampVelocity() {
         if (velocity.x > WorldConstants.CHUNK_SIZE) velocity.x = WorldConstants.CHUNK_SIZE;
         else if (velocity.x < -WorldConstants.CHUNK_SIZE) velocity.x = -WorldConstants.CHUNK_SIZE;
@@ -115,7 +274,7 @@ public abstract class Cell {
     }
 
 
-   public CellType getCellType(){
+    public CellType getCellType() {
         return this.cellType;
     }
 
@@ -156,7 +315,7 @@ public abstract class Cell {
             return this;
         }
 
-        private CellProperty jumpFactor(float jumpFactor){
+        private CellProperty jumpFactor(float jumpFactor) {
             this.jumpFactor = jumpFactor;
             return this;
         }

@@ -32,19 +32,19 @@ public class World {
                 this.loadOrCreateChunk(i, j);
             }
         }
-
-
-        for (int i = -50; i <= 0; i++) {
-            setCell(CellType.STONE, -5, i);
-            setCell(CellType.STONE, 6, i);
-        }
-
-        for (int i = -50; i <= 25; i++) {
-            setCell(CellType.STONE, -20, i);
-            setCell(CellType.STONE, 20, i);
-        }
-
-        setCell(CellType.SAND, 1, 100 + 1);
+//
+//
+//        for (int i = -50; i <= 0; i++) {
+//            setCell(CellType.STONE, -5, i);
+//            setCell(CellType.STONE, 6, i);
+//        }
+//
+//        for (int i = -50; i <= 25; i++) {
+//            setCell(CellType.STONE, -20, i);
+//            setCell(CellType.STONE, 20, i);
+//        }
+//
+//        setCell(CellType.SAND, 1, 100 + 1);
     }
 
     private int updateTimes = 0;
@@ -53,24 +53,23 @@ public class World {
         int height = 100;
         ++updateTimes;
 
-        if (updateTimes >= 100) {
-            setCell(CellType.SAND, -1, height + 1);
-            setCell(CellType.STONE, -1, height + 3);
-            setCell(CellType.WATER, -1, height + 5);
-            setCell(CellType.OIL, 0, height);
-            setCell(CellType.OIL, -2, height);
-        }
+//        if (updateTimes >= 100) {
+//            setCell(CellType.SAND, -1, height + 1);
+//            setCell(CellType.STONE, -1, height + 3);
+//            setCell(CellType.WATER, -1, height + 5);
+//            setCell(CellType.OIL, 0, height);
+//            setCell(CellType.OIL, -2, height);
+//        }
+//
+//        if (updateTimes <= 40) {
+//            setCell(CellType.WATER, -3, height + 5);
+//            setCell(CellType.WATER, -2, height + 5);
+//            setCell(CellType.WATER, -1, height + 5);
+//        }
 
-        if (updateTimes <= 40) {
-            setCell(CellType.WATER, -3, height + 5);
-            setCell(CellType.WATER, -2, height + 5);
-            setCell(CellType.WATER, -1, height + 5);
-        }
-
-        setCell(CellType.SAND, 1, height);
-        setCell(CellType.SAND, 0, height + 1);
-        setCell(CellType.SAND, -1, height);
-        setCell(CellType.SAND, -2, height + 1);
+        setCell(CellType.SAND, -100, height);
+        setCell(CellType.DIRT, 0, height);
+        setCell(CellType.COAL, 100, height);
 
 
         int numThreads = Runtime.getRuntime().availableProcessors();
@@ -102,6 +101,8 @@ public class World {
                 for (Chunk chunk : separatedChunks) {
 
                     if (!chunk.isActive()) continue;
+
+                    //chunk.update(updateDirection);
 
                     futures.add(executor.submit(() -> chunk.update(updateDirection)));
                 }
