@@ -21,7 +21,7 @@ public class World {
     private final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingGrid = new TreeMap<>();
     private final HashMap<Long, Chunk> chunkLUT = new HashMap<>();
 
-    public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise();
+    public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(0L);
 
     public World() {
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
@@ -73,7 +73,11 @@ public class World {
         setCell(CellType.DIRT, 0, height);
         setCell(CellType.COAL, 100, height);
 
-        setCell(CellType.WATER, 5, height + 25);
+        for(int i = -5; i <= 5; i++) {
+            CellType cellType = i <= 0 ? CellType.WATER : CellType.OIL;
+
+            setCell(cellType, i * 15 + 1, height + 25);
+        }
 
 
         int numThreads = Runtime.getRuntime().availableProcessors();

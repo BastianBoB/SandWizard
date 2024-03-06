@@ -46,11 +46,7 @@ public class Liquid extends Cell implements MovingCell {
     @Override
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
         super.update(chunkAccessor, updateDirection);
-
         clampVelocity();
-
-        this.color = !moving ? Color.RED : Color.GREEN;
-
 
         Cell cellBelow = chunkAccessor.getCell(this.posX, this.posY - 1);
 
@@ -60,33 +56,20 @@ public class Liquid extends Cell implements MovingCell {
             this.velocity.add(this.getGravity());
             this.moving = true;
         } else {
+            if(moveOrSwapDownLeftRight(chunkAccessor, updateDirection)) return;
+
             this.velocity.y = -1;
 
-            // if (Math.abs(velocity.x) < 1) {
             boolean spaceRight = canMoveToOrSwap(chunkAccessor.getCell(this.posX + 1, this.posY));
             boolean spaceLeft = canMoveToOrSwap(chunkAccessor.getCell(this.posX - 1, this.posY));
 
             if(!spaceLeft && !spaceRight) {
                 this.moving = false;
                 this.velocity.x = 0;
-                return;
+            } else {
+                this.moving = true;
+                this.velocity.x = getXVelocityWhenBelowIsBlocked(updateDirection, spaceLeft, spaceRight);
             }
-            this.moving = true;
-
-            int velocityModifier = 1;
-
-            if (spaceLeft && spaceRight) {
-                if (velocity.x == 0) {
-                    velocityModifier = updateDirection ? 1 : -1;
-                } else {
-                    velocityModifier = velocity.x > 0 ? 1 : -1;
-                }
-            } else if (spaceLeft) {
-                velocityModifier = -1;
-            }
-
-            this.velocity.x = velocityModifier * this.getDispersionRate();
-            //}
         }
 
         if (!moving) return;
@@ -94,8 +77,22 @@ public class Liquid extends Cell implements MovingCell {
         if (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1) {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
         }
+    }
 
-        moveOrSwapDownLeftRight(chunkAccessor, updateDirection);
+    private float getXVelocityWhenBelowIsBlocked(boolean updateDirection, boolean spaceLeft, boolean spaceRight) {
+        int velocityModifier = 1;
+
+        if (spaceLeft && spaceRight) {
+            if (velocity.x == 0) {
+                velocityModifier = updateDirection ? 1 : -1;
+            } else {
+                velocityModifier = velocity.x > 0 ? 1 : -1;
+            }
+        } else if (spaceLeft) {
+            velocityModifier = -1;
+        }
+
+        return velocityModifier * this.getDispersionRate();
     }
 
     @Override
@@ -186,7 +183,7 @@ public class Liquid extends Cell implements MovingCell {
         protected float dispersionRate = 5f;
         protected float density = 1f;
 
-        public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(6f).density(1f);
+        public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(7f).density(1f);
         public static final LiquidProperty OIL = new LiquidProperty().dispersionRate(4f).density(0.5f);
 
         public LiquidProperty dispersionRate(float dispersionRate) {

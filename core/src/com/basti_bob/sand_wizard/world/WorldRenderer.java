@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.Player;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.util.Array2D;
+import com.basti_bob.sand_wizard.util.FunctionRunTime;
 
 import java.awt.*;
 import java.util.concurrent.ExecutorService;
@@ -123,7 +124,7 @@ public class WorldRenderer {
         mesh.render(shader, GL20.GL_POINTS);
 
 
-        //chunkActiveDebugSquares(chunks, chunkSize);
+        chunkActiveDebugSquares(chunks, chunkSize);
     }
 
     private void chunkActiveDebugSquares(Array2D<Chunk> chunks, int chunkSize) {
@@ -146,14 +147,16 @@ public class WorldRenderer {
         shapeRenderer.end();
     }
 
-    private void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
-        if (chunk.isActive()) {
-            shapeRenderer.setColor(Color.GREEN);
-        } else {
-            shapeRenderer.setColor(Color.RED);
-        }
+    private final Color activeColor = new Color(0.2f, 0.2f, 0.2f, 1);
+    private final Color inActiveColor = new Color(0.1f, 0.1f, 0.1f, 1);
 
-        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 2;
+
+
+    private void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
+
+        shapeRenderer.setColor(chunk.isActive() ? activeColor : inActiveColor);
+
+        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 1;
         shapeRenderer.rect(chunkRenderX, chunkRenderY, rectSize, rectSize);
     }
 }

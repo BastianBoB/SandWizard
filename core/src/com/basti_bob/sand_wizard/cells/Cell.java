@@ -263,13 +263,13 @@ public abstract class Cell {
         else if (velocity.y < -WorldConstants.CHUNK_SIZE) velocity.y = -WorldConstants.CHUNK_SIZE;
     }
 
-    public void moveOrSwapDownLeftRight(ChunkAccessor chunkAccessor, boolean updateDirection) {
+    public boolean moveOrSwapDownLeftRight(ChunkAccessor chunkAccessor, boolean updateDirection) {
         if (updateDirection) {
-            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return;
-            chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
+            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return true;
+            return chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
         } else {
-            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return;
-            chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
+            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return true;
+            return chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
         }
     }
 

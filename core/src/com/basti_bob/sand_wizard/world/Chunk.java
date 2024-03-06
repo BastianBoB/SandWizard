@@ -5,6 +5,7 @@ import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.ChunkBoarderState;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.util.Array2D;
+import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 
 public class Chunk {
 
@@ -64,7 +65,7 @@ public class Chunk {
         setCell(cellType, cellPosX, cellPosY, World.getInChunkPos(cellPosX), World.getInChunkPos(cellPosY));
     }
 
-    private void setCellWithChunkPos(CellType cellType, int inChunkPosX, int inChunkPosY) {
+    public void setCellWithInChunkPos(CellType cellType, int inChunkPosX, int inChunkPosY) {
         setCell(cellType, getCellPosX(inChunkPosX), getCellPosY(inChunkPosY), inChunkPosX, inChunkPosY);
     }
 
@@ -98,36 +99,9 @@ public class Chunk {
     }
 
     public static Chunk loadOrCreate(World world, int chunkPosX, int chunkPosY) {
-        return generateNew(world, chunkPosX, chunkPosY);
+        return ChunkGenerator.generateNew(world, chunkPosX, chunkPosY);
     }
 
-    public static Chunk generateNew(World world, int chunkPosX, int chunkPosY) {
-        Chunk chunk = new Chunk(world, chunkPosX, chunkPosY);
-
-        for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
-
-            int cellPosX = chunk.getCellPosX(i);
-            double terrainHeight = world.openSimplexNoise.eval(cellPosX / 100f, 0, 0) * 0;
-
-            for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
-                chunk.setCellWithChunkPos(CellType.EMPTY, i, j);
-
-                int cellPosY = chunk.getCellPosY(j);
-
-                CellType cellType = CellType.EMPTY;
-
-                //if (cellPosY < terrainHeight) cellType = CellType.SAND;
-                //if (cellPosY < terrainHeight - 10) cellType = CellType.DIRT;
-                if (cellPosY < terrainHeight - 30) cellType = CellType.STONE;
-
-                chunk.setCellWithChunkPos(cellType, i, j);
-            }
-        }
-
-        //chunk.setCell(CellType.GRASS, 0, 0);
-
-        return chunk;
-    }
 
 //    public Chunk load(int chunkX, int chunkY) {
 //

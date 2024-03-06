@@ -174,9 +174,9 @@ public class MovableSolid extends Solid implements MovingCell {
         protected float movingResistance = 0f;
         protected float sprayFactor = 0f;
 
-        public static final MovableSolidProperty SAND = new MovableSolidProperty().movingResistance(0.2f).sprayFactor(0.5f);
-        public static final MovableSolidProperty DIRT = new MovableSolidProperty().movingResistance(0.5f).sprayFactor(0.2f);
-        public static final MovableSolidProperty COAL = new MovableSolidProperty().movingResistance(0.9f).sprayFactor(0.1f);
+        public static final MovableSolidProperty SAND = new MovableSolidProperty().movingResistance(0.1f).sprayFactor(0.6f);
+        public static final MovableSolidProperty DIRT = new MovableSolidProperty().movingResistance(0.3f).sprayFactor(0.3f);
+        public static final MovableSolidProperty COAL = new MovableSolidProperty().movingResistance(0.8f).sprayFactor(0.2f);
 
         public MovableSolidProperty movingResistance(float movingResistance) {
             this.movingResistance = movingResistance;
