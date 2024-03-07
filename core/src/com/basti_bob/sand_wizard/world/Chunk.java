@@ -11,7 +11,7 @@ public class Chunk {
 
 
     private final Array2D<Cell> grid;
-    private final World world;
+    public final World world;
     public final int posX, posY;
     private boolean active, activeNextFrame;
     public final ChunkAccessor chunkAccessor;

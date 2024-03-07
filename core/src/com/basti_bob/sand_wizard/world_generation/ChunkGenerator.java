@@ -13,7 +13,7 @@ public class ChunkGenerator {
         for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
 
             int cellPosX = chunk.getCellPosX(i);
-            double terrainHeight = world.openSimplexNoise.eval(cellPosX / 100f, 0, 0) * 60 - 30;
+            double terrainHeight = getTerrainHeight(world, cellPosX);
 
             for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
                 chunk.setCellWithInChunkPos(CellType.EMPTY, i, j);
@@ -30,8 +30,21 @@ public class ChunkGenerator {
             }
         }
 
+//        int worldX = chunk.getCellPosX(0);
+//        int terrainHeight = getTerrainHeight(world, worldX);
+//        if(chunk.getCellPosY(0) < terrainHeight){
+//            if(Math.random() < 0.1) {
+//                TreeGenerator.BASE_TREE.placeTree(world, worldX, terrainHeight + 20);
+//            }
+//        }
+
+
         //chunk.setCell(CellType.GRASS, 0, 0);
 
         return chunk;
+    }
+
+    public static int getTerrainHeight(World world, int cellPosX) {
+        return (int) (world.openSimplexNoise.eval(cellPosX / 100f, 0, 0) * 60 - 30);
     }
 }

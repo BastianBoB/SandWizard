@@ -1,12 +1,11 @@
 package com.basti_bob.sand_wizard.world;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
+import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
+import com.basti_bob.sand_wizard.world_generation.trees.TreeGenerator;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -32,6 +31,8 @@ public class World {
                 this.loadOrCreateChunk(i, j);
             }
         }
+
+        TreeGenerator.TREE_1.placeTree(this, -200, ChunkGenerator.getTerrainHeight(this, -200));
 //
 //
 //        for (int i = -50; i <= 0; i++) {
@@ -52,7 +53,7 @@ public class World {
     public int numActiveChunks;
 
     public void update() {
-        int height = 100;
+        int height = 200;
         ++updateTimes;
 
 //        if (updateTimes >= 100) {
@@ -62,22 +63,22 @@ public class World {
 //            setCell(CellType.OIL, 0, height);
 //            setCell(CellType.OIL, -2, height);
 //        }
-//
+
 //        if (updateTimes <= 40) {
 //            setCell(CellType.WATER, -3, height + 5);
 //            setCell(CellType.WATER, -2, height + 5);
 //            setCell(CellType.WATER, -1, height + 5);
 //        }
 
-        setCell(CellType.SAND, -100, height);
-        setCell(CellType.DIRT, 0, height);
-        setCell(CellType.COAL, 100, height);
+//        setCell(CellType.SAND, -100, height);
+//        setCell(CellType.DIRT, 0, height);
+//        setCell(CellType.COAL, 100, height);
 
-        for(int i = -5; i <= 5; i++) {
-            CellType cellType = i <= 0 ? CellType.WATER : CellType.OIL;
-
-            setCell(cellType, i * 15 + 1, height + 25);
-        }
+//        for(int i = -2; i <= 2; i++) {
+//            CellType cellType = i <= 0 ? CellType.WATER : CellType.OIL;
+//
+//            setCell(cellType, i * 15 + 1, height + 25);
+//        }
 
 
         int numThreads = Runtime.getRuntime().availableProcessors();
@@ -236,6 +237,10 @@ public class World {
 
     public void setCell(Cell cell, int cellPosX, int cellPosY) {
         getChunkFromCellPos(cellPosX, cellPosY).setCell(cell, cellPosX, cellPosY);
+    }
+
+    public void setCell(Cell cell) {
+        getChunkFromCellPos(cell.posX, cell.posY).setCell(cell, cell.posX, cell.posY);
     }
 //
 //    public boolean isEmpty(int cellPosX, int cellPosY) {

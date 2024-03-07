@@ -10,10 +10,16 @@ import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class Cell {
+
+
+    public static final CellProperty EMPTY = new CellProperty();
+    public static final CellProperty STONE = new CellProperty();
+    public static final CellProperty GRASS = new CellProperty();
+    public static final CellProperty ICE = new CellProperty().friction(0.98f);
+    public static final CellProperty WOOD = new CellProperty();
+    public static final CellProperty LEAF = new CellProperty();
+
 
     public final World world;
     public Color color;
@@ -71,7 +77,7 @@ public abstract class Cell {
         chunkAccessor.swapCells(this, target);
     }
 
-    //Very fucking large but hopefully more efficient than other approach (here for each chunkboardering state there have to be retrieved less chunks and not repeatedly)
+    //Very fucking large but hopefully more efficient than the other approach (here for each chunkboardering state there have to be retrieved less chunks and not repeatedly)
     public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
         final int boarderPos = WorldConstants.CHUNK_SIZE - 1;
 
@@ -244,16 +250,16 @@ public abstract class Cell {
         }
     }
 
-    public void trySetNeighboursMoving2(ChunkAccessor chunkAccessor, int posX, int posY) {
-
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                if (i == 0 && j == 0) continue;
-
-                trySetMoving(chunkAccessor.getCell(posX + i, posY + j));
-            }
-        }
-    }
+//    public void trySetNeighboursMoving2(ChunkAccessor chunkAccessor, int posX, int posY) {
+//
+//        for (int i = -1; i <= 1; i++) {
+//            for (int j = -1; j <= 1; j++) {
+//                if (i == 0 && j == 0) continue;
+//
+//                trySetMoving(chunkAccessor.getCell(posX + i, posY + j));
+//            }
+//        }
+//    }
 
     public void clampVelocity() {
         if (velocity.x > WorldConstants.CHUNK_SIZE) velocity.x = WorldConstants.CHUNK_SIZE;
@@ -299,11 +305,6 @@ public abstract class Cell {
         protected float friction = 0.9f;
         protected float speedFactor = 1f;
         protected float jumpFactor = 1f;
-
-        public static final CellProperty EMPTY = new CellProperty();
-        public static final CellProperty STONE = new CellProperty();
-        public static final CellProperty GRASS = new CellProperty();
-        public static final CellProperty ICE = new CellProperty().friction(0.98f);
 
         private CellProperty friction(float friction) {
             this.friction = friction;

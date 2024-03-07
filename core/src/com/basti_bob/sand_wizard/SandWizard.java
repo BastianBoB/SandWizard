@@ -19,6 +19,8 @@ public class SandWizard extends ApplicationAdapter {
     private WorldRenderer worldRenderer;
     private Player player;
 
+    public static boolean renderChunkBoarder;
+
     @Override
     public void create() {
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -45,6 +47,11 @@ public class SandWizard extends ApplicationAdapter {
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) camera.zoom *= 0.99;
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) camera.zoom *= 1.01;
+
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+            SandWizard.renderChunkBoarder = !SandWizard.renderChunkBoarder;
+        }
 
         camera.update();
         player.update();

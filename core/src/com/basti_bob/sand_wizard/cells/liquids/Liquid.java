@@ -12,6 +12,10 @@ import com.basti_bob.sand_wizard.world.World;
 
 public class Liquid extends Cell implements MovingCell {
 
+
+    public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(7f).density(1f);
+    public static final LiquidProperty OIL = new LiquidProperty().dispersionRate(4f).density(0.5f);
+
     private float dispersionRate;
     private float density;
     private boolean moving;
@@ -182,9 +186,6 @@ public class Liquid extends Cell implements MovingCell {
 
         protected float dispersionRate = 5f;
         protected float density = 1f;
-
-        public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(7f).density(1f);
-        public static final LiquidProperty OIL = new LiquidProperty().dispersionRate(4f).density(0.5f);
 
         public LiquidProperty dispersionRate(float dispersionRate) {
             this.dispersionRate = dispersionRate;

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.Player;
+import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
@@ -124,7 +125,8 @@ public class WorldRenderer {
         mesh.render(shader, GL20.GL_POINTS);
 
 
-        chunkActiveDebugSquares(chunks, chunkSize);
+        if (SandWizard.renderChunkBoarder)
+            chunkActiveDebugSquares(chunks, chunkSize);
     }
 
     private void chunkActiveDebugSquares(Array2D<Chunk> chunks, int chunkSize) {
@@ -149,7 +151,6 @@ public class WorldRenderer {
 
     private final Color activeColor = new Color(0.2f, 0.2f, 0.2f, 1);
     private final Color inActiveColor = new Color(0.1f, 0.1f, 0.1f, 1);
-
 
 
     private void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
