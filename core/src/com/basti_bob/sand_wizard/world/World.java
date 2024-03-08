@@ -32,7 +32,7 @@ public class World {
             }
         }
 
-        TreeGenerator.TREE_1.placeTree(this, -200, ChunkGenerator.getTerrainHeight(this, -200));
+        TreeGenerator.TREE_2.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
 //
 //
 //        for (int i = -50; i <= 0; i++) {
@@ -56,29 +56,29 @@ public class World {
         int height = 200;
         ++updateTimes;
 
-//        if (updateTimes >= 100) {
-//            setCell(CellType.SAND, -1, height + 1);
-//            setCell(CellType.STONE, -1, height + 3);
-//            setCell(CellType.WATER, -1, height + 5);
-//            setCell(CellType.OIL, 0, height);
-//            setCell(CellType.OIL, -2, height);
-//        }
+        if (updateTimes >= 100) {
+            setCell(CellType.SAND, -1, height + 1);
+            setCell(CellType.STONE, -1, height + 3);
+            setCell(CellType.WATER, -1, height + 5);
+            setCell(CellType.OIL, 0, height);
+            setCell(CellType.OIL, -2, height);
+        }
 
-//        if (updateTimes <= 40) {
-//            setCell(CellType.WATER, -3, height + 5);
-//            setCell(CellType.WATER, -2, height + 5);
-//            setCell(CellType.WATER, -1, height + 5);
-//        }
+        if (updateTimes <= 40) {
+            setCell(CellType.WATER, -3, height + 5);
+            setCell(CellType.WATER, -2, height + 5);
+            setCell(CellType.WATER, -1, height + 5);
+        }
 
-//        setCell(CellType.SAND, -100, height);
-//        setCell(CellType.DIRT, 0, height);
-//        setCell(CellType.COAL, 100, height);
+        setCell(CellType.SAND, -100, height);
+        setCell(CellType.DIRT, 0, height);
+        setCell(CellType.COAL, 100, height);
 
-//        for(int i = -2; i <= 2; i++) {
-//            CellType cellType = i <= 0 ? CellType.WATER : CellType.OIL;
-//
-//            setCell(cellType, i * 15 + 1, height + 25);
-//        }
+        for(int i = -2; i <= 2; i++) {
+            CellType cellType = i <= 0 ? CellType.WATER : CellType.OIL;
+
+            setCell(cellType, i * 15 + 1, height + 25);
+        }
 
 
         int numThreads = Runtime.getRuntime().availableProcessors();

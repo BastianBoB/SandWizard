@@ -6,19 +6,22 @@ public class LSystem {
         String lSystem = rule;
 
         for (int i = 0; i < iterations; i++) {
-
-            StringBuilder next = new StringBuilder();
-
-            for (char c : lSystem.toCharArray()) {
-                if (c == 'F')
-                    next.append(rule);
-                else
-                    next.append(c);
-            }
-
-            lSystem = next.toString();
+            lSystem = getNextLSystem(lSystem, rule);
         }
 
         return lSystem;
+    }
+
+    public static String getNextLSystem(String lSystem, String rule) {
+        StringBuilder next = new StringBuilder();
+
+        for (char c : lSystem.toCharArray()) {
+            if (c == 'F')
+                next.append(rule);
+            else
+                next.append(c);
+        }
+
+        return next.toString();
     }
 }

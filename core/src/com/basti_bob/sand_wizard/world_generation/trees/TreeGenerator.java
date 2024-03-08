@@ -14,20 +14,25 @@ import java.util.*;
 
 public class TreeGenerator {
 
-    public static final TreeGenerator TREE_1 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[-F+F+F]").iterations(1).leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
+    public static final TreeGenerator TREE_1 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[-F+F+F]").iterations(3).leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
         if (isOuterBranch) return 9;
         return 4;
-    }).build();
+    }).branchThicknessFunction(i -> Math.max(1, 3 - i)).build();
 
-    public static final TreeGenerator TREE_2 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[--F+F+F+F]").iterations(2).startLength(25f).build();
+    public static final TreeGenerator TREE_2 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[--F+F+F+F]").iterations(3).startLength(40f).leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
+        if (isOuterBranch) return 5;
+        return 2;
+    }).branchThicknessFunction(i -> i == 0 ? 5 : 1).build();
+
     public static final TreeGenerator TREE_3 = new TreeGeneratorBuilder().rule("FF[-FF][FFF][+FF]").startLength(10f).build();
     public static final TreeGenerator TREE_4 = new TreeGeneratorBuilder().rule("FF[-F][FF[-F][+F]]").build();
     public static final TreeGenerator TREE_5 = new TreeGeneratorBuilder().rule("F[-FF]F[+FF][F]").build();
 
     private final CellType branchCellType, leafCellType;
-    private final String lSystem;
+    private final String rule;
     private final int iterations;
     private final float startLength;
+
     private final float lengthMultiplier;
     private final float angleIncrement;
     private final BranchThicknessFunction branchThicknessFunction;
@@ -39,7 +44,7 @@ public class TreeGenerator {
                          LeafSizeFunction leafSize, FloatPredicate shouldAddLeaf) {
         this.branchCellType = branchCellType;
         this.leafCellType = leafCellType;
-        this.lSystem = LSystem.generateLSystem(rule, iterations);
+        this.rule = rule;
         this.iterations = iterations;
         this.lengthMultiplier = lengthMultiplier;
         this.startLength = startLength;
@@ -103,26 +108,6 @@ public class TreeGenerator {
         }
     }
 
-    private Region getRegionsFromPoints(List<Point> points) {
-        Point first = points.get(0);
-
-        int minX = first.x, minY = first.y, maxX = first.x, maxY = first.y;
-
-        for (int i = 1; i < points.size(); i++) {
-            Point point = points.get(i);
-
-            int x = point.x;
-            int y = point.y;
-
-            if (x < minX) minX = x;
-            if (x > maxX) maxX = x;
-            if (y < minY) minY = y;
-            if (y > maxY) maxY = y;
-        }
-
-        return new Region(minX, minY, maxX, maxY);
-    }
-
     public List<Point> generateLeaves(float posX, float posY, int leafRadius) {
         List<Point> leaves = new ArrayList<>();
 
@@ -143,29 +128,44 @@ public class TreeGenerator {
         Stack<State> stateStack = new Stack<>();
 
         float length = (float) (startLength * Math.pow(lengthMultiplier, iterations));
-        float x = startX;
-        float y = startY;
-        float angle = (float) (Math.PI / 2);
 
-        for (char c : lSystem.toCharArray()) {
-            switch (c) {
-                case 'F' -> {
-                    float newX = (float) (x + Math.cos(angle) * length);
-                    float newY = (float) (y + Math.sin(angle) * length);
+        String lSystem = "F";
 
-                    //hier weitermachen arschloch (wahrscheinlich jedes mal die Iterationen vom LSystem erstellen, sodass die iterationen mit übernommen werden)
-                    branches.add(new Branch(x, y, newX, newY));
-                    x = newX;
-                    y = newY;
-                }
-                case '+' -> angle += angleIncrement;
-                case '-' -> angle -= angleIncrement;
-                case '[' -> stateStack.push(new State(x, y, angle));
-                case ']' -> {
-                    State state = stateStack.pop();
-                    x = state.x;
-                    y = state.y;
-                    angle = state.angle;
+        for (int i = 0; i < iterations; i++) {
+
+            lSystem = LSystem.getNextLSystem(lSystem, rule);
+
+            float x = startX;
+            float y = startY;
+            float angle = (float) (Math.PI / 2);
+            int numBranching = 0;
+
+            for (char c : lSystem.toCharArray()) {
+                switch (c) {
+                    case 'F' -> {
+                        float newX = (float) (x + Math.cos(angle) * length);
+                        float newY = (float) (y + Math.sin(angle) * length);
+                        Branch newBranch = new Branch(x, y, newX, newY, numBranching);
+
+                        if (!branches.contains(newBranch)) {
+                            branches.add(newBranch);
+                        }
+                        x = newX;
+                        y = newY;
+                    }
+                    case '+' -> angle += angleIncrement;
+                    case '-' -> angle -= angleIncrement;
+                    case '[' -> {
+                        stateStack.push(new State(x, y, angle));
+                        numBranching++;
+                    }
+                    case ']' -> {
+                        State state = stateStack.pop();
+                        x = state.x;
+                        y = state.y;
+                        angle = state.angle;
+                        numBranching--;
+                    }
                 }
             }
         }
@@ -188,6 +188,9 @@ public class TreeGenerator {
 
         int steps = Math.max(xDistance, yDistance);
 
+        int thickOffMin = -thickness/2;
+        int thickOffMax = (int) Math.ceil(thickness/2f);
+
         if (xDistance > yDistance) {
             float slope = Math.abs((y2 - y1) / (x2 - x1));
 
@@ -195,8 +198,8 @@ public class TreeGenerator {
                 float x = positiveX ? i : -i;
                 float y = positiveY ? i * slope : -i * slope;
 
-                for (int k = -thickness; k <= thickness; k++)
-                    points.add(new Point((int) (x1 + x), (int) (y1 + y + thickness)));
+                for (int k = thickOffMin; k < thickOffMax; k++)
+                    points.add(new Point((int) (x1 + x), (int) (y1 + y) + k));
 
             }
         } else {
@@ -206,15 +209,36 @@ public class TreeGenerator {
                 float x = positiveX ? i * slope : -i * slope;
                 float y = positiveY ? i : -i;
 
-                for (int k = -thickness; k <= thickness; k++)
-                    points.add(new Point((int) (x1 + x + thickness), (int) (y1 + y)));
+                for (int k = thickOffMin; k < thickOffMax; k++)
+                    points.add(new Point((int) (x1 + x) + k, (int) (y1 + y)));
             }
         }
 
         return points;
     }
 
-    public boolean isBranchOuterBranch(Branch testBranch, List<Branch> branches, Point center, float maximumDistance) {
+    private Region getRegionsFromPoints(List<Point> points) {
+        Point first = points.get(0);
+
+        int minX = first.x, minY = first.y, maxX = first.x, maxY = first.y;
+
+        for (int i = 1; i < points.size(); i++) {
+            Point point = points.get(i);
+
+            int x = point.x;
+            int y = point.y;
+
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+
+        return new Region(minX, minY, maxX, maxY);
+    }
+
+    public boolean isBranchOuterBranch(Branch testBranch, List<Branch> branches, Point center,
+                                       float maximumDistance) {
 
         Vector2 centerBranchVector = new Vector2(testBranch.endX - center.x, testBranch.endY - center.y);
         float centerBranchDist = centerBranchVector.len();
@@ -308,9 +332,9 @@ public class TreeGenerator {
         private float lengthMultiplier = 0.5f;
         private float startLength = 20f;
         private float angleIncrement = 0.5f;
-        private BranchThicknessFunction branchThicknessFunction = i -> 5 - i;
+        private BranchThicknessFunction branchThicknessFunction = i -> 3 - i;
 
-        private LeafSizeFunction leafSizeFunction = (v, b) -> 5;
+        private LeafSizeFunction leafSizeFunction = (v, b) -> 3;
         private FloatPredicate shouldAddLeave = v -> true;
 
         private TreeGeneratorBuilder() {
@@ -351,7 +375,7 @@ public class TreeGenerator {
             return this;
         }
 
-        private TreeGeneratorBuilder branchThicknessFunction(float branchThicknessFunction) {
+        private TreeGeneratorBuilder branchThicknessFunction(BranchThicknessFunction branchThicknessFunction) {
             this.branchThicknessFunction = branchThicknessFunction;
             return this;
         }
