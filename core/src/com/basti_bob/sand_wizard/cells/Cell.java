@@ -10,6 +10,8 @@ import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
+import java.lang.reflect.Array;
+
 public abstract class Cell {
 
 
@@ -17,8 +19,8 @@ public abstract class Cell {
     public static final CellProperty STONE = new CellProperty();
     public static final CellProperty GRASS = new CellProperty();
     public static final CellProperty ICE = new CellProperty().friction(0.98f);
-    public static final CellProperty WOOD = new CellProperty();
-    public static final CellProperty LEAF = new CellProperty();
+    public static final CellProperty WOOD = new CellProperty().burningTemperature(200f);
+    public static final CellProperty LEAF = new CellProperty().burningTemperature(50f);
 
 
     public final World world;
@@ -35,6 +37,14 @@ public abstract class Cell {
     private float speedFactor;
     private float jumpFactor;
 
+    private boolean canBeHeated;
+    private boolean canBeCooled;
+
+    private float burningTemperature;
+    private boolean canBurn;
+
+    private float temperature;
+    private boolean burning;
 
     public Cell(CellType cellType, World world, int posX, int posY) {
         this.world = world;
@@ -47,22 +57,58 @@ public abstract class Cell {
         this.friction = cellProperty.friction;
         this.speedFactor = cellProperty.speedFactor;
         this.jumpFactor = cellProperty.jumpFactor;
+
+        this.canBeHeated = cellProperty.canBeHeated;
+        this.canBeCooled = cellProperty.canBeCooled;
+        this.burningTemperature = cellProperty.burningTemperature;
+        this.canBurn = cellProperty.canBurn;
     }
 
-    public Color getColor() {
-        return this.color;
+    public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        this.gotUpdated = true;
+
+        updateMoving(chunkAccessor, updateDirection);
+        updateBurning(chunkAccessor, updateDirection);
     }
 
-    public float getFriction() {
-        return friction;
+    public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection){
+
     }
 
-    public float getSpeedFactor() {
-        return speedFactor;
+    public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        if (!isBurning()) return;
+
+        if(Math.random() > 0.1) return;
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if(i == 0 && j == 0) continue;
+
+                if(Math.random() > 0.1) continue;
+
+                chunkAccessor.setCellIfEmpty(CellType.FIRE, this.posX + i, this.posY + j);
+            }
+        }
     }
 
-    public float getJumpFactor() {
-        return jumpFactor;
+    private void changeTemperature(float temperatureChange) {
+        this.temperature += temperatureChange;
+
+        if (canBurn && this.temperature > burningTemperature) {
+            this.burning = true;
+        }
+    }
+
+    public void applyHeating(float heat) {
+        if (!canBeHeated) return;
+
+        this.changeTemperature(heat);
+    }
+
+    public void applyCooling(float cooling) {
+        if (!canBeCooled) return;
+
+        this.changeTemperature(-cooling);
     }
 
     public void setPosition(int posX, int posY) {
@@ -78,7 +124,9 @@ public abstract class Cell {
     }
 
     //Very fucking large but hopefully more efficient than the other approach (here for each chunkboardering state there have to be retrieved less chunks and not repeatedly)
-    public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
+    public Cell[][] getNeighbourCells(ChunkAccessor chunkAccessor, int posX, int posY) {
+        Cell[][] neighbourCells = new Cell[3][3];
+
         final int boarderPos = WorldConstants.CHUNK_SIZE - 1;
 
         int inChunkX = World.getInChunkPos(posX);
@@ -100,148 +148,150 @@ public abstract class Cell {
                 for (int i = -1; i <= 1; i++) {
                     for (int j = -1; j <= 1; j++) {
                         if (i == 0 && j == 0) continue;
-                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                        neighbourCells[i + 1][j + 1] = cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j);
                     }
                 }
             }
             case TOP_LEFT -> {
-                trySetMoving(cellChunk.getCellFromInChunkPos(0, boarderPos - 1));
-                trySetMoving(cellChunk.getCellFromInChunkPos(1, boarderPos - 1));
-                trySetMoving(cellChunk.getCellFromInChunkPos(1, boarderPos));
+                neighbourCells[1][0] = cellChunk.getCellFromInChunkPos(0, boarderPos - 1);
+                neighbourCells[2][0] = cellChunk.getCellFromInChunkPos(1, boarderPos - 1);
+                neighbourCells[2][1] = cellChunk.getCellFromInChunkPos(1, boarderPos);
 
                 Chunk topLeftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY + 1);
                 if (topLeftChunk != null) {
-                    trySetMoving(topLeftChunk.getCellFromInChunkPos(boarderPos, 0));
+                    neighbourCells[0][2] = topLeftChunk.getCellFromInChunkPos(boarderPos, 0);
                 }
                 Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
                 if (topChunk != null) {
-                    trySetMoving(topChunk.getCellFromInChunkPos(0, 0));
-                    trySetMoving(topChunk.getCellFromInChunkPos(1, 0));
+                    neighbourCells[1][2] = topChunk.getCellFromInChunkPos(0, 0);
+                    neighbourCells[2][2] = topChunk.getCellFromInChunkPos(1, 0);
                 }
                 Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
                 if (leftChunk != null) {
-                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, boarderPos));
-                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, boarderPos - 1));
+                    neighbourCells[0][1] = leftChunk.getCellFromInChunkPos(boarderPos, boarderPos);
+                    neighbourCells[0][0] = leftChunk.getCellFromInChunkPos(boarderPos, boarderPos - 1);
                 }
             }
             case TOP_RIGHT -> {
-                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos, boarderPos - 1));
-                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos - 1));
-                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos));
+                neighbourCells[1][0] = cellChunk.getCellFromInChunkPos(boarderPos, boarderPos - 1);
+                neighbourCells[0][0] = cellChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos - 1);
+                neighbourCells[0][1] = cellChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos);
 
                 Chunk topRightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY + 1);
                 if (topRightChunk != null) {
-                    trySetMoving(topRightChunk.getCellFromInChunkPos(0, 0));
+                    neighbourCells[2][2] = topRightChunk.getCellFromInChunkPos(0, 0);
                 }
                 Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
                 if (topChunk != null) {
-                    trySetMoving(topChunk.getCellFromInChunkPos(boarderPos, 0));
-                    trySetMoving(topChunk.getCellFromInChunkPos(boarderPos - 1, 0));
+                    neighbourCells[1][2] = topChunk.getCellFromInChunkPos(boarderPos, 0);
+                    neighbourCells[0][2] = topChunk.getCellFromInChunkPos(boarderPos - 1, 0);
                 }
                 Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
                 if (rightChunk != null) {
-                    trySetMoving(rightChunk.getCellFromInChunkPos(0, boarderPos));
-                    trySetMoving(rightChunk.getCellFromInChunkPos(0, boarderPos - 1));
+                    neighbourCells[2][1] = rightChunk.getCellFromInChunkPos(0, boarderPos);
+                    neighbourCells[2][0] = rightChunk.getCellFromInChunkPos(0, boarderPos - 1);
                 }
             }
 
             case BOTTOM_LEFT -> {
-                trySetMoving(cellChunk.getCellFromInChunkPos(0, 1));
-                trySetMoving(cellChunk.getCellFromInChunkPos(1, 1));
-                trySetMoving(cellChunk.getCellFromInChunkPos(1, 0));
+                neighbourCells[1][2] = (cellChunk.getCellFromInChunkPos(0, 1));
+                neighbourCells[2][2] = (cellChunk.getCellFromInChunkPos(1, 1));
+                neighbourCells[2][1] = (cellChunk.getCellFromInChunkPos(1, 0));
 
                 Chunk bottomLeftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY - 1);
                 if (bottomLeftChunk != null) {
-                    trySetMoving(bottomLeftChunk.getCellFromInChunkPos(boarderPos, boarderPos));
+                    neighbourCells[0][0] = (bottomLeftChunk.getCellFromInChunkPos(boarderPos, boarderPos));
                 }
                 Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
                 if (bottomChunk != null) {
-                    trySetMoving(bottomChunk.getCellFromInChunkPos(0, boarderPos));
-                    trySetMoving(bottomChunk.getCellFromInChunkPos(1, boarderPos));
+                    neighbourCells[1][0] = (bottomChunk.getCellFromInChunkPos(0, boarderPos));
+                    neighbourCells[2][0] = (bottomChunk.getCellFromInChunkPos(1, boarderPos));
                 }
                 Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
                 if (leftChunk != null) {
-                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, 0));
-                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, 1));
+                    neighbourCells[0][1] = (leftChunk.getCellFromInChunkPos(boarderPos, 0));
+                    neighbourCells[0][2] = (leftChunk.getCellFromInChunkPos(boarderPos, 1));
                 }
             }
 
             case BOTTOM_RIGHT -> {
-                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos, 1));
-                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos - 1, 1));
-                trySetMoving(cellChunk.getCellFromInChunkPos(boarderPos - 1, 0));
+                neighbourCells[1][2] = (cellChunk.getCellFromInChunkPos(boarderPos, 1));
+                neighbourCells[0][2] = (cellChunk.getCellFromInChunkPos(boarderPos - 1, 1));
+                neighbourCells[0][1] = (cellChunk.getCellFromInChunkPos(boarderPos - 1, 0));
 
                 Chunk bottomRightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY - 1);
                 if (bottomRightChunk != null) {
-                    trySetMoving(bottomRightChunk.getCellFromInChunkPos(0, boarderPos));
+                    neighbourCells[2][0] = (bottomRightChunk.getCellFromInChunkPos(0, boarderPos));
                 }
                 Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
                 if (bottomChunk != null) {
-                    trySetMoving(bottomChunk.getCellFromInChunkPos(boarderPos, boarderPos));
-                    trySetMoving(bottomChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos));
+                    neighbourCells[1][0] = (bottomChunk.getCellFromInChunkPos(boarderPos, boarderPos));
+                    neighbourCells[0][0] = (bottomChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos));
                 }
                 Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
                 if (rightChunk != null) {
-                    trySetMoving(rightChunk.getCellFromInChunkPos(0, 0));
-                    trySetMoving(rightChunk.getCellFromInChunkPos(0, 1));
+                    neighbourCells[2][1] = (rightChunk.getCellFromInChunkPos(0, 0));
+                    neighbourCells[2][2] = (rightChunk.getCellFromInChunkPos(0, 1));
                 }
             }
             case LEFT -> {
                 for (int i = 0; i <= 1; i++) {
                     for (int j = -1; j <= 1; j++) {
                         if (i == 0 && j == 0) continue;
-                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                        neighbourCells[i + 1][j + 1] = (cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
                     }
                 }
                 Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
-                if (leftChunk == null) return;
+                if (leftChunk == null) return neighbourCells;
 
                 for (int j = -1; j <= 1; j++)
-                    trySetMoving(leftChunk.getCellFromInChunkPos(boarderPos, inChunkY + j));
+                    neighbourCells[0][j + 1] = (leftChunk.getCellFromInChunkPos(boarderPos, inChunkY + j));
             }
             case TOP -> {
                 for (int i = -1; i <= 1; i++) {
                     for (int j = -1; j <= 0; j++) {
                         if (i == 0 && j == 0) continue;
-                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                        neighbourCells[i + 1][j + 1] = (cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
                     }
                 }
                 Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
-                if (topChunk == null) return;
+                if (topChunk == null) return neighbourCells;
 
                 for (int i = -1; i <= 1; i++)
-                    trySetMoving(topChunk.getCellFromInChunkPos(inChunkX + i, 0));
+                    neighbourCells[i + 1][2] = (topChunk.getCellFromInChunkPos(inChunkX + i, 0));
 
             }
             case BOTTOM -> {
                 for (int i = -1; i <= 1; i++) {
                     for (int j = 0; j <= 1; j++) {
                         if (i == 0 && j == 0) continue;
-                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                        neighbourCells[i + 1][j + 1] = (cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
                     }
                 }
 
                 Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
-                if (bottomChunk == null) return;
+                if (bottomChunk == null) return neighbourCells;
 
                 for (int i = -1; i <= 1; i++)
-                    trySetMoving(bottomChunk.getCellFromInChunkPos(inChunkX + i, boarderPos));
+                    neighbourCells[i + 1][0] = (bottomChunk.getCellFromInChunkPos(inChunkX + i, boarderPos));
             }
             case RIGHT -> {
                 for (int i = -1; i <= 0; i++) {
                     for (int j = -1; j <= 1; j++) {
                         if (i == 0 && j == 0) continue;
-                        trySetMoving(cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
+                        neighbourCells[i + 1][j + 1] = (cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
                     }
                 }
                 Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
-                if (rightChunk == null) return;
+                if (rightChunk == null) return neighbourCells;
 
                 for (int j = -1; j <= 1; j++)
-                    trySetMoving(rightChunk.getCellFromInChunkPos(0, inChunkY + j));
+                    neighbourCells[2][j + 1] = (rightChunk.getCellFromInChunkPos(0, inChunkY + j));
 
             }
         }
+
+        return neighbourCells;
     }
 
     private void trySetMoving(Cell cell) {
@@ -250,16 +300,18 @@ public abstract class Cell {
         }
     }
 
-//    public void trySetNeighboursMoving2(ChunkAccessor chunkAccessor, int posX, int posY) {
-//
-//        for (int i = -1; i <= 1; i++) {
-//            for (int j = -1; j <= 1; j++) {
-//                if (i == 0 && j == 0) continue;
-//
-//                trySetMoving(chunkAccessor.getCell(posX + i, posY + j));
-//            }
-//        }
-//    }
+    public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
+
+        Cell[][] neighbourCells = getNeighbourCells(chunkAccessor, posX, posY);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) continue;
+
+                trySetMoving(neighbourCells[i + 1][j + 1]);
+            }
+        }
+    }
 
     public void clampVelocity() {
         if (velocity.x > WorldConstants.CHUNK_SIZE) velocity.x = WorldConstants.CHUNK_SIZE;
@@ -288,10 +340,6 @@ public abstract class Cell {
         return WorldConstants.GRAVITY;
     }
 
-    public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        this.gotUpdated = true;
-    }
-
     public boolean canMoveToOrSwap(Cell target) {
         return target instanceof Empty || canSwapWith(target);
     }
@@ -300,11 +348,82 @@ public abstract class Cell {
         return false;
     }
 
+    public World getWorld() {
+        return world;
+    }
+
+    public boolean isCanBeHeated() {
+        return canBeHeated;
+    }
+
+    public boolean isCanBeCooled() {
+        return canBeCooled;
+    }
+
+    public float getBurningTemperature() {
+        return burningTemperature;
+    }
+
+    public boolean isCanBurn() {
+        return canBurn;
+    }
+
+    public float getTemperature() {
+        return temperature;
+    }
+
+    public boolean isBurning() {
+        return burning;
+    }
+
+    public Color getColor() {
+        return this.color;
+    }
+
+    public float getFriction() {
+        return friction;
+    }
+
+    public float getSpeedFactor() {
+        return speedFactor;
+    }
+
+    public float getJumpFactor() {
+        return jumpFactor;
+    }
+
     public static class CellProperty {
 
         protected float friction = 0.9f;
         protected float speedFactor = 1f;
         protected float jumpFactor = 1f;
+
+        protected boolean canBeHeated = true;
+        protected boolean canBeCooled = true;
+
+        protected boolean canBurn = true;
+        protected float burningTemperature = 1000;
+
+
+        private CellProperty canBeHeated(boolean canBeHeated) {
+            this.canBeHeated = canBeHeated;
+            return this;
+        }
+
+        private CellProperty canBeCooled(boolean canBeCooled) {
+            this.canBeCooled = canBeCooled;
+            return this;
+        }
+
+        private CellProperty canBurn(boolean canBurn) {
+            this.canBurn = canBurn;
+            return this;
+        }
+
+        private CellProperty burningTemperature(float burningTemperature) {
+            this.burningTemperature = burningTemperature;
+            return this;
+        }
 
         private CellProperty friction(float friction) {
             this.friction = friction;

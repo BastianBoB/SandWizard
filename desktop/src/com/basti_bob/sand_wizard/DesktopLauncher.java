@@ -13,7 +13,8 @@ public class DesktopLauncher {
 		//config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
 
 		config.setForegroundFPS(60);
-		config.setWindowedMode(1920, 1080);
+		float scale = 1f;
+		config.setWindowedMode((int) (1920 * scale), (int) (1080 * scale));
 
 		config.setTitle("Sand Wizard");
 		new Lwjgl3Application(new SandWizard(), config);

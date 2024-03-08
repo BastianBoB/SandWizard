@@ -1,32 +1,40 @@
-package com.basti_bob.sand_wizard.cells.liquids;
+package com.basti_bob.sand_wizard.cells.gases;
 
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;
+import com.basti_bob.sand_wizard.cells.liquids.Liquid;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
-import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world.WorldConstants;
 
-public class Liquid extends Cell implements MovingCell {
+public class Gas extends Cell implements MovingCell {
 
-    public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(7f).density(1f);
-    public static final LiquidProperty OIL = new LiquidProperty().dispersionRate(4f).density(0.5f);
+    private static final Vector2 GAS_GRAVITY = new Vector2(WorldConstants.GRAVITY.x, WorldConstants.GRAVITY.y * -0.1f);
+
+    public static final GasProperty METHANE = new GasProperty().dispersionRate(1f).density(1f);
+    public static final GasProperty FIRE = new GasProperty().dispersionRate(1f).density(1f);
 
     private float dispersionRate;
     private float density;
     private boolean moving;
 
-    public Liquid(CellType cellType, World world, int posX, int posY) {
+    public Gas(CellType cellType, World world, int posX, int posY) {
         super(cellType, world, posX, posY);
-        this.velocity.y = -1;
+        this.velocity.y = 1;
 
-        LiquidProperty cellProperty = (LiquidProperty) cellType.getCellProperty();
+        GasProperty cellProperty = (GasProperty) cellType.getCellProperty();
 
         this.dispersionRate = cellProperty.dispersionRate;
         this.density = cellProperty.density;
+    }
+
+    @Override
+    public Vector2 getGravity() {
+        return GAS_GRAVITY;
     }
 
     public float getDispersionRate() {
@@ -39,38 +47,37 @@ public class Liquid extends Cell implements MovingCell {
 
     @Override
     public boolean canSwapWith(Cell target) {
-        if (target instanceof Liquid liquidTarget) {
-            return liquidTarget.getDensity() < this.getDensity();
+        if (target instanceof Gas gasTarget) {
+            return gasTarget.getDensity() < this.getDensity();
         }
         return false;
     }
+
 
     @Override
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
         clampVelocity();
 
-        Cell cellBelow = chunkAccessor.getCell(this.posX, this.posY - 1);
+        Cell cellAbove = chunkAccessor.getCell(this.posX, this.posY + 1);
 
-        boolean spaceBelow = canMoveToOrSwap(cellBelow);
+        boolean spaceAbove = canMoveToOrSwap(cellAbove);
 
-        if (spaceBelow) {
+        if (spaceAbove) {
             this.velocity.add(this.getGravity());
             this.moving = true;
         } else {
-            if(moveOrSwapDownLeftRight(chunkAccessor, updateDirection)) return;
+            this.velocity.y = 1;
+        }
 
-            this.velocity.y = -1;
+        boolean spaceLeft = canMoveToOrSwap(chunkAccessor.getCell(this.posX - 1, this.posY));
+        boolean spaceRight = canMoveToOrSwap(chunkAccessor.getCell(this.posX + 1, this.posY));
 
-            boolean spaceRight = canMoveToOrSwap(chunkAccessor.getCell(this.posX + 1, this.posY));
-            boolean spaceLeft = canMoveToOrSwap(chunkAccessor.getCell(this.posX - 1, this.posY));
-
-            if(!spaceLeft && !spaceRight) {
-                this.moving = false;
-                this.velocity.x = 0;
-            } else {
-                this.moving = true;
-                this.velocity.x = getXVelocityWhenBelowIsBlocked(updateDirection, spaceLeft, spaceRight);
-            }
+        if (!spaceLeft && !spaceRight && !spaceAbove) {
+            this.moving = false;
+        } else {
+            this.moving = true;
+            this.velocity.x += getXVelocityWhenBelowIsBlocked(updateDirection, spaceLeft, spaceRight);
+            this.velocity.x *= WorldConstants.AIR_FRICTION;
         }
 
         if (!moving) return;
@@ -80,16 +87,11 @@ public class Liquid extends Cell implements MovingCell {
         }
     }
 
-
     private float getXVelocityWhenBelowIsBlocked(boolean updateDirection, boolean spaceLeft, boolean spaceRight) {
         int velocityModifier = 1;
 
         if (spaceLeft && spaceRight) {
-            if (velocity.x == 0) {
-                velocityModifier = updateDirection ? 1 : -1;
-            } else {
-                velocityModifier = velocity.x > 0 ? 1 : -1;
-            }
+            velocityModifier = (Math.random() > 0.5 ? 1 : -1);
         } else if (spaceLeft) {
             velocityModifier = -1;
         }
@@ -157,17 +159,17 @@ public class Liquid extends Cell implements MovingCell {
             return true;
         }
 
-        if (targetCell instanceof Solid) {
+        if (targetCell instanceof Solid || targetCell instanceof Liquid) {
             if (Math.abs(velocity.y) > Math.abs(velocity.x)) {
-                velocity.y = -1;
+                velocity.y = 1;
             }
             return false;
         }
 
-        if (targetCell instanceof Liquid) {
+        if (targetCell instanceof Gas) {
             if (!canSwapWith(targetCell)) return false;
 
-            if(this.posX != lastValidX || this.posY != lastValidY) {
+            if (this.posX != lastValidX || this.posY != lastValidY) {
                 chunkAccessor.moveTo(this, lastValidX, lastValidY);
             }
 
@@ -180,17 +182,17 @@ public class Liquid extends Cell implements MovingCell {
     }
 
 
-    public static class LiquidProperty extends CellProperty {
+    public static class GasProperty extends CellProperty {
 
         protected float dispersionRate = 5f;
         protected float density = 1f;
 
-        public LiquidProperty dispersionRate(float dispersionRate) {
+        public GasProperty dispersionRate(float dispersionRate) {
             this.dispersionRate = dispersionRate;
             return this;
         }
 
-        public LiquidProperty density(float density) {
+        public GasProperty density(float density) {
             this.density = density;
             return this;
         }

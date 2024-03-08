@@ -14,22 +14,45 @@ import java.util.*;
 
 public class TreeGenerator {
 
-    public static final TreeGenerator TREE_1 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[-F+F+F]").iterations(3).leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
-        if (isOuterBranch) return 9;
-        return 4;
-    }).branchThicknessFunction(i -> Math.max(1, 3 - i)).build();
+    public static final TreeGenerator TREE_1 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[-F+F+F]").iterations(2)
+            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
+                if (isOuterBranch) return 3;
+                return 2;
+            }).branchThicknessFunction(i -> Math.max(1, 3 - i)).build();
 
-    public static final TreeGenerator TREE_2 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[--F+F+F+F]").iterations(3).startLength(40f).leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
-        if (isOuterBranch) return 5;
-        return 2;
-    }).branchThicknessFunction(i -> i == 0 ? 5 : 1).build();
+    public static final TreeGenerator TREE_2 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[--F+F+F+F]").iterations(3).startLength(50f).angleIncrement((float) (Math.PI / 7f))
+            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
+                if (isOuterBranch) return 5;
+                return 2;
+            }).branchThicknessFunction(i -> switch (i) {
+                case 0 -> 7;
+                case 1, 2 -> 2;
+                default -> 1;
+            }).build();
 
-    public static final TreeGenerator TREE_3 = new TreeGeneratorBuilder().rule("FF[-FF][FFF][+FF]").startLength(10f).build();
-    public static final TreeGenerator TREE_4 = new TreeGeneratorBuilder().rule("FF[-F][FF[-F][+F]]").build();
-    public static final TreeGenerator TREE_5 = new TreeGeneratorBuilder().rule("F[-FF]F[+FF][F]").build();
+    public static final TreeGenerator TREE_3 = new TreeGeneratorBuilder().rule("FF[-FF][FFF][+FF]").iterations(2).startLength(30f)
+            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
+                if (isOuterBranch) return 3;
+                return 2;
+            }).build();
+
+    public static final TreeGenerator TREE_4 = new TreeGeneratorBuilder().rule("F[-F][FF[-F][+F]]").iterations(2).startLength(18f).angleIncrement((float) (Math.PI / 6f))
+            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> isOuterBranch ? 2 : 1)
+            .branchThicknessFunction(i -> 1).build();
+
+    public static final TreeGenerator TREE_5 = new TreeGeneratorBuilder().rule("F[-FF]F[+FF][F]").iterations(3).startLength(60f)
+            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
+                if (isOuterBranch) return 4;
+                return 2;
+            }).branchThicknessFunction(i -> switch (i) {
+                case 0 -> 5;
+                case 1, 2 -> 2;
+                default -> 1;
+            }).build();
 
     private final CellType branchCellType, leafCellType;
     private final String rule;
+    private final String finalLSystem;
     private final int iterations;
     private final float startLength;
 
@@ -45,6 +68,7 @@ public class TreeGenerator {
         this.branchCellType = branchCellType;
         this.leafCellType = leafCellType;
         this.rule = rule;
+        this.finalLSystem = LSystem.generateLSystem(rule, iterations);
         this.iterations = iterations;
         this.lengthMultiplier = lengthMultiplier;
         this.startLength = startLength;
@@ -65,7 +89,6 @@ public class TreeGenerator {
         for (Branch branch : branches) {
             allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
         }
-
 
         Region branchRegion = getRegionsFromPoints(new ArrayList<>(allBranchPositions));
         float maximumDistanceToCenter = branchRegion.getMaximumDistanceToCenter();
@@ -129,48 +152,37 @@ public class TreeGenerator {
 
         float length = (float) (startLength * Math.pow(lengthMultiplier, iterations));
 
-        String lSystem = "F";
+        float x = startX;
+        float y = startY;
+        float angle = (float) (Math.PI / 2);
+        int numBranching = 0;
 
-        for (int i = 0; i < iterations; i++) {
-
-            lSystem = LSystem.getNextLSystem(lSystem, rule);
-
-            float x = startX;
-            float y = startY;
-            float angle = (float) (Math.PI / 2);
-            int numBranching = 0;
-
-            for (char c : lSystem.toCharArray()) {
-                switch (c) {
-                    case 'F' -> {
-                        float newX = (float) (x + Math.cos(angle) * length);
-                        float newY = (float) (y + Math.sin(angle) * length);
-                        Branch newBranch = new Branch(x, y, newX, newY, numBranching);
-
-                        if (!branches.contains(newBranch)) {
-                            branches.add(newBranch);
-                        }
-                        x = newX;
-                        y = newY;
-                    }
-                    case '+' -> angle += angleIncrement;
-                    case '-' -> angle -= angleIncrement;
-                    case '[' -> {
-                        stateStack.push(new State(x, y, angle));
-                        numBranching++;
-                    }
-                    case ']' -> {
-                        State state = stateStack.pop();
-                        x = state.x;
-                        y = state.y;
-                        angle = state.angle;
-                        numBranching--;
-                    }
+        for (char c : finalLSystem.toCharArray()) {
+            switch (c) {
+                case 'F' -> {
+                    float newX = (float) (x + Math.cos(angle) * length);
+                    float newY = (float) (y + Math.sin(angle) * length);
+                    branches.add(new Branch((int) x, (int) y, (int) newX, (int) newY, numBranching));
+                    x = newX;
+                    y = newY;
+                }
+                case '+' -> angle += angleIncrement;
+                case '-' -> angle -= angleIncrement;
+                case '[' -> {
+                    stateStack.push(new State(x, y, angle));
+                    numBranching++;
+                }
+                case ']' -> {
+                    State state = stateStack.pop();
+                    x = state.x;
+                    y = state.y;
+                    angle = state.angle;
+                    numBranching--;
                 }
             }
         }
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             branches.get(i).hasLeaf = false;
         }
 
@@ -188,8 +200,8 @@ public class TreeGenerator {
 
         int steps = Math.max(xDistance, yDistance);
 
-        int thickOffMin = -thickness/2;
-        int thickOffMax = (int) Math.ceil(thickness/2f);
+        int thickOffMin = -thickness / 2;
+        int thickOffMax = (int) Math.ceil(thickness / 2f);
 
         if (xDistance > yDistance) {
             float slope = Math.abs((y2 - y1) / (x2 - x1));
@@ -243,9 +255,14 @@ public class TreeGenerator {
         Vector2 centerBranchVector = new Vector2(testBranch.endX - center.x, testBranch.endY - center.y);
         float centerBranchDist = centerBranchVector.len();
 
-        Vector2 branchEdgeVector = centerBranchVector.nor().scl(maximumDistance - centerBranchDist);
+        Vector2 branchOffsetVector = centerBranchVector.nor();
 
-        Line2D branchEdgeLine = new Line2D.Float(testBranch.endX, testBranch.endY, testBranch.endX + branchEdgeVector.x, testBranch.endY + branchEdgeVector.y);
+        float startX = testBranch.endX + branchOffsetVector.x;
+        float startY = testBranch.endY + branchOffsetVector.y;
+
+        Vector2 branchEdgeVector = branchOffsetVector.scl(maximumDistance - centerBranchDist);
+
+        Line2D branchEdgeLine = new Line2D.Float(startX, startY, testBranch.endX + branchEdgeVector.x, testBranch.endY + branchEdgeVector.y);
 
         for (Branch branch : branches) {
             if (branch.equals(testBranch)) continue;
@@ -287,11 +304,11 @@ public class TreeGenerator {
     }
 
     private static class Branch {
-        public final float startX, startY, endX, endY;
+        public final int startX, startY, endX, endY;
         public final int iteration;
         public boolean hasLeaf = true;
 
-        public Branch(float startX, float startY, float endX, float endY, int iteration) {
+        public Branch(int startX, int startY, int endX, int endY, int iteration) {
             this.startX = startX;
             this.startY = startY;
             this.endX = endX;

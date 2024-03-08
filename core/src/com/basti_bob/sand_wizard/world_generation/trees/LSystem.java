@@ -3,7 +3,7 @@ package com.basti_bob.sand_wizard.world_generation.trees;
 public class LSystem {
 
     public static String generateLSystem(String rule, int iterations) {
-        String lSystem = rule;
+        String lSystem = "F";
 
         for (int i = 0; i < iterations; i++) {
             lSystem = getNextLSystem(lSystem, rule);

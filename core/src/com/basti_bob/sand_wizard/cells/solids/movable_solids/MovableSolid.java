@@ -47,11 +47,8 @@ public class MovableSolid extends Solid implements MovingCell {
     public boolean canSwapWith(Cell target) {
         return target instanceof Liquid;
     }
-
     @Override
-    public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        super.update(chunkAccessor, updateDirection);
-
+    public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
         clampVelocity();
 
         Cell cellBelow = chunkAccessor.getCell(this.posX, this.posY - 1);
