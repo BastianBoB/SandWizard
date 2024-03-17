@@ -3,6 +3,9 @@ package com.basti_bob.sand_wizard.cells;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.basti_bob.sand_wizard.cell_properties.CellProperties;
+import com.basti_bob.sand_wizard.cell_properties.CellProperty;
+import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.world.Chunk;
@@ -10,18 +13,7 @@ import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
-import java.lang.reflect.Array;
-
 public abstract class Cell {
-
-
-    public static final CellProperty EMPTY = new CellProperty();
-    public static final CellProperty STONE = new CellProperty();
-    public static final CellProperty GRASS = new CellProperty();
-    public static final CellProperty ICE = new CellProperty().friction(0.98f);
-    public static final CellProperty WOOD = new CellProperty().burningTemperature(200f);
-    public static final CellProperty LEAF = new CellProperty().burningTemperature(50f);
-
 
     public final World world;
     public Color color;
@@ -43,6 +35,9 @@ public abstract class Cell {
     private float burningTemperature;
     private boolean canBurn;
 
+    private int maxBurningTime;
+    private int timeBurning;
+
     private float temperature;
     private boolean burning;
 
@@ -62,13 +57,21 @@ public abstract class Cell {
         this.canBeCooled = cellProperty.canBeCooled;
         this.burningTemperature = cellProperty.burningTemperature;
         this.canBurn = cellProperty.canBurn;
+        this.maxBurningTime = cellProperty.maxBurningTime;
     }
 
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
         this.gotUpdated = true;
 
         updateMoving(chunkAccessor, updateDirection);
-        updateBurning(chunkAccessor, updateDirection);
+
+        if(isBurning()) {
+            if(++timeBurning > getMaxBurningTime()) {
+                finishedBurning(chunkAccessor, updateDirection);
+            } else {
+                updateBurning(chunkAccessor, updateDirection);
+            }
+        }
     }
 
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection){
@@ -76,25 +79,27 @@ public abstract class Cell {
     }
 
     public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        if (!isBurning()) return;
-
         if(Math.random() > 0.1) return;
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if(i == 0 && j == 0) continue;
 
-                if(Math.random() > 0.1) continue;
+                if(Math.random() > 0.5) continue;
 
                 chunkAccessor.setCellIfEmpty(CellType.FIRE, this.posX + i, this.posY + j);
             }
         }
     }
 
+    public void finishedBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        chunkAccessor.setCell(CellType.EMPTY, this.posX, this.posY);
+    }
+
     private void changeTemperature(float temperatureChange) {
         this.temperature += temperatureChange;
 
-        if (canBurn && this.temperature > burningTemperature) {
+        if (canBurn() && this.getTemperature() > getBurningTemperature()) {
             this.burning = true;
         }
     }
@@ -364,7 +369,7 @@ public abstract class Cell {
         return burningTemperature;
     }
 
-    public boolean isCanBurn() {
+    public boolean canBurn() {
         return canBurn;
     }
 
@@ -374,6 +379,10 @@ public abstract class Cell {
 
     public boolean isBurning() {
         return burning;
+    }
+
+    public int getMaxBurningTime() {
+        return maxBurningTime;
     }
 
     public Color getColor() {
@@ -392,53 +401,4 @@ public abstract class Cell {
         return jumpFactor;
     }
 
-    public static class CellProperty {
-
-        protected float friction = 0.9f;
-        protected float speedFactor = 1f;
-        protected float jumpFactor = 1f;
-
-        protected boolean canBeHeated = true;
-        protected boolean canBeCooled = true;
-
-        protected boolean canBurn = true;
-        protected float burningTemperature = 1000;
-
-
-        private CellProperty canBeHeated(boolean canBeHeated) {
-            this.canBeHeated = canBeHeated;
-            return this;
-        }
-
-        private CellProperty canBeCooled(boolean canBeCooled) {
-            this.canBeCooled = canBeCooled;
-            return this;
-        }
-
-        private CellProperty canBurn(boolean canBurn) {
-            this.canBurn = canBurn;
-            return this;
-        }
-
-        private CellProperty burningTemperature(float burningTemperature) {
-            this.burningTemperature = burningTemperature;
-            return this;
-        }
-
-        private CellProperty friction(float friction) {
-            this.friction = friction;
-            return this;
-        }
-
-        private CellProperty speedFactor(float speedFactor) {
-            this.speedFactor = speedFactor;
-            return this;
-        }
-
-        private CellProperty jumpFactor(float jumpFactor) {
-            this.jumpFactor = jumpFactor;
-            return this;
-        }
-
-    }
 }

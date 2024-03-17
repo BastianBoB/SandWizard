@@ -13,21 +13,25 @@ public class Fire extends Gas {
 
     public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
 
-        if(Math.random() > 0.1) return;
+        if (Math.random() > 0.2) return;
 
         Cell[][] neighbourCells = getNeighbourCells(chunkAccessor, this.posX, this.posY);
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                if(i == 0 && j == 0) continue;
+                if (i == 0 && j == 0) continue;
 
-                Cell cell = neighbourCells[i+1][j+1];
+                Cell cell = neighbourCells[i + 1][j + 1];
 
-                if(cell == null || cell instanceof Empty) continue;
+                if (cell == null || cell instanceof Empty) continue;
 
                 cell.applyHeating(100f);
             }
         }
     }
 
+    @Override
+    public boolean isBurning() {
+        return true;
+    }
 }

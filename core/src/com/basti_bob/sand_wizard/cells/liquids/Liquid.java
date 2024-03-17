@@ -1,19 +1,16 @@
 package com.basti_bob.sand_wizard.cells.liquids;
 
-import com.badlogic.gdx.graphics.Color;
+import com.basti_bob.sand_wizard.cell_properties.CellProperty;
+import com.basti_bob.sand_wizard.cell_properties.LiquidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;
 import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
-import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
 public class Liquid extends Cell implements MovingCell {
-
-    public static final LiquidProperty WATER = new LiquidProperty().dispersionRate(7f).density(1f);
-    public static final LiquidProperty OIL = new LiquidProperty().dispersionRate(4f).density(0.5f);
 
     private float dispersionRate;
     private float density;
@@ -57,14 +54,14 @@ public class Liquid extends Cell implements MovingCell {
             this.velocity.add(this.getGravity());
             this.moving = true;
         } else {
-            if(moveOrSwapDownLeftRight(chunkAccessor, updateDirection)) return;
+            if (moveOrSwapDownLeftRight(chunkAccessor, updateDirection)) return;
 
             this.velocity.y = -1;
 
             boolean spaceRight = canMoveToOrSwap(chunkAccessor.getCell(this.posX + 1, this.posY));
             boolean spaceLeft = canMoveToOrSwap(chunkAccessor.getCell(this.posX - 1, this.posY));
 
-            if(!spaceLeft && !spaceRight) {
+            if (!spaceLeft && !spaceRight) {
                 this.moving = false;
                 this.velocity.x = 0;
             } else {
@@ -167,7 +164,7 @@ public class Liquid extends Cell implements MovingCell {
         if (targetCell instanceof Liquid) {
             if (!canSwapWith(targetCell)) return false;
 
-            if(this.posX != lastValidX || this.posY != lastValidY) {
+            if (this.posX != lastValidX || this.posY != lastValidY) {
                 chunkAccessor.moveTo(this, lastValidX, lastValidY);
             }
 
@@ -177,22 +174,5 @@ public class Liquid extends Cell implements MovingCell {
         }
 
         return false;
-    }
-
-
-    public static class LiquidProperty extends CellProperty {
-
-        protected float dispersionRate = 5f;
-        protected float density = 1f;
-
-        public LiquidProperty dispersionRate(float dispersionRate) {
-            this.dispersionRate = dispersionRate;
-            return this;
-        }
-
-        public LiquidProperty density(float density) {
-            this.density = density;
-            return this;
-        }
     }
 }

@@ -1,6 +1,7 @@
 package com.basti_bob.sand_wizard.cells.gases;
 
 import com.badlogic.gdx.math.Vector2;
+import com.basti_bob.sand_wizard.cell_properties.GasProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;
@@ -15,8 +16,6 @@ public class Gas extends Cell implements MovingCell {
 
     private static final Vector2 GAS_GRAVITY = new Vector2(WorldConstants.GRAVITY.x, WorldConstants.GRAVITY.y * -0.1f);
 
-    public static final GasProperty METHANE = new GasProperty().dispersionRate(1f).density(1f);
-    public static final GasProperty FIRE = new GasProperty().dispersionRate(1f).density(1f);
 
     private float dispersionRate;
     private float density;
@@ -179,22 +178,5 @@ public class Gas extends Cell implements MovingCell {
         }
 
         return false;
-    }
-
-
-    public static class GasProperty extends CellProperty {
-
-        protected float dispersionRate = 5f;
-        protected float density = 1f;
-
-        public GasProperty dispersionRate(float dispersionRate) {
-            this.dispersionRate = dispersionRate;
-            return this;
-        }
-
-        public GasProperty density(float density) {
-            this.density = density;
-            return this;
-        }
     }
 }

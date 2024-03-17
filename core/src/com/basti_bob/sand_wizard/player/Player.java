@@ -1,4 +1,4 @@
-package com.basti_bob.sand_wizard;
+package com.basti_bob.sand_wizard.player;
 
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.util.Array2D;

@@ -153,6 +153,18 @@ public class ChunkAccessor {
         targetChunk.setCell(cellType, posX, posY, targetInChunkX, targetInChunkY);
     }
 
+    public void setCell(CellType cellType, int posX, int posY) {
+        Chunk targetChunk = getNeighbourChunk(posX, posY);
+
+        if (targetChunk == null) return;
+
+        int targetInChunkX = World.getInChunkPos(posX);
+        int targetInChunkY = World.getInChunkPos(posY);
+
+        targetChunk.setCell(cellType, posX, posY, targetInChunkX, targetInChunkY);
+    }
+
+
     public boolean isEmpty(int targetX, int targetY) {
         return getCell(targetX, targetY) instanceof Empty;
     }

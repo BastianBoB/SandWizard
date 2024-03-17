@@ -98,9 +98,6 @@ public class Chunk {
 
     }
 
-    public static Chunk loadOrCreate(World world, int chunkPosX, int chunkPosY) {
-        return ChunkGenerator.generateNew(world, chunkPosX, chunkPosY);
-    }
 
 
 //    public Chunk load(int chunkX, int chunkY) {

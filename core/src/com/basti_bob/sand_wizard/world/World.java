@@ -7,6 +7,7 @@ import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 import com.basti_bob.sand_wizard.world_generation.trees.TreeGenerator;
+import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -33,11 +34,11 @@ public class World {
             }
         }
 
-        TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
-        TreeGenerator.TREE_2.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
-        TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
-        TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
-        TreeGenerator.TREE_5.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
+//        TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
+//        TreeGenerator.TREE_2.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
+//        TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
+//        TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
+//        TreeGenerator.TREE_5.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
 
 
         //FunctionRunTime.timeFunction("generating Tree", () -> TreeGenerator.TREE_2.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0)));
@@ -64,7 +65,7 @@ public class World {
         int height = 200;
         ++updateTimes;
 
-        setCell(CellType.FIRE, -30, 0);
+        //setCell(CellType.FIRE, -30, 0);
 
 //        if (updateTimes >= 100) {
 //            setCell(CellType.SAND, -1, height + 1);
@@ -181,18 +182,23 @@ public class World {
         if (!this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
         Chunk chunk = this.getChunkFromChunkPos(chunkPosX, chunkPosY);
+        ChunkSaver.writeChunk(chunk);
         this.removeChunk(chunk);
     }
 
     public void loadOrCreateChunk(int chunkPosX, int chunkPosY) {
         if (this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
-        Chunk chunk = Chunk.loadOrCreate(this, chunkPosX, chunkPosY);
+        Chunk chunk = ChunkSaver.readChunk(this, chunkPosX, chunkPosY);
+
+        if(chunk == null) {
+            chunk = ChunkGenerator.generateNew(this, chunkPosX, chunkPosY);
+        }
 
         addChunk(chunk);
     }
 
-    public void addChunk(Chunk chunk) {
+    private void addChunk(Chunk chunk) {
         chunks.add(chunk);
         chunkLUT.put(getChunkKey(chunk.posX, chunk.posY), chunk);
 
@@ -218,7 +224,7 @@ public class World {
         }
     }
 
-    public void removeChunk(Chunk chunk) {
+    private void removeChunk(Chunk chunk) {
         chunks.remove(chunk);
         chunkLUT.remove(getChunkKey(chunk.posX, chunk.posY));
 

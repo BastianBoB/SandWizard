@@ -5,12 +5,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.WorldRenderer;
+import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
 
 public class SandWizard extends ApplicationAdapter {
 
@@ -29,11 +30,12 @@ public class SandWizard extends ApplicationAdapter {
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
         player = new Player(world, 0, 0);
+
     }
 
     @Override
     public void render() {
-        System.out.println("fps: " + Gdx.graphics.getFramesPerSecond());
+        //System.out.println("fps: " + Gdx.graphics.getFramesPerSecond());
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -56,8 +58,11 @@ public class SandWizard extends ApplicationAdapter {
         camera.update();
         player.update();
 
-        FunctionRunTime.timeFunction("updating " + world.numActiveChunks + "/" + world.chunks.size() + " chunks", () -> world.update());
-        FunctionRunTime.timeFunction("rendering world", () -> worldRenderer.render(player));
+        world.update();
+        worldRenderer.render(player);
+
+//        FunctionRunTime.timeFunction("updating " + world.numActiveChunks + "/" + world.chunks.size() + " chunks", () -> world.update());
+//        FunctionRunTime.timeFunction("rendering world", () -> worldRenderer.render(player));
     }
 
 
