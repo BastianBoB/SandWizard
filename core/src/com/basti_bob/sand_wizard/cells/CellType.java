@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.basti_bob.sand_wizard.cell_properties.CellProperties;
 import com.basti_bob.sand_wizard.cell_properties.CellProperty;
+import com.basti_bob.sand_wizard.cells.gases.DebugCellSingleTick;
 import com.basti_bob.sand_wizard.cells.gases.Fire;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
@@ -19,6 +20,9 @@ import java.util.Arrays;
 public enum CellType {
 
     EMPTY("empty", PhysicalState.OTHER, CellProperties.EMPTY, Empty::new, true, hC(0x000000)), //(x, y, world) -> Empty.getInstance()
+
+    SINGLE_TICK("single_tick", PhysicalState.OTHER, CellProperties.EMPTY, DebugCellSingleTick::new, true, hC(0xFF0000)),
+
     STONE("stone", PhysicalState.SOLID, CellProperties.STONE, ImmovableSolid::new, true, hC(0x4c4c4c), hC(0x666666), hC(0x7f7f7f)),
     GRASS("grass", PhysicalState.SOLID, CellProperties.GRASS, ImmovableSolid::new, true, c(19, 109, 21), c(38, 139, 7), c(65, 152, 10)),
     ICE("ice", PhysicalState.SOLID, CellProperties.ICE, ImmovableSolid::new, true, c(255, 255, 255), c(185, 232, 234), c(134, 214, 216), c(63, 208, 212), c(32, 195, 208)),

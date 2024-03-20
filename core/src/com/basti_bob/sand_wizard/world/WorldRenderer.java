@@ -86,8 +86,8 @@ public class WorldRenderer {
                 Chunk chunk = chunks.get(finalChunkI, finalChunkJ);
                 if (chunk == null) continue;
 
-                float chunkRenderX = (chunk.posX * chunkSize - chunkSize / 2f) * WorldConstants.CELL_SIZE;
-                float chunkRenderY = (chunk.posY * chunkSize - chunkSize / 2f) * WorldConstants.CELL_SIZE;
+                float chunkRenderX = (chunk.posX * chunkSize) * WorldConstants.CELL_SIZE;
+                float chunkRenderY = (chunk.posY * chunkSize) * WorldConstants.CELL_SIZE;
 
                 final Array2D<Cell> chunkGrid = chunk.getGrid();
 
@@ -137,8 +137,8 @@ public class WorldRenderer {
                 Chunk chunk = chunks.get(chunkI, chunkJ);
                 if (chunk == null) continue;
 
-                float chunkRenderX = (chunk.posX * chunkSize - chunkSize / 2f) * WorldConstants.CELL_SIZE;
-                float chunkRenderY = (chunk.posY * chunkSize - chunkSize / 2f) * WorldConstants.CELL_SIZE;
+                float chunkRenderX = (chunk.posX * chunkSize) * WorldConstants.CELL_SIZE;
+                float chunkRenderY = (chunk.posY * chunkSize) * WorldConstants.CELL_SIZE;
 
                 renderChunkActiveDebugSquare(chunk, chunkRenderX, chunkRenderY);
             }
@@ -150,7 +150,7 @@ public class WorldRenderer {
     private final Color inActiveColor = new Color(0.1f, 0.1f, 0.1f, 1);
 
 
-    private void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
+    public void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
 
         shapeRenderer.setColor(chunk.isActive() ? activeColor : inActiveColor);
 

@@ -29,7 +29,7 @@ public class SandWizard extends ApplicationAdapter {
 
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
-        player = new Player(world, 0, 0);
+        player = new Player(world, 0, 50);
 
     }
 
@@ -42,10 +42,11 @@ public class SandWizard extends ApplicationAdapter {
 
         camera.position.lerp(new Vector3(player.getPosition().scl(WorldConstants.CELL_SIZE), 0), 0.5f);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) player.moveBy(-2, 0);
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) player.moveBy(2, 0);
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) player.moveBy(0, 2);
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) player.moveBy(0, -2);
+        float speed = 1f;
+
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) player.xVel = -speed;
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) player.xVel = speed;
+        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) player.yVel = 5;
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) camera.zoom *= 0.99;
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) camera.zoom *= 1.01;
@@ -56,10 +57,11 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         camera.update();
+        world.update();
         player.update();
 
-        world.update();
         worldRenderer.render(player);
+        player.render(camera);
 
 //        FunctionRunTime.timeFunction("updating " + world.numActiveChunks + "/" + world.chunks.size() + " chunks", () -> world.update());
 //        FunctionRunTime.timeFunction("rendering world", () -> worldRenderer.render(player));

@@ -32,12 +32,15 @@ public class MovableSolid extends Solid implements MovingCell {
     public float getMovingResistance() {
         return movingResistance;
     }
+
     public float getSprayFactor() {
         return sprayFactor;
     }
+
     public void trySetMoving() {
         this.moving = this.moving || MathUtils.random() > this.getMovingResistance();
     }
+
     public void trySetStationary() {
         this.moving = !(MathUtils.random() < this.getMovingResistance());
     }
@@ -46,15 +49,20 @@ public class MovableSolid extends Solid implements MovingCell {
     public boolean canSwapWith(Cell target) {
         return target instanceof Liquid;
     }
+
     @Override
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
         clampVelocity();
 
         Cell cellBelow = chunkAccessor.getCell(this.posX, this.posY - 1);
+        boolean spaceBelow;
 
-        velocity.x *= cellBelow.getFriction();
-
-        boolean spaceBelow = canMoveToOrSwap(cellBelow);
+        if (cellBelow == null) {
+            spaceBelow = false;
+        } else {
+            velocity.x *= cellBelow.getFriction();
+            spaceBelow = canMoveToOrSwap(cellBelow);
+        }
 
         if (spaceBelow) {
             this.moving = true;
@@ -70,6 +78,7 @@ public class MovableSolid extends Solid implements MovingCell {
         moveOrSwapDownLeftRight(chunkAccessor, updateDirection);
 
         trySetStationary();
+
     }
 
     @Override
@@ -140,10 +149,10 @@ public class MovableSolid extends Solid implements MovingCell {
             return false;
         }
 
-        if(targetCell instanceof Liquid) {
+        if (targetCell instanceof Liquid) {
             this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
 
-            if(this.posX != lastValidX || this.posY != lastValidY) {
+            if (this.posX != lastValidX || this.posY != lastValidY) {
                 chunkAccessor.moveToIfEmpty(this, lastValidX, lastValidY);
             }
 

@@ -37,6 +37,7 @@ public abstract class Cell {
 
     private int maxBurningTime;
     private int timeBurning;
+    private float fireSpreadChance;
 
     private float temperature;
     private boolean burning;
@@ -58,6 +59,7 @@ public abstract class Cell {
         this.burningTemperature = cellProperty.burningTemperature;
         this.canBurn = cellProperty.canBurn;
         this.maxBurningTime = cellProperty.maxBurningTime;
+        this.fireSpreadChance = cellProperty.fireSpreadChance;
     }
 
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
@@ -79,13 +81,13 @@ public abstract class Cell {
     }
 
     public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        if(Math.random() > 0.1) return;
+        if(Math.random() > this.getFireSpreadChance()) return;
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if(i == 0 && j == 0) continue;
 
-                if(Math.random() > 0.5) continue;
+                if(Math.random() > this.getFireSpreadChance()) continue;
 
                 chunkAccessor.setCellIfEmpty(CellType.FIRE, this.posX + i, this.posY + j);
             }
@@ -401,4 +403,7 @@ public abstract class Cell {
         return jumpFactor;
     }
 
+    public float getFireSpreadChance() {
+        return fireSpreadChance;
+    }
 }

@@ -10,15 +10,15 @@ public class CellProperties {
     public static final CellProperty STONE = CellProperty.builder().build();
     public static final CellProperty GRASS = CellProperty.builder().build();
     public static final CellProperty ICE = CellProperty.builder().friction(0.98f).build();
-    public static final CellProperty WOOD = CellProperty.builder().burningTemperature(200).maxBurningTime(600).build();
-    public static final CellProperty LEAF = CellProperty.builder().burningTemperature(50).maxBurningTime(10).build();
+    public static final CellProperty WOOD = CellProperty.builder().burningTemperature(200).maxBurningTime(600).fireSpreadChance(0.05f).build();
+    public static final CellProperty LEAF = CellProperty.builder().burningTemperature(50).maxBurningTime(10).fireSpreadChance(0.4f).build();
 
     public static final MovableSolidProperty SAND = MovableSolidProperty.builder().movingResistance(0.1f).sprayFactor(0.6f).build();
     public static final MovableSolidProperty DIRT = MovableSolidProperty.builder().movingResistance(0.3f).sprayFactor(0.3f).build();
-    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().movingResistance(0.8f).sprayFactor(0.2f).build();
+    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().movingResistance(0.8f).sprayFactor(0.2f).burningTemperature(500).maxBurningTime(6000).fireSpreadChance(0.001f).build();
 
     public static final LiquidProperty WATER = LiquidProperty.builder().dispersionRate(7f).density(1f).build();
-    public static final LiquidProperty OIL = LiquidProperty.builder().dispersionRate(7f).density(0.5f).maxBurningTime(1).burningTemperature(1).build();
+    public static final LiquidProperty OIL = LiquidProperty.builder().dispersionRate(7f).density(0.5f).maxBurningTime(5).burningTemperature(1).fireSpreadChance(0.7f).build();
 
     public static final GasProperty METHANE = GasProperty.builder().dispersionRate(1f).density(1f).build();
     public static final GasProperty FIRE = GasProperty.builder().dispersionRate(1f).density(1f).maxBurningTime(40).build();
