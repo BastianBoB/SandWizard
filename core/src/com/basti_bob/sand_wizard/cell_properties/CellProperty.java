@@ -14,6 +14,9 @@ public class CellProperty {
     public final int maxBurningTime;
     public final float fireSpreadChance;
 
+    public final float maxCorrosionHealth;
+    public final boolean canCorrode;
+
     public CellProperty(Builder builder) {
         this.friction = builder.friction;
         this.speedFactor = builder.speedFactor;
@@ -24,6 +27,8 @@ public class CellProperty {
         this.burningTemperature = builder.burningTemperature;
         this.maxBurningTime = builder.maxBurningTime;
         this.fireSpreadChance = builder.fireSpreadChance;
+        this.maxCorrosionHealth = builder.maxCorrosionHealth;
+        this.canCorrode = builder.canCorrode;
     }
 
     public static Builder builder() {
@@ -43,6 +48,9 @@ public class CellProperty {
         protected float burningTemperature = 1000;
         protected int maxBurningTime = 100;
         protected float fireSpreadChance = 0.2f;
+
+        protected float maxCorrosionHealth = 100;
+        protected boolean canCorrode = true;
 
         public T canBeHeated(boolean canBeHeated) {
             this.canBeHeated = canBeHeated;
@@ -79,6 +87,16 @@ public class CellProperty {
 
         public T friction(float friction) {
             this.friction = friction;
+            return (T) this;
+        }
+
+        public T maxCorrosionHealth(float maxCorrosionHealth) {
+            this.maxCorrosionHealth = maxCorrosionHealth;
+            return (T) this;
+        }
+
+        public T canCorrode(boolean canCorrode) {
+            this.canCorrode = canCorrode;
             return (T) this;
         }
 

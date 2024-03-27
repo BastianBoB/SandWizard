@@ -4,8 +4,6 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.cells.Cell;
-import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
 import com.basti_bob.sand_wizard.util.Array2D;
@@ -19,8 +17,13 @@ public class Player {
 
     private final EntityHitBox hitBox;
     private final World world;
-    private float ox, oy, nx, ny;
+    private float ox;
+    private float oy;
+    private float nx;
+    public float ny;
     public float xVel, yVel;
+    public boolean onGround;
+    private int stepUpHeight = 16;
 
     private final Array2D<Chunk> renderingChunks = new Array2D<>(Chunk.class,
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1,
@@ -43,11 +46,17 @@ public class Player {
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
     }
 
-    public void update() {
+    public void update(float deltaTime) {
         this.yVel += WorldConstants.GRAVITY.y;
+        this.xVel *= 0.95;
 
-        moveWithVelocity();
+        moveWithVelocity(deltaTime);
         updatePosition();
+    }
+
+    public void jump() {
+        this.onGround = false;
+        this.yVel = 6;
     }
 
 
@@ -61,7 +70,7 @@ public class Player {
         float rw = hitBox.getWidth() * s;
         float rh = hitBox.getHeight() * s;
 
-        shapeRenderer.rect(this.nx * s - rw / 2f, this.ny * s - rh / 2f, rw, rh);
+        shapeRenderer.rect(this.nx * s - rw / 2f, this.ny * s, rw, rh);
         shapeRenderer.end();
     }
 
@@ -76,53 +85,103 @@ public class Player {
 
     public void moveBy(float x, float y) {
         moveTo(ox + x, oy + y);
+
     }
 
-    private void moveWithVelocity() {
+    public int getDownY(int i) {
+        return (int) this.oy - i;
+    }
+
+    public int getUpY(int i) {
+        return (int) (this.oy + this.hitBox.getHeight()) + i;
+    }
+
+    public int getRightX(int i) {
+        return (int) (this.ox + this.hitBox.getWidth() / 2f) + i;
+    }
+
+    public int getLeftX(int i) {
+        return (int) (this.ox - this.hitBox.getWidth() / 2f) - i;
+    }
+
+    private void moveWithVelocity(float deltaTime) {
+        if (this.xVel > 0) {
+            int a = 2;
+        }
+
         float targetX = ox + xVel;
+        float targetY = oy + yVel;
+
+        if ((int) Math.floor(targetY) != (int) Math.floor(oy)) {
+
+            int steps = (int) Math.abs(yVel) + 1;
+            int step;
+            for (step = 0; step < steps; step++) {
+                int checkY = yVel > 0 ? getUpY(step + 1) : getDownY(step + 1);
+
+                if (wouldCollideVertically((int) ox, checkY)) {
+                    break;
+                }
+            }
+
+            if (step == steps) {
+                this.ny = targetY;
+            } else {
+                this.ny = (int) (oy + step * (yVel > 0 ? 1 : -1));
+                if (this.yVel < 0) onGround = true;
+                this.yVel = 0;
+            }
+        } else {
+            this.ny = targetY;
+        }
 
         if ((int) (targetX) != (int) ox) {
-            if (canMoveFromTo(ox, oy, targetX, oy))
+
+            int steps = (int) Math.abs(xVel) + 1;
+            int step;
+            for (step = 0; step < steps; step++) {
+                int checkX = xVel > 0 ? getRightX(step + 1) : getLeftX(step + 1);
+
+                int stepHeight = stepHeightAtTarget(checkX, (int) this.ny);
+
+                if (stepHeight < this.stepUpHeight) {
+                    this.ny = this.ny + stepHeight;
+                } else {
+                    this.xVel = 0;
+                    break;
+                }
+            }
+
+            if (step == steps) {
                 this.nx = targetX;
+            } else {
+                this.nx = ox + step * (xVel > 0 ? 1 : -1);
+            }
         } else {
             this.nx = targetX;
         }
 
-        float targetY = oy + yVel;
-
-        if ((int) (targetY) != (int) oy) {
-            if (canMoveFromTo(nx, oy, nx, targetY))
-                this.ny = targetY;
-        } else {
-            this.ny = targetY;
-        }
     }
 
-    public boolean canMoveFromTo(float x1, float y1, float x2, float y2) {
-        int hitBoxOffsetX = (int) Math.ceil(hitBox.getWidth() / 2f);
-        int hitBoxOffsetY = (int) Math.ceil(hitBox.getHeight() / 2f);
+    public int stepHeightAtTarget(int x, int y) {
 
-        for (int j = -hitBoxOffsetY + 1; j <= hitBoxOffsetY; j++) {
-            int targetX = (int) (x2 + hitBoxOffsetX * (x2 > x1 ? 1 : -1));
-            int targetY = (int) (y2 + j);
-
-            Cell cell = world.getCell(targetX, targetY);
-
-            if (cell instanceof Solid)
-                return false;
+        int stepHeight = 0;
+        for (int j = 0; j <= hitBox.getHeight(); j++) {
+            if (world.getCell(x, y + j) instanceof Solid)
+                stepHeight = j+1;
         }
 
-        for (int i = -hitBoxOffsetX + 1; i <= hitBoxOffsetX; i++) {
-            int targetX = (int) (x2 + i);
-            int targetY = (int) (y2 + hitBoxOffsetY * (y2 > y1 ? 1 : -1));
+        return stepHeight;
+    }
 
-            Cell cell = world.getCell(targetX, targetY);
+    public boolean wouldCollideVertically(int x, int y) {
+        int offsetX = (int) Math.ceil(hitBox.getWidth() / 2f);
 
-            if (cell instanceof Solid)
-                return false;
+        for (int i = -offsetX + 1; i <= offsetX; i++) {
+            if (world.getCell(x + i, y) instanceof Solid)
+                return true;
         }
-
-        return true;
+        return false;
     }
 
 

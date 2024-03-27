@@ -81,7 +81,7 @@ public class Gas extends Cell implements MovingCell {
 
         if (!moving) return;
 
-        if (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1) {
+        if (Math.abs(velocity.x) >= 1 || Math.abs(velocity.y) >= 1) {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
         }
     }

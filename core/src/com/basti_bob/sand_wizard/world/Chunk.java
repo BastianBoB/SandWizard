@@ -22,6 +22,8 @@ public class Chunk {
         this.posY = posY;
         this.grid = new Array2D<>(Cell.class, WorldConstants.CHUNK_SIZE, WorldConstants.CHUNK_SIZE);
         this.chunkAccessor = new ChunkAccessor(this);
+        this.active = true;
+        this.activeNextFrame = true;
     }
 
     public Array2D<Cell> getGrid() {

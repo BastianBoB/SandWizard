@@ -6,7 +6,7 @@ import java.util.List;
 
 public class EntityHitBox {
 
-    private float width, height;
+    private final float width, height;
 
     public EntityHitBox(float width, float height) {
         this.width = width;

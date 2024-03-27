@@ -72,7 +72,7 @@ public class Liquid extends Cell implements MovingCell {
 
         if (!moving) return;
 
-        if (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1) {
+        if (Math.abs(velocity.x) >= 1 || Math.abs(velocity.y) >= 1) {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
         }
     }
@@ -91,7 +91,7 @@ public class Liquid extends Cell implements MovingCell {
             velocityModifier = -1;
         }
 
-        return velocityModifier * this.getDispersionRate();
+        return (float) (Math.random() * (velocityModifier * this.getDispersionRate()));
     }
 
     @Override

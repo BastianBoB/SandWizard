@@ -15,11 +15,14 @@ public class CellProperties {
 
     public static final MovableSolidProperty SAND = MovableSolidProperty.builder().movingResistance(0.1f).sprayFactor(0.6f).build();
     public static final MovableSolidProperty DIRT = MovableSolidProperty.builder().movingResistance(0.3f).sprayFactor(0.3f).build();
-    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().movingResistance(0.8f).sprayFactor(0.2f).burningTemperature(500).maxBurningTime(6000).fireSpreadChance(0.001f).build();
+    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().movingResistance(0.8f).sprayFactor(0.2f).burningTemperature(200).maxBurningTime(6000).fireSpreadChance(0.1f).build();
+    public static final MovableSolidProperty GRAVEL = MovableSolidProperty.builder().movingResistance(0.2f).sprayFactor(0.5f).build();
 
-    public static final LiquidProperty WATER = LiquidProperty.builder().dispersionRate(7f).density(1f).build();
-    public static final LiquidProperty OIL = LiquidProperty.builder().dispersionRate(7f).density(0.5f).maxBurningTime(5).burningTemperature(1).fireSpreadChance(0.7f).build();
+    public static final LiquidProperty WATER = LiquidProperty.builder().dispersionRate(7f).density(1f).burningTemperature(100).maxBurningTime(0).build();
+    public static final LiquidProperty ACID = LiquidProperty.builder().dispersionRate(6f).density(0.75f).build();
+    public static final LiquidProperty OIL = LiquidProperty.builder().dispersionRate(5f).density(0.5f).maxBurningTime(5).burningTemperature(1).fireSpreadChance(0.7f).build();
 
     public static final GasProperty METHANE = GasProperty.builder().dispersionRate(1f).density(1f).build();
+    public static final GasProperty STEAM = GasProperty.builder().dispersionRate(1.5f).density(0.5f).build();
     public static final GasProperty FIRE = GasProperty.builder().dispersionRate(1f).density(1f).maxBurningTime(40).build();
 }

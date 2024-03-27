@@ -42,6 +42,10 @@ public abstract class Cell {
     private float temperature;
     private boolean burning;
 
+    private float maxCorrosionHealth;
+    private float corrosionHealth;
+    private boolean canCorrode;
+
     public Cell(CellType cellType, World world, int posX, int posY) {
         this.world = world;
         this.setPosition(posX, posY);
@@ -60,6 +64,10 @@ public abstract class Cell {
         this.canBurn = cellProperty.canBurn;
         this.maxBurningTime = cellProperty.maxBurningTime;
         this.fireSpreadChance = cellProperty.fireSpreadChance;
+        this.maxCorrosionHealth = cellProperty.maxCorrosionHealth;
+        this.canCorrode = cellProperty.canCorrode;
+
+        this.corrosionHealth = maxCorrosionHealth;
     }
 
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
@@ -67,35 +75,54 @@ public abstract class Cell {
 
         updateMoving(chunkAccessor, updateDirection);
 
-        if(isBurning()) {
-            if(++timeBurning > getMaxBurningTime()) {
-                finishedBurning(chunkAccessor, updateDirection);
+        if (isBurning()) {
+            if (++timeBurning > getMaxBurningTime()) {
+                if(finishedBurning(chunkAccessor, updateDirection)) return;
             } else {
                 updateBurning(chunkAccessor, updateDirection);
             }
         }
+
+        if(updateCorrosion(chunkAccessor, updateDirection)) return;
     }
 
-    public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection){
+    public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
 
     }
 
     public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        if(Math.random() > this.getFireSpreadChance()) return;
+        if (Math.random() > this.getFireSpreadChance()) return;
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                if(i == 0 && j == 0) continue;
+                if (i == 0 && j == 0) continue;
 
-                if(Math.random() > this.getFireSpreadChance()) continue;
+                if (Math.random() > this.getFireSpreadChance()) continue;
 
                 chunkAccessor.setCellIfEmpty(CellType.FIRE, this.posX + i, this.posY + j);
             }
         }
     }
 
-    public void finishedBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
+    public boolean updateCorrosion(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        if (this.corrosionHealth < 0) {
+            return die(chunkAccessor);
+        }
+        return false;
+    }
+
+    public boolean finishedBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        return die(chunkAccessor);
+    }
+
+    public boolean die(ChunkAccessor chunkAccessor) {
         chunkAccessor.setCell(CellType.EMPTY, this.posX, this.posY);
+        return true;
+    }
+
+    public boolean replace(CellType cellType, ChunkAccessor chunkAccessor) {
+        chunkAccessor.setCell(cellType, this.posX, this.posY);
+        return true;
     }
 
     private void changeTemperature(float temperatureChange) {
@@ -124,6 +151,10 @@ public abstract class Cell {
 
         this.inChunkX = World.getInChunkPos(posX);
         this.inChunkY = World.getInChunkPos(posY);
+    }
+
+    public void applyCorrosion(float amount) {
+        this.corrosionHealth -= amount;
     }
 
     public void swapWith(ChunkAccessor chunkAccessor, Cell target) {
@@ -405,5 +436,17 @@ public abstract class Cell {
 
     public float getFireSpreadChance() {
         return fireSpreadChance;
+    }
+
+    public float getMaxCorrosionHealth() {
+        return maxCorrosionHealth;
+    }
+
+    public float getCorrosionHealth() {
+        return corrosionHealth;
+    }
+
+    public boolean canCorrode() {
+        return canCorrode;
     }
 }

@@ -15,7 +15,6 @@ import java.util.concurrent.*;
 public class World {
 
 
-
     private boolean updateDirection;
 
     private final ArrayList<Chunk> chunks = new ArrayList<>();
@@ -36,41 +35,59 @@ public class World {
             }
         }
 
-//        TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
-//        TreeGenerator.TREE_2.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
-//        TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
-//        TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
-//        TreeGenerator.TREE_5.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
+        TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
+        TreeGenerator.TREE_2.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
+        TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
+        TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
+        TreeGenerator.TREE_5.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
 
 
         //FunctionRunTime.timeFunction("generating Tree", () -> TreeGenerator.TREE_2.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0)));
 //
 //
-        for (int i = -50; i <= 100; i++) {
-            setCell(CellType.STONE, 50, i);
-            setCell(CellType.STONE, -50, i);
-
-//            if(i < 45)
-//                setCell(CellType.STONE, 0, i);
-        }
+//        for (int i = -50; i <= 100; i++) {
+//            setCell(CellType.STONE, -50, i);
 //
-//        for (int i = -50; i <= 25; i++) {
-//            setCell(CellType.STONE, -20, i);
-//            setCell(CellType.STONE, 20, i);
+//            setCell(CellType.STONE, i, i > 0 ? 50 : 51);
+////            if(i < 45)
+////                setCell(CellType.STONE, 0, i);
 //        }
-//
-//        setCell(CellType.SAND, 1, 100 + 1);
     }
 
-    private int updateTimes = 0;
-
-    public int numActiveChunks;
 
     public void asyncRemoveOrAddChunk(Chunk chunk, boolean remove) {
         removeOrAddChunk.put(chunk, remove);
     }
 
     public void update() {
+        addAndRemoveChunks();
+
+        int height = 250;
+        try {
+            setCell(CellType.FIRE, -15, 0);
+            setCell(CellType.ACID, -50, height);
+            setCell(CellType.DIRT, 0, height);
+            setCell(CellType.SAND, 50, height);
+        } catch (Exception e) {
+        }
+
+        int numThreads = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+
+        updateChunkActiveAndSetCellsNotUpdated(executor);
+        updateAllCells(executor);
+
+        executor.shutdown();
+
+//        try {
+//            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        } catch (InterruptedException e) {
+//            System.err.println("Executor interrupted");
+//        }
+
+    }
+
+    private void addAndRemoveChunks() {
         Iterator<Map.Entry<Chunk, Boolean>> iterator = removeOrAddChunk.entrySet().iterator();
 
         while (iterator.hasNext()) {
@@ -83,32 +100,13 @@ public class World {
             }
             iterator.remove();
         }
+    }
 
-        int height = 200;
-        ++updateTimes;
-
-//        try {
-//
-//            setCell(CellType.FIRE, -30, 0);
-//
-//            setCell(CellType.SAND, -100, height);
-//            setCell(CellType.DIRT, 0, height);
-//            setCell(CellType.COAL, 100, height);
-//
-//
-//            for (int i = -5; i <= 5; i++) {
-//                setCell(CellType.OIL, i * 5 + 1, height + 5);
-//            }
-//        } catch (Exception e) {
-//
-//        }
-
-
-        int numThreads = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-
+    private void updateChunkActiveAndSetCellsNotUpdated(ExecutorService executor) {
         for (Chunk chunk : chunks) {
             chunk.updateActive();
+
+            if (!chunk.isActive()) continue;
 
             final Array2D<Cell> grid = chunk.getGrid();
 
@@ -122,8 +120,10 @@ public class World {
         }
 
         updateDirection = !updateDirection;
+    }
 
-        numActiveChunks = 0;
+    private void updateAllCells(ExecutorService executor) {
+        updateDirection = !updateDirection;
 
         for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkUpdatingGrid.values()) {
 
@@ -136,8 +136,7 @@ public class World {
 
                     if (!chunk.isActive()) continue;
 
-                    numActiveChunks++;
-
+                    //chunk.update(updateDirection);
                     futures.add(executor.submit(() -> chunk.update(updateDirection)));
                 }
 
@@ -151,14 +150,10 @@ public class World {
                 }
             }
         }
+    }
 
-        executor.shutdown();
-//        try {
-//            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-//        } catch (InterruptedException e) {
-//            System.err.println("Executor interrupted");
-//        }
-
+    public float getTemperatureForChunkX(int chunkX) {
+        return (float) (openSimplexNoise.eval(chunkX * 0.1f, 0, 0) * 50);
     }
 
     public static int getChunkPos(int cellPos) {
@@ -194,7 +189,9 @@ public class World {
         if (!this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
         Chunk chunk = this.getChunkFromChunkPos(chunkPosX, chunkPosY);
-        ChunkSaver.writeChunk(chunk);
+
+        if (WorldConstants.SAVE_CHUNK_DATA)
+            ChunkSaver.writeChunk(chunk);
 
         removeChunk(chunk);
     }
@@ -203,10 +200,11 @@ public class World {
         if (!this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
         Chunk chunk = this.getChunkFromChunkPos(chunkPosX, chunkPosY);
-        ChunkSaver.writeChunk(chunk);
+
+        if (WorldConstants.SAVE_CHUNK_DATA)
+            ChunkSaver.writeChunk(chunk);
 
         asyncRemoveOrAddChunk(chunk, true);
-
     }
 
     public void loadOrCreateChunk(int chunkPosX, int chunkPosY) {
@@ -277,21 +275,35 @@ public class World {
     public Cell getCell(int cellPosX, int cellPosY) {
         return getCell(cellPosX, cellPosY, getChunkPos(cellPosX), getChunkPos(cellPosY));
     }
-//
+
+    //
     public Cell getCell(int cellPosX, int cellPosY, int chunkPosX, int chunkPosY) {
-        return getChunkFromChunkPos(chunkPosX, chunkPosY).getCellFromInChunkPos(getInChunkPos(cellPosX), getInChunkPos(cellPosY));
+        Chunk chunk = getChunkFromChunkPos(chunkPosX, chunkPosY);
+        if (chunk == null) return null;
+
+        return chunk.getCellFromInChunkPos(getInChunkPos(cellPosX), getInChunkPos(cellPosY));
     }
-//
+
+    //
     public void setCell(CellType cellType, int cellPosX, int cellPosY) {
-        getChunkFromCellPos(cellPosX, cellPosY).setCell(cellType, cellPosX, cellPosY);
+        Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
+        if (chunk == null) return;
+
+        chunk.setCell(cellType, cellPosX, cellPosY);
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY) {
-        getChunkFromCellPos(cellPosX, cellPosY).setCell(cell, cellPosX, cellPosY);
+        Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
+        if (chunk == null) return;
+
+        chunk.setCell(cell, cellPosX, cellPosY);
     }
 
     public void setCell(Cell cell) {
-        getChunkFromCellPos(cell.posX, cell.posY).setCell(cell, cell.posX, cell.posY);
+        Chunk chunk = getChunkFromCellPos(cell.posX, cell.posY);
+        if (chunk == null) return;
+
+        chunk.setCell(cell, cell.posX, cell.posY);
     }
 
 //

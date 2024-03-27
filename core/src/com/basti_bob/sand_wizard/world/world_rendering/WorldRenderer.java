@@ -1,14 +1,16 @@
-package com.basti_bob.sand_wizard.world;
+package com.basti_bob.sand_wizard.world.world_rendering;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.Array2D;
+import com.basti_bob.sand_wizard.world.Chunk;
+import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world.WorldConstants;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,24 +49,8 @@ public class WorldRenderer {
 
     private ShaderProgram generateShader() {
 
-        final String vertex_shader = String.format("""
-                attribute vec2 a_position;
-                attribute vec3 a_color;
-                varying vec3 v_color;
-                uniform mat4 u_proj;
-                void main() {
-                    v_color = a_color;
-                    gl_Position = u_proj * vec4(a_position, 0.0, 1.0);
-                    gl_PointSize = %d;
-                }
-                """, WorldConstants.CELL_SIZE);
-
-        final String fragment_shader = """
-                varying vec3 v_color;
-                void main() {
-                    gl_FragColor = vec4(v_color, 1.0);
-                }
-                """;
+        final String vertex_shader = Gdx.files.internal("shaders/vertex_shader.glsl").readString();
+        final String fragment_shader = Gdx.files.internal("shaders/fragment_shader.glsl").readString();
 
         return new ShaderProgram(vertex_shader, fragment_shader);
     }
@@ -76,6 +62,10 @@ public class WorldRenderer {
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         final int chunkSize = WorldConstants.CHUNK_SIZE;
+
+//        final float rM = (float) world.openSimplexNoise.eval(SandWizard.updateTimes * 0.01f, 0, 0) * 0.5f + 0.5f;
+//        final float gM = (float) world.openSimplexNoise.eval(0, SandWizard.updateTimes * 0.01f, 0) * 0.5f + 0.5f;
+//        final float bM = (float) world.openSimplexNoise.eval(0, 0, SandWizard.updateTimes * 0.01f) * 0.5f + 0.5f;
 
         for (int chunkI = 0; chunkI < chunks.rows; chunkI++) {
             for (int chunkJ = 0; chunkJ < chunks.cols; chunkJ++) {
@@ -92,8 +82,9 @@ public class WorldRenderer {
                 final Array2D<Cell> chunkGrid = chunk.getGrid();
 
                 executor.submit(() -> {
-                    for (int i = 0; i < chunkSize; i++) {
-                        for (int j = 0; j < chunkSize; j++) {
+                    for (int j = 0; j < chunkSize; j++) {
+
+                        for (int i = 0; i < chunkSize; i++) {
 
                             int cellIndexX = finalChunkI * chunkSize + i;
                             int cellIndexY = finalChunkJ * chunkSize + j;
@@ -146,7 +137,7 @@ public class WorldRenderer {
         shapeRenderer.end();
     }
 
-    private final Color activeColor = new Color(0.2f, 0.2f, 0.2f, 1);
+    private final Color activeColor = new Color(0.3f, 0.3f, 0.3f, 1);
     private final Color inActiveColor = new Color(0.1f, 0.1f, 0.1f, 1);
 
 
@@ -158,3 +149,4 @@ public class WorldRenderer {
         shapeRenderer.rect(chunkRenderX, chunkRenderY, rectSize, rectSize);
     }
 }
+
