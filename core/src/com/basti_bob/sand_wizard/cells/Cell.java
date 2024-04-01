@@ -15,8 +15,8 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 public abstract class Cell {
 
     public final World world;
-    public Color color;
     private final CellType cellType;
+    private Color color;
 
     public int posX, posY;
     public int inChunkX, inChunkY;

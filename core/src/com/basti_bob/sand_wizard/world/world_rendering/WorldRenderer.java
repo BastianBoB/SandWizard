@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.world.world_rendering;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.SandWizard;
@@ -20,28 +21,14 @@ public class WorldRenderer {
 
     private final World world;
     private final Camera camera;
-    private final Mesh mesh;
     private final ShaderProgram shader;
-    private final float[] vertices;
-    private final int rows, cols;
-
     private final ShapeRenderer shapeRenderer;
-
 
     public WorldRenderer(World world, Camera camera) {
         this.shapeRenderer = new ShapeRenderer();
 
         this.world = world;
         this.camera = camera;
-        this.rows = WorldConstants.CHUNK_SIZE * (WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1);
-        this.cols = WorldConstants.CHUNK_SIZE * (WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_Y * 2 + 1);
-
-        int numCells = rows * cols;
-
-        vertices = new float[numCells * 5];
-
-        mesh = new Mesh(true, numCells, 0, new VertexAttribute(VertexAttributes.Usage.Position, 2, "a_position"),
-                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_color"));
 
         ShaderProgram.pedantic = true;
         Gdx.gl.glEnable(GL32.GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -60,65 +47,22 @@ public class WorldRenderer {
 
         Array2D<Chunk> chunks = player.getRenderingChunks();
 
-        int numThreads = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-        final int chunkSize = WorldConstants.CHUNK_SIZE;
-
-//        final float rM = (float) world.openSimplexNoise.eval(SandWizard.updateTimes * 0.01f, 0, 0) * 0.5f + 0.5f;
-//        final float gM = (float) world.openSimplexNoise.eval(0, SandWizard.updateTimes * 0.01f, 0) * 0.5f + 0.5f;
-//        final float bM = (float) world.openSimplexNoise.eval(0, 0, SandWizard.updateTimes * 0.01f) * 0.5f + 0.5f;
-
-        for (int chunkI = 0; chunkI < chunks.rows; chunkI++) {
-            for (int chunkJ = 0; chunkJ < chunks.cols; chunkJ++) {
-
-                int finalChunkI = chunkI;
-                int finalChunkJ = chunkJ;
-
-                Chunk chunk = chunks.get(finalChunkI, finalChunkJ);
-                if (chunk == null) continue;
-
-                float chunkRenderX = (chunk.posX * chunkSize) * WorldConstants.CELL_SIZE;
-                float chunkRenderY = (chunk.posY * chunkSize) * WorldConstants.CELL_SIZE;
-
-                final Array2D<Cell> chunkGrid = chunk.getGrid();
-
-                executor.submit(() -> {
-                    for (int j = 0; j < chunkSize; j++) {
-
-                        for (int i = 0; i < chunkSize; i++) {
-
-                            int cellIndexX = finalChunkI * chunkSize + i;
-                            int cellIndexY = finalChunkJ * chunkSize + j;
-
-                            int cellIndex = cellIndexY * rows + cellIndexX;
-                            int vertexI = cellIndex * 5;
-
-                            Color color = chunkGrid.get(i, j).getColor();
-
-                            vertices[vertexI] = chunkRenderX + i * WorldConstants.CELL_SIZE;
-                            vertices[vertexI + 1] = chunkRenderY + j * WorldConstants.CELL_SIZE;
-                            vertices[vertexI + 2] = color.r;
-                            vertices[vertexI + 3] = color.g;
-                            vertices[vertexI + 4] = color.b;
-                        }
-                    }
-                });
-            }
-        }
-
-        executor.shutdown();
-
-        mesh.setVertices(vertices);
         shader.bind();
         shader.setUniformMatrix("u_proj", camera.combined);
-        mesh.render(shader, GL20.GL_POINTS);
 
+        for (Chunk chunk : chunks.getArray()) {
+            if (chunk == null) continue;
+
+            chunk.mesh.render(shader, GL20.GL_POINTS);
+        }
 
         if (SandWizard.renderChunkBoarder)
-            chunkActiveDebugSquares(chunks, chunkSize);
+            chunkActiveDebugSquares(chunks);
     }
 
-    private void chunkActiveDebugSquares(Array2D<Chunk> chunks, int chunkSize) {
+    private void chunkActiveDebugSquares(Array2D<Chunk> chunks) {
+        float chunkSize = WorldConstants.CHUNK_SIZE;
+
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);

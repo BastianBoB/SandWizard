@@ -1,5 +1,10 @@
 package com.basti_bob.sand_wizard.world;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
@@ -13,15 +18,44 @@ public class Chunk {
     public final int posX, posY;
     private boolean active, activeNextFrame;
     public final ChunkAccessor chunkAccessor;
+    public final Mesh mesh;
 
     public Chunk(World world, int posX, int posY) {
+        int cs = WorldConstants.CHUNK_SIZE;
+
         this.world = world;
         this.posX = posX;
         this.posY = posY;
-        this.grid = new Array2D<>(Cell.class, WorldConstants.CHUNK_SIZE, WorldConstants.CHUNK_SIZE);
+        this.grid = new Array2D<>(Cell.class, cs, cs);
         this.chunkAccessor = new ChunkAccessor(this);
         this.active = true;
         this.activeNextFrame = true;
+
+        int numCells = cs * cs;
+
+        this.mesh = new Mesh(true, numCells, 0,
+                new VertexAttribute(VertexAttributes.Usage.Position, 2, "a_position"),
+                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_color"));
+
+        float[] vertices = new float[numCells * 5];
+
+        float chunkRenderX = posX * cs * WorldConstants.CELL_SIZE;
+        float chunkRenderY = posY * cs * WorldConstants.CELL_SIZE;
+
+        for (int j = 0; j < cs; j++) {
+            for (int i = 0; i < cs; i++) {
+
+                int vertexI = (j * cs + i) * 5;
+
+                vertices[vertexI] = chunkRenderX + i * WorldConstants.CELL_SIZE;
+                vertices[vertexI + 1] = chunkRenderY + j * WorldConstants.CELL_SIZE;
+                vertices[vertexI + 2] = 0;
+                vertices[vertexI + 3] = 0;
+                vertices[vertexI + 4] = 0;
+            }
+        }
+
+        mesh.setVertices(vertices);
     }
 
     public Array2D<Cell> getGrid() {
@@ -29,32 +63,34 @@ public class Chunk {
     }
 
     public void setCell(CellType cellType, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
-//        if(inChunkPosX >= 32 || inChunkPosX < 0 || inChunkPosY >= 32 || inChunkPosY < 0) System.out.println("EROOROORORORORORO");
-/////*
-////        int cellChunkX = World.getChunkPos(cellPosX);
-////        int cellChunkY = World.getChunkPos(cellPosY);
-////
-////        if(cellChunkX != this.posX || cellChunkY != this.posY) {
-////            System.out.println("______________CELL POS NOT MATCH CHUNK1");
-////        }*/
-
-        grid.set(inChunkPosX, inChunkPosY, cellType.createCell(world, cellPosX, cellPosY));
+        Cell cell = cellType.createCell(world, cellPosX, cellPosY);
+        grid.set(inChunkPosX, inChunkPosY, cell);
         this.cellActivatesChunk(inChunkPosX, inChunkPosY);
+
+        updateMeshColor(inChunkPosX, inChunkPosY, cell.getColor());
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
-//        if(inChunkPosX >= 32 || inChunkPosX < 0 || inChunkPosY >= 32 || inChunkPosY < 0) System.out.println("EROOROORORORORORO");
-//
-//        int cellChunkX = World.getChunkPos(cellPosX);
-//        int cellChunkY = World.getChunkPos(cellPosY);
-//
-//        if(cellChunkX != this.posX || cellChunkY != this.posY) {
-//            System.out.println(cell.getCellType() + ": CELL POS NOT MATCH CHUNK2");
-//        }
-//
         cell.setPosition(cellPosX, cellPosY);
         grid.set(inChunkPosX, inChunkPosY, cell);
         this.cellActivatesChunk(inChunkPosX, inChunkPosY);
+
+        updateMeshColor(inChunkPosX, inChunkPosY, cell.getColor());
+    }
+
+
+    public void updateMeshColor(int inChunkPosX, int inChunkPosY, Color color) {
+        int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * 5;
+
+        float[] vertices = new float[]{color.r, color.g, color.b};
+         mesh.updateVertices(index + 2, vertices);
+    }
+
+    public void updateMeshColor(Cell cell) {
+        int inChunkX = World.getInChunkPos(cell.posX);
+        int inChunkY = World.getInChunkPos(cell.posY);
+        updateMeshColor(inChunkX, inChunkY, cell.getColor());
+
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY) {
@@ -99,7 +135,6 @@ public class Chunk {
     }
 
 
-
 //    public Chunk load(int chunkX, int chunkY) {
 //
 //    }
@@ -120,7 +155,7 @@ public class Chunk {
     public void activateNeighbourChunk(int offsetX, int offsetY) {
         Chunk neighbourChunk = chunkAccessor.getNeighbourChunkWithOffset(offsetX, offsetY);
 
-        if(neighbourChunk == null) return;
+        if (neighbourChunk == null) return;
 
         neighbourChunk.activateChunk();
     }

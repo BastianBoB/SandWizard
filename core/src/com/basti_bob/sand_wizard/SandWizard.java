@@ -68,8 +68,10 @@ public class SandWizard extends ApplicationAdapter {
 
         if(Gdx.input.isKeyPressed(Input.Keys.SPACE) && player.onGround) player.jump();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) camera.zoom *= 0.99;
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) camera.zoom *= 1.01;
+        float zoom = 0.001f;
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) camera.zoom *= 1 - zoom;
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) camera.zoom *= 1 + zoom;
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) camera.zoom = 1;
 
 
