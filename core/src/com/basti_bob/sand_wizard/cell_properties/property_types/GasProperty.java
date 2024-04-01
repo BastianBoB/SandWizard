@@ -1,4 +1,6 @@
-package com.basti_bob.sand_wizard.cell_properties;
+package com.basti_bob.sand_wizard.cell_properties.property_types;
+
+import com.basti_bob.sand_wizard.cell_properties.CellProperty;
 
 public class GasProperty extends CellProperty {
 

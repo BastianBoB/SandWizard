@@ -1,19 +1,18 @@
 package com.basti_bob.sand_wizard.cells.solids.movable_solids;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.basti_bob.sand_wizard.cell_properties.CellProperty;
-import com.basti_bob.sand_wizard.cell_properties.MovableSolidProperty;
+import com.basti_bob.sand_wizard.cell_properties.property_types.MovableSolidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.MovingCell;
+import com.basti_bob.sand_wizard.cells.other.Empty;
+import com.basti_bob.sand_wizard.cells.util.MovingCell;
+import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
-import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
 import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
 public class MovableSolid extends Solid implements MovingCell {
-
 
     private boolean moving;
     private float movingResistance;
@@ -47,7 +46,7 @@ public class MovableSolid extends Solid implements MovingCell {
 
     @Override
     public boolean canSwapWith(Cell target) {
-        return target instanceof Liquid;
+        return target instanceof Liquid || target instanceof Gas;
     }
 
     @Override
@@ -149,7 +148,7 @@ public class MovableSolid extends Solid implements MovingCell {
             return false;
         }
 
-        if (targetCell instanceof Liquid) {
+        if (targetCell instanceof Liquid || targetCell instanceof Gas) {
             this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
 
             if (this.posX != lastValidX || this.posY != lastValidY) {

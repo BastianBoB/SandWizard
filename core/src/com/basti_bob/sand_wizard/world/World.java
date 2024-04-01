@@ -62,11 +62,12 @@ public class World {
     public void update() {
         addAndRemoveChunks();
 
-        int height = 250;
+        int height = (int) ChunkGenerator.getTerrainHeight(this, 0) + 100;
         try {
-            setCell(CellType.FIRE, -15, 0);
+            setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
             setCell(CellType.ACID, -50, height);
-            setCell(CellType.DIRT, 0, height);
+            setCell(CellType.DIRT, 25, height);
+            setCell(CellType.COAL, -25, height);
             setCell(CellType.SAND, 50, height);
         } catch (Exception e) {
         }
@@ -103,6 +104,8 @@ public class World {
     }
 
     private void updateChunkActiveAndSetCellsNotUpdated(ExecutorService executor) {
+        List<Callable<Object>> tasks = new ArrayList<>();
+
         for (Chunk chunk : chunks) {
             chunk.updateActive();
 
@@ -110,13 +113,19 @@ public class World {
 
             final Array2D<Cell> grid = chunk.getGrid();
 
-            executor.submit(() -> {
+            tasks.add(Executors.callable(() -> {
                 for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
                     for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {
                         grid.get(inChunkX, inChunkY).gotUpdated = false;
                     }
                 }
-            });
+            }));
+        }
+
+        try {
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         updateDirection = !updateDirection;
@@ -130,23 +139,18 @@ public class World {
             for (int i = 0; i < 3; i++) {
                 ArrayList<Chunk> separatedChunks = worldUpdatingChunkRow.separateChunksList[i];
 
-                List<Future<?>> futures = new ArrayList<>();
+                List<Callable<Object>> tasks = new ArrayList<>();
 
                 for (Chunk chunk : separatedChunks) {
-
                     if (!chunk.isActive()) continue;
 
-                    //chunk.update(updateDirection);
-                    futures.add(executor.submit(() -> chunk.update(updateDirection)));
+                    tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
                 }
 
-                //Wait for all tasks submitted in this iteration to complete
-                for (Future<?> future : futures) {
-                    try {
-                        future.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    executor.invokeAll(tasks);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }

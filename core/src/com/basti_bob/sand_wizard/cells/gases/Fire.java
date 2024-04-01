@@ -2,7 +2,7 @@ package com.basti_bob.sand_wizard.cells.gases;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.solids.Empty;
+import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
@@ -25,7 +25,7 @@ public class Fire extends Gas {
 
                 if (cell == null || cell instanceof Empty) continue;
 
-                cell.applyHeating(100f);
+                cell.applyHeating(10f);
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.basti_bob.sand_wizard.cells.gases;
+package com.basti_bob.sand_wizard.cells.other;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;

@@ -1,5 +1,6 @@
-package com.basti_bob.sand_wizard.cells;
+package com.basti_bob.sand_wizard.cells.util;
 
+import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.world.ChunkAccessor;
 
 public interface MovingCell {

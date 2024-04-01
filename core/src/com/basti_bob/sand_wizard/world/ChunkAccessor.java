@@ -2,7 +2,7 @@ package com.basti_bob.sand_wizard.world;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.solids.Empty;
+import com.basti_bob.sand_wizard.cells.other.Empty;
 
 public class ChunkAccessor {
 
@@ -71,6 +71,14 @@ public class ChunkAccessor {
 
     public Chunk getNeighbourChunkWithOffset(int offsetX, int offsetY) {
         return surroundingChunks[offsetX + 1][offsetY + 1];
+    }
+
+    public void cellActivatesChunk(int cellX, int cellY) {
+        int inChunkX = World.getInChunkPos(cellX);
+        int inChunkY = World.getInChunkPos(cellY);
+        Chunk cellChunk = getNeighbourChunk(cellX, cellY);
+
+        cellChunk.cellActivatesChunk(inChunkX, inChunkY);
     }
 
 //    public Chunk getNeighbourChunk(ChunkBoarderState chunkBoarderState) {

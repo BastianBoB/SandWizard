@@ -5,8 +5,8 @@ import com.basti_bob.sand_wizard.world.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
-import com.basti_bob.sand_wizard.world_generation.biomes.SurfaceGenerator;
-import com.basti_bob.sand_wizard.world_generation.biomes.TerrainHeightGenerator;
+import com.basti_bob.sand_wizard.world_generation.surface_generation.SurfaceGenerator;
+import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
 public class ChunkGenerator {
 
@@ -34,12 +34,11 @@ public class ChunkGenerator {
             float surfaceInterpolationFactor = i / (float) WorldConstants.CHUNK_SIZE;
 
             for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
-                chunk.setCellWithInChunkPos(CellType.EMPTY, i, j);
 
                 int cellPosY = chunk.getCellPosY(j);
 
-
-                CellType cellType = Math.random() < surfaceInterpolationFactor ? rightSurfaceGenerator.getCellType(cellPosY, terrainHeight) : surfaceGenerator.getCellType(cellPosY, terrainHeight);
+                CellType cellType = Math.random() < surfaceInterpolationFactor ?
+                        rightSurfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight) : surfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight);
 
                 chunk.setCellWithInChunkPos(cellType, i, j);
             }
@@ -49,7 +48,7 @@ public class ChunkGenerator {
 
     }
 
-    public static int getTerrainHeight(World world, int cellPosX) {
+    public static float getTerrainHeight(World world, int cellPosX) {
         int chunkPosX = World.getChunkPos(cellPosX);
 
         TerrainHeightGenerator terrainHeightGenerator = BiomeType.getBiomeTypeWithChunkPos(world, chunkPosX).terrainHeightGenerator;
@@ -62,15 +61,15 @@ public class ChunkGenerator {
         return getTerrainHeight(world, chunkPosX, cellPosX, terrainHeightGenerator, terrainHeightGeneratorsToRight);
     }
 
-    public static int nextDifferentHeightGeneratorIndex(TerrainHeightGenerator heightGenerator, TerrainHeightGenerator[]  heightGeneratorsToRight) {
+    public static int nextDifferentHeightGeneratorIndex(TerrainHeightGenerator heightGenerator, TerrainHeightGenerator[] heightGeneratorsToRight) {
         for (int i = 0; i < heightGeneratorsToRight.length; i++) {
             if (heightGenerator != heightGeneratorsToRight[i]) return i;
         }
         return -1;
     }
 
-    public static int getTerrainHeight(World world, int chunkPosX, int cellPosX, TerrainHeightGenerator heightGenerator, TerrainHeightGenerator[] heightGeneratorsToRight) {
-        int currentHeight = heightGenerator.getTerrainHeight(world, cellPosX);
+    public static float getTerrainHeight(World world, int chunkPosX, int cellPosX, TerrainHeightGenerator heightGenerator, TerrainHeightGenerator[] heightGeneratorsToRight) {
+        float currentHeight = heightGenerator.getTerrainHeight(world, cellPosX);
         int nextDifferentHeightGeneratorIndex = nextDifferentHeightGeneratorIndex(heightGenerator, heightGeneratorsToRight);
 
         if (nextDifferentHeightGeneratorIndex == -1) {
@@ -81,13 +80,13 @@ public class ChunkGenerator {
 
         // Get  heights from current and adjacent biomes
         int targetX = (chunkPosX + nextDifferentHeightGeneratorIndex + 1) * WorldConstants.CHUNK_SIZE;
-        int HeightRight = HeightGeneratorRight.getTerrainHeight(world, targetX);
+        float HeightRight = HeightGeneratorRight.getTerrainHeight(world, targetX);
 
-        int heightDifference = HeightRight - currentHeight;
+        float heightDifference = HeightRight - currentHeight;
 
         float interpolationFactor = 1 - ((targetX - cellPosX) / ((float) WorldConstants.CHUNK_SIZE * TERRAIN_HEIGHT_BLENDING_RADIUS));
 
-        return (int) (currentHeight + heightDifference * interpolationFactor);
+        return currentHeight + heightDifference * interpolationFactor;
     }
 
 }

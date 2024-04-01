@@ -1,11 +1,11 @@
 package com.basti_bob.sand_wizard.cells.liquids;
 
-import com.basti_bob.sand_wizard.cell_properties.CellProperty;
-import com.basti_bob.sand_wizard.cell_properties.LiquidProperty;
+import com.basti_bob.sand_wizard.cell_properties.property_types.LiquidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.MovingCell;
-import com.basti_bob.sand_wizard.cells.solids.Empty;
+import com.basti_bob.sand_wizard.cells.other.Empty;
+import com.basti_bob.sand_wizard.cells.util.MovingCell;
+import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
 import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
@@ -36,6 +36,8 @@ public class Liquid extends Cell implements MovingCell {
 
     @Override
     public boolean canSwapWith(Cell target) {
+        if(target instanceof Gas) return true;
+
         if (target instanceof Liquid liquidTarget) {
             return liquidTarget.getDensity() < this.getDensity();
         }
@@ -161,7 +163,7 @@ public class Liquid extends Cell implements MovingCell {
             return false;
         }
 
-        if (targetCell instanceof Liquid) {
+        if (targetCell instanceof Liquid || targetCell instanceof Gas) {
             if (!canSwapWith(targetCell)) return false;
 
             if (this.posX != lastValidX || this.posY != lastValidY) {

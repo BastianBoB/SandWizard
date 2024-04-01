@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.Chunk;
@@ -137,7 +138,7 @@ public class WorldRenderer {
         shapeRenderer.end();
     }
 
-    private final Color activeColor = new Color(0.3f, 0.3f, 0.3f, 1);
+    private final Color activeColor = new Color(0.5f, 0.5f, 0.5f, 1);
     private final Color inActiveColor = new Color(0.1f, 0.1f, 0.1f, 1);
 
 

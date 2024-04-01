@@ -2,10 +2,8 @@ package com.basti_bob.sand_wizard.world;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.ChunkBoarderState;
-import com.basti_bob.sand_wizard.cells.solids.Empty;
+import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
 import com.basti_bob.sand_wizard.util.Array2D;
-import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 
 public class Chunk {
 
@@ -92,7 +90,7 @@ public class Chunk {
 
                 Cell cell = grid.get(xIndex, inChunkY);
 
-                if (cell instanceof Empty || cell.gotUpdated) continue;
+                if (cell == null || cell.gotUpdated) continue;
 
                 cell.update(chunkAccessor, updateDirection);
             }

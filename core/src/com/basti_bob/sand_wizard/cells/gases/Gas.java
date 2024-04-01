@@ -1,12 +1,12 @@
 package com.basti_bob.sand_wizard.cells.gases;
 
 import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.cell_properties.GasProperty;
+import com.basti_bob.sand_wizard.cell_properties.property_types.GasProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.MovingCell;
+import com.basti_bob.sand_wizard.cells.other.Empty;
+import com.basti_bob.sand_wizard.cells.util.MovingCell;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
-import com.basti_bob.sand_wizard.cells.solids.Empty;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
 import com.basti_bob.sand_wizard.world.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
@@ -95,7 +95,7 @@ public class Gas extends Cell implements MovingCell {
             velocityModifier = -1;
         }
 
-        return velocityModifier * this.getDispersionRate();
+        return (float) (velocityModifier * this.getDispersionRate() * Math.random());
     }
 
     @Override

@@ -16,6 +16,7 @@ public class DesktopLauncher {
 		config.useVsync(false);
 		float scale = 1f;
 		config.setWindowedMode((int) (1920 * scale), (int) (1080 * scale));
+		config.setMaximizedMonitor(Lwjgl3ApplicationConfiguration.getMonitors()[2]);
 
 		config.setTitle("Sand Wizard");
 		new Lwjgl3Application(new SandWizard(), config);

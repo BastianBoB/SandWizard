@@ -1,9 +1,5 @@
 package com.basti_bob.sand_wizard.entities;
 
-import com.basti_bob.sand_wizard.cells.PhysicalState;
-
-import java.util.List;
-
 public class EntityHitBox {
 
     private final float width, height;

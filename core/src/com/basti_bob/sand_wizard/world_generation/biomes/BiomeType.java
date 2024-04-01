@@ -1,6 +1,9 @@
 package com.basti_bob.sand_wizard.world_generation.biomes;
 
 import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world_generation.surface_generation.SurfaceGenerator;
+import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.ScaledShiftedTerrainHeightGenerator;
+import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,12 +11,18 @@ import java.util.List;
 public class BiomeType {
 
     public static final List<BiomeType> biomeTypes = new ArrayList<>();
-    public static final BiomeType GRASS_FIELD = new BiomeTypeBuilder(10, 20, 0.8f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
-    public static final BiomeType FLOWER_FIELD = new BiomeTypeBuilder(20, 30, 0.2f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
+    public static final BiomeType ERROR = new BiomeTypeBuilder(0, 0, 0f).build();
 
-    public static final BiomeType ICE_MOUNTAINS = new BiomeTypeBuilder(-50, -20, 1f)
-            .surfaceGenerator(SurfaceGenerator.ICE_MOUNTAINS)
-            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
+//    public static final BiomeType GRASS_FIELD = new BiomeTypeBuilder(10, 20, 0.8f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
+//    public static final BiomeType FLOWER_FIELD = new BiomeTypeBuilder(20, 30, 0.2f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
+//
+//    public static final BiomeType ICE_MOUNTAINS = new BiomeTypeBuilder(-50, -20, 1f)
+//            .surfaceGenerator(SurfaceGenerator.ICE_MOUNTAINS)
+//            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
+    
+    public static final BiomeType FANCY = new BiomeTypeBuilder(-100, 100, 1f)
+            .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
+            .terrainHeightGenerator(TerrainHeightGenerator.FANCY).build();
 
 
     public final int minTemperature;
@@ -66,7 +75,7 @@ public class BiomeType {
         }
 
         //shouldn't happen
-        return BiomeType.GRASS_FIELD;
+        return BiomeType.ERROR;
     }
 
     public static class BiomeTypeBuilder {
@@ -75,7 +84,7 @@ public class BiomeType {
         public final int maxTemperature;
         public final float weight;
         public SurfaceGenerator surfaceGenerator = SurfaceGenerator.STONE_ONLY;
-        public TerrainHeightGenerator terrainHeightGenerator = TerrainHeightGenerator.BASE_PERLIN_NOISE;
+        public TerrainHeightGenerator terrainHeightGenerator = TerrainHeightGenerator.FANCY;
 
         public BiomeTypeBuilder(int minTemperature, int maxTemperature, float weight) {
             this.minTemperature = minTemperature;

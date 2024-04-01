@@ -14,18 +14,17 @@ public class Acid extends Liquid {
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
         super.updateMoving(chunkAccessor, updateDirection);
 
-        Cell[][] neighbourCells = this.getNeighbourCells(chunkAccessor, this.posX, posY);
+        Cell[] directNeighbourCells = this.getDirectNeighbourCells(chunkAccessor, this.posX, this.posY);
 
-        for(int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if(i == 1 && j == 1) continue;
+        boolean corrodedCell = false;
+        for (int i = 0; i < 4; i++) {
+            Cell cell = directNeighbourCells[i];
 
-                Cell cell = neighbourCells[i][j];
+            if (cell == null || cell instanceof Acid) continue;
 
-                if(cell == null || cell instanceof Acid) continue;
-
-                cell.applyCorrosion(1f);
-            }
+            corrodedCell = cell.applyCorrosion(1f);
         }
+
+        if(corrodedCell) chunkAccessor.cellActivatesChunk(this.posX, this.posY);
     }
 }

@@ -23,7 +23,7 @@ public class Player {
     public float ny;
     public float xVel, yVel;
     public boolean onGround;
-    private int stepUpHeight = 16;
+    private int stepUpHeight = 6;
 
     private final Array2D<Chunk> renderingChunks = new Array2D<>(Chunk.class,
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1,

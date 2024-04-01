@@ -5,6 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.world.World;
@@ -14,16 +17,22 @@ import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
 public class SandWizard extends ApplicationAdapter {
 
     private OrthographicCamera camera;
+    private OrthographicCamera hudCamera;
+
     private World world;
     private WorldRenderer worldRenderer;
     private Player player;
+    private SpriteBatch spriteBatch;
+    private BitmapFont font;
 
     public static boolean renderChunkBoarder;
 
     private float accumulatedTime;
-    private final float fixedDeltaTime = 1.0f / 60.0f; // 60 FPS
+    private final float fixedDeltaTime = 1.0f / 60f; // 60 FPS
 
     public static int updateTimes = 0;
+
+
 
     @Override
     public void create() {
@@ -32,8 +41,13 @@ public class SandWizard extends ApplicationAdapter {
 
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
-        player = new Player(world, 0, 150);
+        player = new Player(world, -200, 150);
 
+        hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        hudCamera.position.set(hudCamera.viewportWidth / 2.0f, hudCamera.viewportHeight / 2.0f, 1.0f);
+        spriteBatch = new SpriteBatch();
+
+        font = new BitmapFont();
     }
 
     @Override
@@ -63,6 +77,10 @@ public class SandWizard extends ApplicationAdapter {
             SandWizard.renderChunkBoarder = !SandWizard.renderChunkBoarder;
         }
 
+        if(Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+            Gdx.app.exit();
+        }
+
         while (accumulatedTime >= fixedDeltaTime) {
             fixedUpdate(fixedDeltaTime);
             accumulatedTime -= fixedDeltaTime;
@@ -73,7 +91,6 @@ public class SandWizard extends ApplicationAdapter {
     }
 
     public void fixedUpdate(float deltaTime) {
-        camera.update();
         world.update();
         player.update(deltaTime);
     }
@@ -82,8 +99,15 @@ public class SandWizard extends ApplicationAdapter {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+        camera.update();
         worldRenderer.render(player);
         player.render(camera);
+
+        hudCamera.update();
+        spriteBatch.setProjectionMatrix(hudCamera.combined);
+        spriteBatch.begin();
+        font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 50, hudCamera.viewportHeight - 50);
+        spriteBatch.end();
     }
 
 

@@ -1,4 +1,4 @@
-package com.basti_bob.sand_wizard.cells;
+package com.basti_bob.sand_wizard.cells.util;
 
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
