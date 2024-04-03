@@ -3,10 +3,10 @@ package com.basti_bob.sand_wizard.world_saving;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.world.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
-import org.apache.commons.lang3.StringUtils;
+import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 
 public class ChunkSaver {
 
@@ -17,6 +17,7 @@ public class ChunkSaver {
     }
 
     public static void writeChunk(Chunk chunk) {
+        System.out.println("Saved chunk: " + chunk.posX + " , " + chunk.posY);
 
         FileHandle file = Gdx.files.local(getChunkFileLocation(chunk.posX, chunk.posY));
 
@@ -48,13 +49,13 @@ public class ChunkSaver {
     }
 
 
-    public static Chunk readChunk(World world, int chunkX, int chunkY) {
+    public static ChunkBuilder readChunk(World world, int chunkX, int chunkY) {
         try {
 
             FileHandle file = Gdx.files.local(getChunkFileLocation(chunkX, chunkY));
             if (!file.exists()) return null;
 
-            Chunk chunk = new Chunk(world, chunkX, chunkY);
+            ChunkBuilder chunkBuilder = new ChunkBuilder(world, chunkX, chunkY);
 
             String[] cellsAndNumbers = file.readString().split(",");
 
@@ -74,13 +75,13 @@ public class ChunkSaver {
                         numRepeatingCells = Integer.parseInt(cellsAndNumbers[arrayIndex + 1]);
                     }
 
-                    chunk.setCellWithInChunkPos(currentCellType, i, j);
+                    chunkBuilder.setCellWithInChunkPos(currentCellType, i, j);
 
                     repeatedCellIteration++;
                 }
             }
 
-            return chunk;
+            return chunkBuilder;
         } catch (Exception e) {
             System.out.println("FAILED READING CHUNK at: " + chunkX + ", " + chunkY);
             return null;

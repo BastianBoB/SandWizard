@@ -1,9 +1,10 @@
 package com.basti_bob.sand_wizard.world_generation;
 
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.world.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
 import com.basti_bob.sand_wizard.world_generation.surface_generation.SurfaceGenerator;
 import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
@@ -12,8 +13,8 @@ public class ChunkGenerator {
 
     public static final int TERRAIN_HEIGHT_BLENDING_RADIUS = 3;
 
-    public static Chunk generateNew(World world, int chunkPosX, int chunkPosY) {
-        Chunk chunk = new Chunk(world, chunkPosX, chunkPosY);
+    public static ChunkBuilder generateNew(World world, int chunkPosX, int chunkPosY) {
+        ChunkBuilder chunkBuilder = new ChunkBuilder(world, chunkPosX, chunkPosY);
 
         BiomeType biomeType = BiomeType.getBiomeTypeWithChunkPos(world, chunkPosX);
         TerrainHeightGenerator terrainHeightGenerator = biomeType.terrainHeightGenerator;
@@ -28,24 +29,23 @@ public class ChunkGenerator {
 
         for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
 
-            int cellPosX = chunk.getCellPosX(i);
+            int cellPosX = chunkBuilder.getCellPosX(i);
             double terrainHeight = getTerrainHeight(world, chunkPosX, cellPosX, terrainHeightGenerator, terrainHeightGeneratorsToRight);
 
             float surfaceInterpolationFactor = i / (float) WorldConstants.CHUNK_SIZE;
 
             for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
 
-                int cellPosY = chunk.getCellPosY(j);
+                int cellPosY = chunkBuilder.getCellPosY(j);
 
                 CellType cellType = Math.random() < surfaceInterpolationFactor ?
                         rightSurfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight) : surfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight);
 
-                chunk.setCellWithInChunkPos(cellType, i, j);
+                chunkBuilder.setCellWithInChunkPos(cellType, i, j);
             }
         }
 
-        return chunk;
-
+        return chunkBuilder;
     }
 
     public static float getTerrainHeight(World world, int cellPosX) {

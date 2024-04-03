@@ -2,7 +2,7 @@ package com.basti_bob.sand_wizard.world_generation;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.util.Array2D;
-import com.basti_bob.sand_wizard.world.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 
 import java.util.List;

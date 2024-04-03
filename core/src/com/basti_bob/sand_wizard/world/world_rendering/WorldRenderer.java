@@ -2,20 +2,14 @@ package com.basti_bob.sand_wizard.world.world_rendering;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.SandWizard;
-import com.basti_bob.sand_wizard.cells.Cell;
-import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.Array2D;
-import com.basti_bob.sand_wizard.world.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class WorldRenderer {
 
@@ -82,7 +76,7 @@ public class WorldRenderer {
         shapeRenderer.end();
     }
 
-    private final Color activeColor = new Color(0.5f, 0.5f, 0.5f, 1);
+    private final Color activeColor = new Color(1f, 1f, 1f, 1);
     private final Color inActiveColor = new Color(0.1f, 0.1f, 0.1f, 1);
 
 
@@ -90,7 +84,7 @@ public class WorldRenderer {
 
         shapeRenderer.setColor(chunk.isActive() ? activeColor : inActiveColor);
 
-        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 1;
+        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 2;
         shapeRenderer.rect(chunkRenderX, chunkRenderY, rectSize, rectSize);
     }
 }

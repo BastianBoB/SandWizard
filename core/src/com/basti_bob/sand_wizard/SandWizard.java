@@ -54,8 +54,6 @@ public class SandWizard extends ApplicationAdapter {
     public void render() {
         updateTimes++;
 
-        System.out.println("fps: " + Gdx.graphics.getFramesPerSecond());
-
         float deltaTime = Gdx.graphics.getDeltaTime();
         accumulatedTime += deltaTime;
 

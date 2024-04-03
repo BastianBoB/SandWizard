@@ -7,7 +7,7 @@ import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.util.MovingCell;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
-import com.basti_bob.sand_wizard.world.ChunkAccessor;
+import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
 public class Liquid extends Cell implements MovingCell {

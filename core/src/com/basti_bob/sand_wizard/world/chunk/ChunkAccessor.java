@@ -1,8 +1,10 @@
-package com.basti_bob.sand_wizard.world;
+package com.basti_bob.sand_wizard.world.chunk;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.other.Empty;
+import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 
 public class ChunkAccessor {
 

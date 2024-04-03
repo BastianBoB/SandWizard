@@ -7,8 +7,8 @@ import com.basti_bob.sand_wizard.cell_properties.CellProperty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
 import com.basti_bob.sand_wizard.cells.other.Empty;
-import com.basti_bob.sand_wizard.world.Chunk;
-import com.basti_bob.sand_wizard.world.ChunkAccessor;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
@@ -17,6 +17,7 @@ public abstract class Cell {
     public final World world;
     private final CellType cellType;
     private Color color;
+    private Color originalColor;
 
     public int posX, posY;
     public int inChunkX, inChunkY;
@@ -50,6 +51,7 @@ public abstract class Cell {
         this.setPosition(posX, posY);
         this.cellType = cellType;
         this.color = cellType.getCellColors().getColor(world, posX, posY);
+        this.originalColor = color;
 
         CellProperty cellProperty = cellType.getCellProperty();
 
@@ -81,12 +83,28 @@ public abstract class Cell {
                 updateBurning(chunkAccessor, updateDirection);
             }
         }
-
-        if (updateCorrosion(chunkAccessor, updateDirection)) return;
     }
 
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
 
+    }
+
+    public void clampVelocity() {
+        if (velocity.x > WorldConstants.CHUNK_SIZE) velocity.x = WorldConstants.CHUNK_SIZE;
+        else if (velocity.x < -WorldConstants.CHUNK_SIZE) velocity.x = -WorldConstants.CHUNK_SIZE;
+
+        if (velocity.y > WorldConstants.CHUNK_SIZE) velocity.y = WorldConstants.CHUNK_SIZE;
+        else if (velocity.y < -WorldConstants.CHUNK_SIZE) velocity.y = -WorldConstants.CHUNK_SIZE;
+    }
+
+    public boolean moveOrSwapDownLeftRight(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        if (updateDirection) {
+            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return true;
+            return chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
+        } else {
+            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return true;
+            return chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
+        }
     }
 
     public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
@@ -103,13 +121,6 @@ public abstract class Cell {
         }
     }
 
-    public boolean updateCorrosion(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        if (this.corrosionHealth < 0) {
-            return die(chunkAccessor);
-        }
-        return false;
-    }
-
     public boolean finishedBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
         return die(chunkAccessor);
     }
@@ -124,24 +135,26 @@ public abstract class Cell {
         return true;
     }
 
-    private void changeTemperature(float temperatureChange) {
+    public boolean shouldActiveChunk() {
+        return false;
+    }
+
+    private void changeTemperature(ChunkAccessor chunkAccessor, float temperatureChange) {
         this.temperature += temperatureChange;
 
-        if (canBurn() && this.getTemperature() > getBurningTemperature()) {
-            this.burning = true;
-        }
+        this.burning = canBurn() && this.getTemperature() > getBurningTemperature();
     }
 
-    public void applyHeating(float heat) {
+    public void applyHeating(ChunkAccessor chunkAccessor, float heat) {
         if (!canBeHeated) return;
 
-        this.changeTemperature(heat);
+        this.changeTemperature(chunkAccessor, heat);
     }
 
-    public void applyCooling(float cooling) {
+    public void applyCooling(ChunkAccessor chunkAccessor, float cooling) {
         if (!canBeCooled) return;
 
-        this.changeTemperature(-cooling);
+        this.changeTemperature(chunkAccessor, -cooling);
     }
 
     public void setPosition(int posX, int posY) {
@@ -152,10 +165,15 @@ public abstract class Cell {
         this.inChunkY = World.getInChunkPos(posY);
     }
 
-    public boolean applyCorrosion(float amount) {
+    public boolean applyCorrosion(ChunkAccessor chunkAccessor, float amount) {
         if(!this.canCorrode()) return false;
 
         this.corrosionHealth -= amount;
+
+        if (this.corrosionHealth < 0) {
+            die(chunkAccessor);
+        }
+
         return true;
     }
 
@@ -483,24 +501,6 @@ public abstract class Cell {
 
                 trySetMoving(neighbourCells[i + 1][j + 1]);
             }
-        }
-    }
-
-    public void clampVelocity() {
-        if (velocity.x > WorldConstants.CHUNK_SIZE) velocity.x = WorldConstants.CHUNK_SIZE;
-        else if (velocity.x < -WorldConstants.CHUNK_SIZE) velocity.x = -WorldConstants.CHUNK_SIZE;
-
-        if (velocity.y > WorldConstants.CHUNK_SIZE) velocity.y = WorldConstants.CHUNK_SIZE;
-        else if (velocity.y < -WorldConstants.CHUNK_SIZE) velocity.y = -WorldConstants.CHUNK_SIZE;
-    }
-
-    public boolean moveOrSwapDownLeftRight(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        if (updateDirection) {
-            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return true;
-            return chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
-        } else {
-            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return true;
-            return chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
         }
     }
 

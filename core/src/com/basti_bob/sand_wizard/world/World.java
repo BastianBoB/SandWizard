@@ -3,11 +3,16 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
+import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 import com.basti_bob.sand_wizard.world_generation.trees.TreeGenerator;
 import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
+import org.apache.commons.lang3.tuple.Pair;
 
+import javax.swing.text.Utilities;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -23,7 +28,7 @@ public class World {
 
     public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(0L);
 
-    private final ConcurrentHashMap<Chunk, Boolean> removeOrAddChunk = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, Pair<Chunk, ChunkBuilder>> chunksToRemoveOrAdd = new ConcurrentHashMap<>();
 
     public World() {
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
@@ -54,23 +59,15 @@ public class World {
 //        }
     }
 
-
-    public void asyncRemoveOrAddChunk(Chunk chunk, boolean remove) {
-        removeOrAddChunk.put(chunk, remove);
-    }
-
     public void update() {
         addAndRemoveChunks();
 
         int height = (int) ChunkGenerator.getTerrainHeight(this, 0) + 100;
-        try {
-            setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
-            setCell(CellType.ACID, -50, height);
-            setCell(CellType.DIRT, 25, height);
-            setCell(CellType.COAL, -25, height);
-            setCell(CellType.SAND, 50, height);
-        } catch (Exception e) {
-        }
+        setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
+        setCell(CellType.ACID, -50, height);
+        setCell(CellType.DIRT, 25, height);
+        setCell(CellType.COAL, -25, height);
+        setCell(CellType.SAND, 50, height);
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
@@ -88,17 +85,33 @@ public class World {
 
     }
 
+    private void chunkToAdd(ChunkBuilder chunkBuilder) {
+        long key = getChunkKey(chunkBuilder.posX, chunkBuilder.posY);
+
+        chunksToRemoveOrAdd.put(key, Pair.of(null, chunkBuilder));
+    }
+
+    private void chunkToRemove(Chunk chunk) {
+        long key = getChunkKey(chunk.posX, chunk.posY);
+
+        chunksToRemoveOrAdd.put(key, Pair.of(chunk, null));
+    }
+
     private void addAndRemoveChunks() {
-        Iterator<Map.Entry<Chunk, Boolean>> iterator = removeOrAddChunk.entrySet().iterator();
+        Iterator<Map.Entry<Long, Pair<Chunk, ChunkBuilder>>> iterator = chunksToRemoveOrAdd.entrySet().iterator();
 
         while (iterator.hasNext()) {
-            Map.Entry<Chunk, Boolean> entry = iterator.next();
-            Chunk chunk = entry.getKey();
-            if (entry.getValue()) {
-                removeChunk(chunk);
+            Map.Entry<Long, Pair<Chunk, ChunkBuilder>> entry = iterator.next();
+
+            Pair<Chunk, ChunkBuilder> pair = entry.getValue();
+
+            Chunk chunk = pair.getLeft();
+            if (chunk != null) {
+                removeChunk(pair.getLeft());
             } else {
-                addChunk(chunk);
+                addChunk(pair.getRight().buildChunk());
             }
+
             iterator.remove();
         }
     }
@@ -190,9 +203,9 @@ public class World {
     }
 
     public void unloadChunk(int chunkPosX, int chunkPosY) {
-        if (!this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
-
         Chunk chunk = this.getChunkFromChunkPos(chunkPosX, chunkPosY);
+        if (chunk == null) return;
+
 
         if (WorldConstants.SAVE_CHUNK_DATA)
             ChunkSaver.writeChunk(chunk);
@@ -201,38 +214,37 @@ public class World {
     }
 
     public void unloadChunkAsync(int chunkPosX, int chunkPosY) {
-        if (!this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
-
         Chunk chunk = this.getChunkFromChunkPos(chunkPosX, chunkPosY);
+        if (chunk == null) return;
 
-        if (WorldConstants.SAVE_CHUNK_DATA)
+        if (WorldConstants.SAVE_CHUNK_DATA && chunk.hasBeenModified)
             ChunkSaver.writeChunk(chunk);
 
-        asyncRemoveOrAddChunk(chunk, true);
+        chunkToRemove(chunk);
     }
 
     public void loadOrCreateChunk(int chunkPosX, int chunkPosY) {
         if (this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
-        Chunk chunk = ChunkSaver.readChunk(this, chunkPosX, chunkPosY);
+        ChunkBuilder chunkBuilder = ChunkSaver.readChunk(this, chunkPosX, chunkPosY);
 
-        if (chunk == null) {
-            chunk = ChunkGenerator.generateNew(this, chunkPosX, chunkPosY);
+        if (chunkBuilder == null) {
+            chunkBuilder = ChunkGenerator.generateNew(this, chunkPosX, chunkPosY);
         }
 
-        addChunk(chunk);
+        addChunk(chunkBuilder.buildChunk());
     }
 
     public void loadOrCreateChunkAsync(int chunkPosX, int chunkPosY) {
         if (this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
-        Chunk chunk = ChunkSaver.readChunk(this, chunkPosX, chunkPosY);
+        ChunkBuilder chunkBuilder = ChunkSaver.readChunk(this, chunkPosX, chunkPosY);
 
-        if (chunk == null) {
-            chunk = ChunkGenerator.generateNew(this, chunkPosX, chunkPosY);
+        if (chunkBuilder == null) {
+            chunkBuilder = ChunkGenerator.generateNew(this, chunkPosX, chunkPosY);
         }
 
-        asyncRemoveOrAddChunk(chunk, false);
+        chunkToAdd(chunkBuilder);
     }
 
     private void addChunk(Chunk chunk) {

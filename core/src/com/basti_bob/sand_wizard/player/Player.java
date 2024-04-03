@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.solids.Solid;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
 import com.basti_bob.sand_wizard.util.Array2D;
-import com.basti_bob.sand_wizard.world.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
@@ -168,7 +168,7 @@ public class Player {
         int stepHeight = 0;
         for (int j = 0; j <= hitBox.getHeight(); j++) {
             if (world.getCell(x, y + j) instanceof Solid)
-                stepHeight = j+1;
+                stepHeight = j + 1;
         }
 
         return stepHeight;
@@ -210,7 +210,7 @@ public class Player {
         int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
 
 
-        //CompletableFuture.runAsync(() -> {
+        CompletableFuture.runAsync(() -> {
             if (Math.abs(chunkXDiff) == 1) {
                 int xOff = loadX * chunkXDiff;
 
@@ -228,9 +228,7 @@ public class Player {
                     world.loadOrCreateChunkAsync(newChunkX + i, newChunkY + yOff);
                 }
             }
-        //}).thenRun(() ->
-
-        setRenderingChunks(newChunkX, newChunkY);
+        }).thenRun(() -> setRenderingChunks(newChunkX, newChunkY));
     }
 
     public void setRenderingChunks(int chunkX, int chunkY) {

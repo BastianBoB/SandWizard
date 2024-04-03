@@ -1,5 +1,7 @@
 package com.basti_bob.sand_wizard.world;
 
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
+
 import java.util.ArrayList;
 
 public class WorldUpdatingChunkRow {

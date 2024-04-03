@@ -1,7 +1,7 @@
 package com.basti_bob.sand_wizard.cells.liquids;
 
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.world.ChunkAccessor;
+import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
 public class Water extends Liquid {
