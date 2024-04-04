@@ -20,16 +20,16 @@ import java.util.concurrent.*;
 
 public class World {
 
-
     private boolean updateDirection;
 
-    private final ArrayList<Chunk> chunks = new ArrayList<>();
-    private final Set<ChunkAccessor> chunkUpdatingGrid = new HashSet<>();
-    private final HashMap<Long, Chunk> chunkLUT = new HashMap<>();
-
+    public final ArrayList<Chunk> chunks = new ArrayList<>();
+    public final Set<ChunkAccessor> chunkUpdatingGrid = new HashSet<>();
+    public final HashMap<Long, Chunk> chunkLUT = new HashMap<>();
     public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(0L);
 
-    private final ConcurrentHashMap<Long, Pair<Chunk, ChunkBuilder>> chunksToRemoveOrAdd = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Long, Pair<Chunk, ChunkBuilder>> chunksToRemoveOrAdd = new ConcurrentHashMap<>();
+
+    public int activeChunks;
 
     public World() {
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
@@ -64,15 +64,16 @@ public class World {
         addAndRemoveChunks();
 
         int height = (int) ChunkGenerator.getTerrainHeight(this, 0) + 100;
-//        setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
-//        setCell(CellType.ACID, -50, height);
-//        setCell(CellType.WATER, -100, height);
-//        setCell(CellType.OIL, -250, height);
-//
-//
-//        setCell(CellType.DIRT, 25, height);
-//        setCell(CellType.COAL, -25, height);
-//        setCell(CellType.SAND, 50, height);
+
+        setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
+        setCell(CellType.ACID, -50, height);
+        setCell(CellType.WATER, -100, height);
+        setCell(CellType.OIL, -250, height);
+
+
+        setCell(CellType.DIRT, 25, height);
+        setCell(CellType.COAL, -25, height);
+        setCell(CellType.SAND, 50, height);
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
@@ -122,12 +123,15 @@ public class World {
     }
 
     private void updateChunkActiveAndSetCellsNotUpdated(ExecutorService executor) {
+        activeChunks = 0;
+
         List<Callable<Object>> tasks = new ArrayList<>();
 
         for (Chunk chunk : chunks) {
             chunk.updateActive();
 
             if (!chunk.isActive()) continue;
+            activeChunks++;
 
             final Array2D<Cell> grid = chunk.getGrid();
 
@@ -162,8 +166,8 @@ public class World {
 
                     if (chunk == null || !chunk.isActive()) continue;
 
-                    tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
-
+                    //tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
+                    chunk.update(updateDirection);
                 }
 
                 try {
@@ -275,19 +279,32 @@ public class World {
         }
 
         if (shouldChunkBeUsedInUpdatingGrid(chunk)) {
-            System.out.println(chunk.posX + "," + chunk.posY);
-
             chunkUpdatingGrid.add(chunk.chunkAccessor);
         }
     }
 
     private void removeChunk(Chunk chunk) {
         chunks.remove(chunk);
-        chunkLUT.remove(getChunkKey(chunk.posX, chunk.posY));
+        chunkLUT.remove(getChunkKey(chunk.posX, chunk.posY), chunk);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) continue;
+
+                Chunk neighbourChunk = getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
+
+                if (neighbourChunk == null) continue;
+
+                neighbourChunk.chunkAccessor.removeSurroundingChunk(chunk);
+                chunk.chunkAccessor.removeSurroundingChunk(neighbourChunk);
+            }
+        }
 
         if (shouldChunkBeUsedInUpdatingGrid(chunk)) {
             chunkUpdatingGrid.remove(chunk.chunkAccessor);
         }
+
+        chunk.dispose();
     }
 
     //

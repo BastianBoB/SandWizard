@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
@@ -18,7 +19,7 @@ public class Player {
     private final World world;
     private float ox;
     private float oy;
-    private float nx;
+    public float nx;
     public float ny;
     public float xVel, yVel;
     public boolean onGround;
@@ -59,7 +60,7 @@ public class Player {
 
     public void jump() {
         this.onGround = false;
-        this.yVel = 6;
+        this.yVel = 5;
     }
 
 
@@ -167,7 +168,9 @@ public class Player {
 
         int stepHeight = 0;
         for (int j = 0; j <= hitBox.getHeight(); j++) {
-            if (world.getCell(x, y + j).isSolid())
+            Cell cell = world.getCell(x, y + j);
+
+            if (cell != null && cell.isSolid())
                 stepHeight = j + 1;
         }
 
@@ -178,7 +181,11 @@ public class Player {
         int offsetX = (int) Math.ceil(hitBox.getWidth() / 2f);
 
         for (int i = -offsetX + 1; i <= offsetX; i++) {
-            if (world.getCell(x + i, y).isSolid())
+            Cell cell = world.getCell(x + i, y);
+
+            if (cell == null) return false;
+
+            if (cell.isSolid())
                 return true;
         }
         return false;
@@ -208,8 +215,6 @@ public class Player {
 
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
         int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
-
-
 
 
         CompletableFuture.runAsync(() -> {

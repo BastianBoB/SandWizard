@@ -15,6 +15,9 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SandWizard extends ApplicationAdapter {
 
     private OrthographicCamera camera;
@@ -35,7 +38,6 @@ public class SandWizard extends ApplicationAdapter {
     public static int updateTimes = 0;
 
 
-
     @Override
     public void create() {
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -50,12 +52,11 @@ public class SandWizard extends ApplicationAdapter {
         spriteBatch = new SpriteBatch();
 
         font = new BitmapFont();
+
     }
 
     @Override
     public void render() {
-        updateTimes++;
-
         float deltaTime = Gdx.graphics.getDeltaTime();
         accumulatedTime += deltaTime;
 
@@ -86,15 +87,26 @@ public class SandWizard extends ApplicationAdapter {
         if (accumulatedTime >= fixedDeltaTime) {
             FunctionRunTime.timeFunction("Fixed Update", () -> fixedUpdate(fixedDeltaTime));
             accumulatedTime -= fixedDeltaTime;
+            //renderGame();
         }
 
         renderGame();
     }
 
     public void fixedUpdate(float deltaTime) {
+        updateTimes++;
+
         world.update();
-       player.update(deltaTime);
+        player.update(deltaTime);
+
+        if(updateTimes % 20 == 0) {
+            Runtime runtime = Runtime.getRuntime();
+            freeMemory = runtime.freeMemory() >> 20;
+            maxMemory = runtime.maxMemory() >> 20;
+        }
     }
+
+    float freeMemory, maxMemory;
 
     public void renderGame() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -107,7 +119,14 @@ public class SandWizard extends ApplicationAdapter {
         hudCamera.update();
         spriteBatch.setProjectionMatrix(hudCamera.combined);
         spriteBatch.begin();
-        font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 50, hudCamera.viewportHeight - 50);
+        font.draw(spriteBatch, "fps: " + Gdx.graphics.getFramesPerSecond(), 50, hudCamera.viewportHeight - 50);
+        font.draw(spriteBatch, "existing chunks: " + world.chunks.size(), 50, hudCamera.viewportHeight - 80);
+        font.draw(spriteBatch, "loaded chunks: " + world.activeChunks, 50, hudCamera.viewportHeight - 110);
+
+        font.draw(spriteBatch, "player pos: " + String.format("%.1f", player.nx) + ", " + String.format("%.1f", player.ny), 50, hudCamera.viewportHeight - 140);
+        font.draw(spriteBatch, "player vel: " + String.format("%.1f", player.xVel) + ", " + String.format("%.1f", player.yVel), 50, hudCamera.viewportHeight - 170);
+
+        font.draw(spriteBatch, "memory usage: " + (int)freeMemory + " / " + (int) maxMemory + "MB | " + String.format("%.1f", 100 * (freeMemory/maxMemory)) + " %", 50, hudCamera.viewportHeight - 200);
         spriteBatch.end();
     }
 

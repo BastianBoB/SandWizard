@@ -151,6 +151,7 @@ public class Liquid extends MovingCell {
 
     @Override
     public boolean moveAlong(ChunkAccessor chunkAccessor, Cell targetCell, int lastValidX, int lastValidY, boolean updateDirection) {
+        if(targetCell == null) return false;
 
         switch (targetCell.getPhysicalState()) {
 

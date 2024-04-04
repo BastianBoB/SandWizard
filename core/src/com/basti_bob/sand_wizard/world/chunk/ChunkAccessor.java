@@ -26,6 +26,13 @@ public class ChunkAccessor {
         surroundingChunks[gridX][gridY] = chunk;
     }
 
+    public void removeSurroundingChunk(Chunk chunk) {
+        int gridX = chunk.posX - centerChunkX + 1;
+        int gridY = chunk.posY - centerChunkY + 1;
+
+        surroundingChunks[gridX][gridY] = null;
+    }
+
     public Cell getCell(int targetX, int targetY) {
         Chunk targetChunk = getNeighbourChunk(targetX, targetY);
         if (targetChunk == null) return null;

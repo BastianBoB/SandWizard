@@ -39,6 +39,9 @@ public class Chunk {
         this.activeNextFrame = true;
     }
 
+    public void dispose() {
+        mesh.dispose();
+    }
 
     public void update(boolean updateDirection) {
 

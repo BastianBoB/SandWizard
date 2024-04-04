@@ -21,7 +21,7 @@ public class BiomeType {
 //            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
     
     public static final BiomeType FANCY = new BiomeTypeBuilder(-100, 100, 1f)
-            .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
+            .surfaceGenerator(SurfaceGenerator.GRASS_FIELD)
             .terrainHeightGenerator(TerrainHeightGenerator.FANCY).build();
 
 
