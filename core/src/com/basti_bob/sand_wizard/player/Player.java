@@ -51,6 +51,10 @@ public class Player {
 
         moveWithVelocity(deltaTime);
         updatePosition();
+
+        int chunkX = World.getChunkPos((int) this.nx);
+        int chunkY = World.getChunkPos((int) this.ny);
+        setRenderingChunks(chunkX, chunkY);
     }
 
     public void jump() {
@@ -227,7 +231,7 @@ public class Player {
                     world.loadOrCreateChunkAsync(newChunkX + i, newChunkY + yOff);
                 }
             }
-        }).thenRun(() -> setRenderingChunks(newChunkX, newChunkY));
+        });
     }
 
     public void setRenderingChunks(int chunkX, int chunkY) {

@@ -29,6 +29,7 @@ public class SandWizard extends ApplicationAdapter {
 
     private float accumulatedTime;
     private final float fixedDeltaTime = 1.0f / 60f; // 60 FPS
+    private final int maxUpdatesPerFrame = 3;
 
     public static int updateTimes = 0;
 
@@ -66,7 +67,7 @@ public class SandWizard extends ApplicationAdapter {
 
         if(Gdx.input.isKeyPressed(Input.Keys.SPACE) && player.onGround) player.jump();
 
-        float zoom = 0.001f;
+        float zoom = 1 * deltaTime;
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) camera.zoom *= 1 - zoom;
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) camera.zoom *= 1 + zoom;
@@ -81,7 +82,7 @@ public class SandWizard extends ApplicationAdapter {
             Gdx.app.exit();
         }
 
-        while (accumulatedTime >= fixedDeltaTime) {
+        if (accumulatedTime >= fixedDeltaTime) {
             fixedUpdate(fixedDeltaTime);
             accumulatedTime -= fixedDeltaTime;
         }

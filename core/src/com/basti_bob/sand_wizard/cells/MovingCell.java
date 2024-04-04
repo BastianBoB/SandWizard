@@ -14,9 +14,9 @@ public abstract class MovingCell extends Cell {
 
     @Override
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        super.update(chunkAccessor, updateDirection);
-
         updateMoving(chunkAccessor, updateDirection);
+
+        super.update(chunkAccessor, updateDirection);
     }
 
     public abstract boolean moveWithVelocity(ChunkAccessor chunkAccessor, boolean updateDirection);

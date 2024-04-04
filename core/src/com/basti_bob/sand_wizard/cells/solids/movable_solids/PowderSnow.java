@@ -16,6 +16,8 @@ public class PowderSnow  extends ImmovableSolid {
 
         if(Math.random() < 0.5) {
             replace(CellType.WATER, chunkAccessor);
+        } else {
+            die(chunkAccessor);
         }
     }
 }

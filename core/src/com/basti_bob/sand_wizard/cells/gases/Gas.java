@@ -17,6 +17,7 @@ public class Gas extends MovingCell {
 
     private float dispersionRate;
     private float density;
+    private int lifeTime;
     private boolean moving;
 
     public Gas(CellType cellType, World world, int posX, int posY) {
@@ -27,6 +28,7 @@ public class Gas extends MovingCell {
 
         this.dispersionRate = cellProperty.dispersionRate;
         this.density = cellProperty.density;
+        this.lifeTime = cellProperty.lifeTime;
     }
 
     @Override
@@ -50,6 +52,12 @@ public class Gas extends MovingCell {
         return false;
     }
 
+    @Override
+    public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        super.update(chunkAccessor, updateDirection);
+
+        if (--lifeTime <= 0) die(chunkAccessor);
+    }
 
     @Override
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
@@ -80,7 +88,7 @@ public class Gas extends MovingCell {
 
         if (!moving) return;
 
-        if (Math.abs(velocityX) >= 1 || Math.abs(velocityX) >= 1) {
+        if (Math.abs(velocityX) >= 1 || Math.abs(velocityY) >= 1) {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
         }
     }
@@ -183,4 +191,10 @@ public class Gas extends MovingCell {
 
         return false;
     }
+
+    @Override
+    public boolean shouldActiveChunk() {
+        return true;
+    }
+
 }

@@ -10,24 +10,24 @@ public class CellProperty {
     public static final CellProperty STONE = CellProperty.builder().build();
     public static final CellProperty GRASS = CellProperty.builder().build();
     public static final CellProperty ICE = CellProperty.builder().friction(0.98f).build();
-    public static final CellProperty WOOD = CellProperty.builder().burningTemperature(80).maxBurningTime(600).fireSpreadChance(0.08f).build();
-    public static final CellProperty LEAF = CellProperty.builder().burningTemperature(30).maxBurningTime(10).fireSpreadChance(0.5f).build();
-    public static final CellProperty COMPACT_SNOW = CellProperty.builder().burningTemperature(30).maxBurningTime(0).build();
+    public static final CellProperty WOOD = CellProperty.builder().burningTemperature(800).maxBurningTime(600).fireSpreadChance(0.08f).build();
+    public static final CellProperty LEAF = CellProperty.builder().burningTemperature(200).maxBurningTime(10).fireSpreadChance(0.5f).build();
+    public static final CellProperty COMPACT_SNOW = CellProperty.builder().burningTemperature(100).maxBurningTime(0).build();
 
     public static final MovableSolidProperty SAND = MovableSolidProperty.builder().movingResistance(0.1f).sprayFactor(0.6f).build();
     public static final MovableSolidProperty DIRT = MovableSolidProperty.builder().movingResistance(0.3f).sprayFactor(0.3f).build();
-    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().movingResistance(0.8f).sprayFactor(0.2f).burningTemperature(200).maxBurningTime(6000).fireSpreadChance(0.1f).build();
+    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().movingResistance(0.8f).sprayFactor(0.2f).burningTemperature(1500).maxBurningTime(6000).fireSpreadChance(0.1f).build();
     public static final MovableSolidProperty GRAVEL = MovableSolidProperty.builder().movingResistance(0.2f).sprayFactor(0.5f).build();
-    public static final MovableSolidProperty POWDER_SNOW = MovableSolidProperty.builder().burningTemperature(30).maxBurningTime(0).movingResistance(0.05f).sprayFactor(0.8f).build();
+    public static final MovableSolidProperty POWDER_SNOW = MovableSolidProperty.builder().burningTemperature(100).maxBurningTime(0).movingResistance(0.05f).sprayFactor(0.8f).build();
 
 
     public static final LiquidProperty WATER = LiquidProperty.builder().dispersionRate(7f).density(1f).burningTemperature(100).maxBurningTime(0).build();
-    public static final LiquidProperty ACID = LiquidProperty.builder().dispersionRate(6f).density(0.75f).burningTemperature(30).maxBurningTime(200).fireSpreadChance(0.3f).build();
-    public static final LiquidProperty OIL = LiquidProperty.builder().dispersionRate(5f).density(0.5f).burningTemperature(1).maxBurningTime(5).fireSpreadChance(0.7f).build();
+    public static final LiquidProperty ACID = LiquidProperty.builder().dispersionRate(6f).density(0.75f).burningTemperature(100).maxBurningTime(50).fireSpreadChance(0.3f).build();
+    public static final LiquidProperty OIL = LiquidProperty.builder().dispersionRate(5f).density(0.5f).burningTemperature(100).maxBurningTime(5).fireSpreadChance(0.7f).build();
 
-    public static final GasProperty METHANE = GasProperty.builder().dispersionRate(2f).density(1f).build();
-    public static final GasProperty STEAM = GasProperty.builder().dispersionRate(3f).density(0.5f).build();
-    public static final GasProperty FIRE = GasProperty.builder().dispersionRate(2f).density(1f).maxBurningTime(40).build();
+    public static final GasProperty METHANE = GasProperty.builder().dispersionRate(2f).density(1f).lifeTime(500).build();
+    public static final GasProperty STEAM = GasProperty.builder().dispersionRate(3f).density(0.5f).lifeTime(500).build();
+    public static final GasProperty FIRE = GasProperty.builder().dispersionRate(2f).density(1f).maxBurningTime(60).build();
 
     public final float friction;
     public final float speedFactor;

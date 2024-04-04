@@ -11,6 +11,7 @@ public class Fire extends Gas {
         super(cellType, world, posX, posY);
     }
 
+    @Override
     public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
 
         if (Math.random() > 0.2) return;
@@ -25,7 +26,7 @@ public class Fire extends Gas {
 
                 if (cell == null || cell instanceof Empty) continue;
 
-                cell.applyHeating(chunkAccessor, 10f);
+                cell.transferTemperature(chunkAccessor, 1500f, 0.1f);
             }
         }
     }
@@ -36,7 +37,7 @@ public class Fire extends Gas {
     }
 
     @Override
-    public boolean shouldActiveChunk() {
-        return true;
+    public int getMaxBurningTime() {
+        return super.getMaxBurningTime();
     }
 }

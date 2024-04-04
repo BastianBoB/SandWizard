@@ -6,12 +6,14 @@ public class GasProperty extends CellProperty {
 
     public final float dispersionRate;
     public final float density;
+    public final int lifeTime;
 
     public GasProperty(Builder builder) {
         super(builder);
 
         this.dispersionRate = builder.dispersionRate;
         this.density = builder.density;
+        this.lifeTime = builder.lifeTime;
     }
 
     public static Builder builder() {
@@ -22,7 +24,7 @@ public class GasProperty extends CellProperty {
 
         protected float dispersionRate = 5f;
         protected float density = 1f;
-
+        protected int lifeTime = 600;
 
         public Builder dispersionRate(float dispersionRate) {
             this.dispersionRate = dispersionRate;
@@ -31,6 +33,11 @@ public class GasProperty extends CellProperty {
 
         public Builder density(float density) {
             this.density = density;
+            return this;
+        }
+
+        public Builder lifeTime(int lifeTime) {
+            this.lifeTime = lifeTime;
             return this;
         }
 

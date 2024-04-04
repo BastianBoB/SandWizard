@@ -65,6 +65,10 @@ public class World {
         int height = (int) ChunkGenerator.getTerrainHeight(this, 0) + 100;
         setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
         setCell(CellType.ACID, -50, height);
+        setCell(CellType.WATER, -100, height);
+        setCell(CellType.OIL, -250, height);
+
+
         setCell(CellType.DIRT, 25, height);
         setCell(CellType.COAL, -25, height);
         setCell(CellType.SAND, 50, height);

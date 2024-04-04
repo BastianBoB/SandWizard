@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cell_properties.CellProperty;
 import com.basti_bob.sand_wizard.cell_properties.PhysicalState;
+import com.basti_bob.sand_wizard.cells.liquids.Acid;
 import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
@@ -174,8 +175,7 @@ public abstract class Cell {
     }
 
     public boolean die(ChunkAccessor chunkAccessor) {
-        chunkAccessor.setCell(CellType.EMPTY, this.posX, this.posY);
-        return true;
+        return replace(CellType.EMPTY, chunkAccessor);
     }
 
     public boolean replace(CellType cellType, ChunkAccessor chunkAccessor) {
@@ -188,7 +188,11 @@ public abstract class Cell {
     }
 
     public void changeTemperature(ChunkAccessor chunkAccessor, float temperatureChange) {
-        this.temperature += temperatureChange;
+        setTemperature(chunkAccessor, temperature + temperatureChange);
+    }
+
+    public void setTemperature(ChunkAccessor chunkAccessor, float temperature) {
+        this.temperature = temperature;
 
         if (canBurn() && this.getTemperature() > getBurningTemperature()) {
             startedBurning(chunkAccessor);
@@ -196,15 +200,22 @@ public abstract class Cell {
     }
 
     public void applyHeating(ChunkAccessor chunkAccessor, float heat) {
-        if (!canBeHeated) return;
+        if (!canBeHeated()) return;
 
         this.changeTemperature(chunkAccessor, heat);
     }
 
     public void applyCooling(ChunkAccessor chunkAccessor, float cooling) {
-        if (!canBeCooled) return;
+        if (!canBeCooled()) return;
 
         this.changeTemperature(chunkAccessor, -cooling);
+    }
+
+    public void transferTemperature(ChunkAccessor chunkAccessor, float targetTemperature, float factor) {
+        if(targetTemperature > getTemperature() && !canBeHeated()) return;
+        if(targetTemperature < getTemperature() && !canBeCooled()) return;
+
+        this.setTemperature(chunkAccessor, MathUtil.lerp(this.temperature, targetTemperature, factor));
     }
 
 
@@ -532,14 +543,19 @@ public abstract class Cell {
 
     public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
 
-        Cell[][] neighbourCells = getNeighbourCells(chunkAccessor, posX, posY);
+//        Cell[][] neighbourCells = getNeighbourCells(chunkAccessor, posX, posY);
+//
+//        for (int i = -1; i <= 1; i++) {
+//            for (int j = -1; j <= 1; j++) {
+//                if (i == 0 && j == 0) continue;
+//
+//                trySetMoving(neighbourCells[i + 1][j + 1]);
+//            }
+//        }
 
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
-                if (i == 0 && j == 0) continue;
-
-                trySetMoving(neighbourCells[i + 1][j + 1]);
-            }
+        Cell[] directNeighbourCells = this.getDirectNeighbourCells(chunkAccessor, this.posX, this.posY);
+        for (Cell cell : directNeighbourCells) {
+            trySetMoving(cell);
         }
     }
 
@@ -564,11 +580,11 @@ public abstract class Cell {
         return world;
     }
 
-    public boolean isCanBeHeated() {
+    public boolean canBeHeated() {
         return canBeHeated;
     }
 
-    public boolean isCanBeCooled() {
+    public boolean canBeCooled() {
         return canBeCooled;
     }
 

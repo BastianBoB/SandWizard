@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.cells.liquids;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
@@ -17,12 +18,11 @@ public class Water extends Liquid {
 
         Cell[] directNeighbourCells = this.getDirectNeighbourCells(chunkAccessor, this.posX, this.posY);
 
+        for (Cell cell : directNeighbourCells) {
 
-        for (int i = 0; i < 4; i++) {
-            Cell cell = directNeighbourCells[i];
+            if (cell instanceof Empty || cell == null) continue;
 
-            if (cell == null || cell instanceof Acid) continue;
-
+            cell.transferTemperature(chunkAccessor, 20f, 0.01f);
             cell.cleanColor(chunkAccessor, 0.01f);
         }
     }

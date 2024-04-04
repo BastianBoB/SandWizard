@@ -10,6 +10,7 @@ import com.basti_bob.sand_wizard.cells.liquids.Acid;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
 import com.basti_bob.sand_wizard.cells.liquids.Water;
 import com.basti_bob.sand_wizard.cells.solids.immovable_solids.CompactSnow;
+import com.basti_bob.sand_wizard.cells.solids.immovable_solids.Ice;
 import com.basti_bob.sand_wizard.cells.solids.immovable_solids.ImmovableSolid;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.other.Empty;
@@ -27,7 +28,7 @@ public class CellType {
 
     public static final CellType STONE = new CellType("stone", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.STONE);
     public static final CellType GRASS = new CellType("grass", PhysicalState.SOLID, CellProperty.GRASS, ImmovableSolid::new, CellColors.GRASS);
-    public static final CellType ICE = new CellType("ice", PhysicalState.SOLID, CellProperty.ICE, ImmovableSolid::new, CellColors.ICE);
+    public static final CellType ICE = new CellType("ice", PhysicalState.SOLID, CellProperty.ICE, Ice::new, CellColors.ICE);
     public static final CellType SUMMER_LEAF = new CellType("summer_leaf", PhysicalState.SOLID, CellProperty.LEAF, ImmovableSolid::new, CellColors.SUMMER_LEAF);
     public static final CellType SPRING_LEAF = new CellType("spring_leaf", PhysicalState.SOLID, CellProperty.LEAF, ImmovableSolid::new, CellColors.SPRING_LEAF);
     public static final CellType COMPACT_SNOW = new CellType("compact_snow", PhysicalState.SOLID, CellProperty.COMPACT_SNOW, CompactSnow::new, CellColors.COMPACT_SNOW);
