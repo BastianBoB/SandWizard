@@ -4,15 +4,14 @@ import com.badlogic.gdx.math.MathUtils;
 import com.basti_bob.sand_wizard.cell_properties.property_types.MovableSolidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.MovingCell;
 import com.basti_bob.sand_wizard.cells.other.Empty;
-import com.basti_bob.sand_wizard.cells.util.MovingCell;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
-import com.basti_bob.sand_wizard.cells.solids.Solid;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
-public class MovableSolid extends Solid implements MovingCell {
+public class MovableSolid extends MovingCell {
 
     private boolean moving;
     private float movingResistance;
@@ -20,7 +19,7 @@ public class MovableSolid extends Solid implements MovingCell {
 
     public MovableSolid(CellType cellType, World world, int x, int y) {
         super(cellType, world, x, y);
-        this.velocity.y = -1;
+        this.velocityY = -1;
 
         MovableSolidProperty cellProperty = (MovableSolidProperty) cellType.getCellProperty();
 
@@ -59,18 +58,19 @@ public class MovableSolid extends Solid implements MovingCell {
         if (cellBelow == null) {
             spaceBelow = false;
         } else {
-            velocity.x *= cellBelow.getFriction();
+            velocityX *= cellBelow.getFriction();
             spaceBelow = canMoveToOrSwap(cellBelow);
         }
 
         if (spaceBelow) {
             this.moving = true;
-            this.velocity.add(this.getGravity());
+            this.velocityX += this.getGravity().x;
+            this.velocityY += this.getGravity().y;
         }
 
         if (!moving) return;
 
-        if (Math.abs(velocity.x) >= 1 || Math.abs(velocity.y) >= 1) {
+        if (Math.abs(velocityX) >= 1 || Math.abs(velocityY) >= 1) {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
         }
 
@@ -82,14 +82,14 @@ public class MovableSolid extends Solid implements MovingCell {
 
     @Override
     public boolean moveWithVelocity(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        float xDistance = Math.abs(velocity.x);
-        float yDistance = Math.abs(velocity.y);
+        float xDistance = Math.abs(velocityX);
+        float yDistance = Math.abs(velocityY);
 
-        boolean positiveX = velocity.x > 0;
-        boolean positiveY = velocity.y > 0;
+        boolean positiveX = velocityX > 0;
+        boolean positiveY = velocityY > 0;
 
-        float xSlope = Math.abs(velocity.y / velocity.x);
-        float ySlope = Math.abs(velocity.x / velocity.y);
+        float xSlope = Math.abs(velocityY / velocityX);
+        float ySlope = Math.abs(velocityX / velocityY);
 
         int steps = (int) Math.max(xDistance, yDistance);
 
@@ -133,31 +133,34 @@ public class MovableSolid extends Solid implements MovingCell {
     @Override
     public boolean moveAlong(ChunkAccessor chunkAccessor, Cell targetCell, int lastValidX, int lastValidY, boolean updateDirection) {
 
-        if (targetCell instanceof Empty) {
-            this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
-            return true;
-        }
+        switch (targetCell.getPhysicalState()) {
 
-        if (targetCell instanceof Solid) {
-            if (targetCell.posY < this.posY) {
-                velocity.x = getSidewaysVelocity(targetCell, updateDirection);
-                velocity.y = -1;
-            } else {
-                velocity.x = 0;
-            }
-            return false;
-        }
-
-        if (targetCell instanceof Liquid || targetCell instanceof Gas) {
-            this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
-
-            if (this.posX != lastValidX || this.posY != lastValidY) {
-                chunkAccessor.moveToIfEmpty(this, lastValidX, lastValidY);
+            case OTHER -> {
+                this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
+                return true;
             }
 
-            swapWith(chunkAccessor, targetCell);
+            case SOLID -> {
+                if (targetCell.posY < this.posY) {
+                    velocityX = getSidewaysVelocity(targetCell, updateDirection);
+                    velocityY = -1;
+                } else {
+                    velocityX = 0;
+                }
+                return false;
+            }
 
-            return true;
+            case LIQUID, GAS -> {
+                this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
+
+                if (this.posX != lastValidX || this.posY != lastValidY) {
+                    chunkAccessor.moveToIfEmpty(this, lastValidX, lastValidY);
+                }
+
+                swapWith(chunkAccessor, targetCell);
+
+                return true;
+            }
         }
 
         return false;
@@ -166,11 +169,11 @@ public class MovableSolid extends Solid implements MovingCell {
     public float getSidewaysVelocity(Cell hitCell, boolean updateDirection) {
         float sprayFactor = getSprayFactor();
 
-        if (sprayFactor == 0 || Math.abs(velocity.y) < 1.5) return 0;
+        if (sprayFactor == 0 || Math.abs(velocityY) < 1.5) return 0;
 //####################################################################################
-        float strength = (float) (Math.random() + Math.pow(hitCell.getFriction(), 8) / 2f) * Math.abs(this.velocity.y) * sprayFactor;
+        float strength = (float) (Math.random() + Math.pow(hitCell.getFriction(), 8) / 2f) * Math.abs(this.velocityY) * sprayFactor;
 
-        if (velocity.x < 0 || (velocity.x == 0 && updateDirection)) {
+        if (velocityX < 0 || (velocityX == 0 && updateDirection)) {
             strength *= -1;
         }
 

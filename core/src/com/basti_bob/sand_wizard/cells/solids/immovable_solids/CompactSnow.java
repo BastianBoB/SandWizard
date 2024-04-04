@@ -15,4 +15,5 @@ public class CompactSnow extends ImmovableSolid {
 
         replace(CellType.WATER, chunkAccessor);
     }
+
 }

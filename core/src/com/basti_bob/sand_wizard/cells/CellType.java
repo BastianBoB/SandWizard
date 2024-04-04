@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.basti_bob.sand_wizard.cell_properties.CellColors;
 import com.basti_bob.sand_wizard.cell_properties.CellProperty;
 import com.basti_bob.sand_wizard.cell_properties.PhysicalState;
-import com.basti_bob.sand_wizard.cells.other.DebugCellSingleTick;
 import com.basti_bob.sand_wizard.cells.gases.Fire;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.liquids.Acid;
@@ -17,8 +16,6 @@ import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.PowderSnow;
 import com.basti_bob.sand_wizard.world.World;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +24,6 @@ public class CellType {
     private static final Map<String, CellType> ID_NAME_MAP = new HashMap<>();
 
     public static final CellType EMPTY = new CellType("empty", PhysicalState.OTHER, CellProperty.EMPTY, Empty::new, CellColors.EMPTY); //(x, y, world) -> Empty.getInstance()
-    public static final CellType SINGLE_TICK = new CellType("single_tick", PhysicalState.OTHER, CellProperty.EMPTY, DebugCellSingleTick::new, new CellColors(Color.RED));
 
     public static final CellType STONE = new CellType("stone", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.STONE);
     public static final CellType GRASS = new CellType("grass", PhysicalState.SOLID, CellProperty.GRASS, ImmovableSolid::new, CellColors.GRASS);
@@ -87,6 +83,10 @@ public class CellType {
 
     public CellProperty getCellProperty() {
         return this.cellProperty;
+    }
+
+    public PhysicalState getPhysicalState() {
+        return physicalState;
     }
 
     public CellColors getCellColors() {

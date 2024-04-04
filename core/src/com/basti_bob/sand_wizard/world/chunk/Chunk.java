@@ -74,20 +74,20 @@ public class Chunk {
         grid.set(inChunkPosX, inChunkPosY, cell);
         this.cellActivatesChunk(inChunkPosX, inChunkPosY);
 
-        updateMeshColor(inChunkPosX, inChunkPosY, cell.getColor());
+        updateMeshColor(inChunkPosX, inChunkPosY, cell.getColorR(), cell.getColorG(), cell.getColorB());
         this.hasBeenModified = true;
     }
 
 
-    public void updateMeshColor(int inChunkPosX, int inChunkPosY, Color color) {
+    public void updateMeshColor(int inChunkPosX, int inChunkPosY, float r, float g, float b) {
         int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * 5;
 
-        float[] vertices = new float[]{color.r, color.g, color.b};
+        float[] vertices = new float[]{r, g, b};
         mesh.updateVertices(index + 2, vertices);
     }
 
     public void updateMeshColor(Cell cell) {
-        updateMeshColor(cell.inChunkX, cell.inChunkY, cell.getColor());
+        updateMeshColor(cell.inChunkX, cell.inChunkY, cell.getColorR(), cell.getColorG(), cell.getColorB());
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY) {

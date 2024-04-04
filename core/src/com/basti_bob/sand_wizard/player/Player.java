@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.cells.solids.Solid;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
@@ -167,7 +166,7 @@ public class Player {
 
         int stepHeight = 0;
         for (int j = 0; j <= hitBox.getHeight(); j++) {
-            if (world.getCell(x, y + j) instanceof Solid)
+            if (world.getCell(x, y + j).isSolid())
                 stepHeight = j + 1;
         }
 
@@ -178,7 +177,7 @@ public class Player {
         int offsetX = (int) Math.ceil(hitBox.getWidth() / 2f);
 
         for (int i = -offsetX + 1; i <= offsetX; i++) {
-            if (world.getCell(x + i, y) instanceof Solid)
+            if (world.getCell(x + i, y).isSolid())
                 return true;
         }
         return false;

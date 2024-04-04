@@ -3,14 +3,13 @@ package com.basti_bob.sand_wizard.cells.liquids;
 import com.basti_bob.sand_wizard.cell_properties.property_types.LiquidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.MovingCell;
 import com.basti_bob.sand_wizard.cells.other.Empty;
-import com.basti_bob.sand_wizard.cells.util.MovingCell;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
-import com.basti_bob.sand_wizard.cells.solids.Solid;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
-public class Liquid extends Cell implements MovingCell {
+public class Liquid extends MovingCell {
 
     private float dispersionRate;
     private float density;
@@ -18,7 +17,7 @@ public class Liquid extends Cell implements MovingCell {
 
     public Liquid(CellType cellType, World world, int posX, int posY) {
         super(cellType, world, posX, posY);
-        this.velocity.y = -1;
+        this.velocityY = -1;
 
         LiquidProperty cellProperty = (LiquidProperty) cellType.getCellProperty();
 
@@ -36,7 +35,7 @@ public class Liquid extends Cell implements MovingCell {
 
     @Override
     public boolean canSwapWith(Cell target) {
-        if(target instanceof Gas) return true;
+        if (target instanceof Gas) return true;
 
         if (target instanceof Liquid liquidTarget) {
             return liquidTarget.getDensity() < this.getDensity();
@@ -53,28 +52,29 @@ public class Liquid extends Cell implements MovingCell {
         boolean spaceBelow = canMoveToOrSwap(cellBelow);
 
         if (spaceBelow) {
-            this.velocity.add(this.getGravity());
+            this.velocityX += this.getGravity().x;
+            this.velocityY += this.getGravity().y;
             this.moving = true;
         } else {
             if (moveOrSwapDownLeftRight(chunkAccessor, updateDirection)) return;
 
-            this.velocity.y = -1;
+            this.velocityY = -1;
 
             boolean spaceRight = canMoveToOrSwap(chunkAccessor.getCell(this.posX + 1, this.posY));
             boolean spaceLeft = canMoveToOrSwap(chunkAccessor.getCell(this.posX - 1, this.posY));
 
             if (!spaceLeft && !spaceRight) {
                 this.moving = false;
-                this.velocity.x = 0;
+                this.velocityX = 0;
             } else {
                 this.moving = true;
-                this.velocity.x = getXVelocityWhenBelowIsBlocked(updateDirection, spaceLeft, spaceRight);
+                this.velocityX = getXVelocityWhenBelowIsBlocked(updateDirection, spaceLeft, spaceRight);
             }
         }
 
         if (!moving) return;
 
-        if (Math.abs(velocity.x) >= 1 || Math.abs(velocity.y) >= 1) {
+        if (Math.abs(velocityX) >= 1 || Math.abs(velocityY) >= 1) {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
         }
     }
@@ -84,10 +84,10 @@ public class Liquid extends Cell implements MovingCell {
         int velocityModifier = 1;
 
         if (spaceLeft && spaceRight) {
-            if (velocity.x == 0) {
+            if (velocityX == 0) {
                 velocityModifier = updateDirection ? 1 : -1;
             } else {
-                velocityModifier = velocity.x > 0 ? 1 : -1;
+                velocityModifier = velocityX > 0 ? 1 : -1;
             }
         } else if (spaceLeft) {
             velocityModifier = -1;
@@ -98,14 +98,14 @@ public class Liquid extends Cell implements MovingCell {
 
     @Override
     public boolean moveWithVelocity(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        float xDistance = Math.abs(velocity.x);
-        float yDistance = Math.abs(velocity.y);
+        float xDistance = Math.abs(velocityX);
+        float yDistance = Math.abs(velocityY);
 
-        boolean positiveX = velocity.x > 0;
-        boolean positiveY = velocity.y > 0;
+        boolean positiveX = velocityX > 0;
+        boolean positiveY = velocityY > 0;
 
-        float xSlope = Math.abs(velocity.y / velocity.x);
-        float ySlope = Math.abs(velocity.x / velocity.y);
+        float xSlope = Math.abs(velocityY / velocityX);
+        float ySlope = Math.abs(velocityX / velocityY);
 
         int steps = (int) Math.max(xDistance, yDistance);
 
@@ -116,8 +116,8 @@ public class Liquid extends Cell implements MovingCell {
         int startPosY = posY;
 
         for (int i = 1; i <= steps; i++) {
-            xDistance = Math.abs(velocity.x);
-            yDistance = Math.abs(velocity.y);
+            xDistance = Math.abs(velocityX);
+            yDistance = Math.abs(velocityY);
 
             float x, y;
 
@@ -151,28 +151,32 @@ public class Liquid extends Cell implements MovingCell {
 
     @Override
     public boolean moveAlong(ChunkAccessor chunkAccessor, Cell targetCell, int lastValidX, int lastValidY, boolean updateDirection) {
-        if (targetCell instanceof Empty) {
-            this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
-            return true;
-        }
 
-        if (targetCell instanceof Solid) {
-            if (Math.abs(velocity.y) > Math.abs(velocity.x)) {
-                velocity.y = -1;
-            }
-            return false;
-        }
+        switch (targetCell.getPhysicalState()) {
 
-        if (targetCell instanceof Liquid || targetCell instanceof Gas) {
-            if (!canSwapWith(targetCell)) return false;
-
-            if (this.posX != lastValidX || this.posY != lastValidY) {
-                chunkAccessor.moveTo(this, lastValidX, lastValidY);
+            case OTHER -> {
+                this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
+                return true;
             }
 
-            swapWith(chunkAccessor, targetCell);
+            case SOLID -> {
+                if (Math.abs(velocityY) > Math.abs(velocityX)) {
+                    velocityY = -1;
+                }
+                return false;
+            }
 
-            return true;
+            case LIQUID, GAS -> {
+                if (!canSwapWith(targetCell)) return false;
+
+                if (this.posX != lastValidX || this.posY != lastValidY) {
+                    chunkAccessor.moveTo(this, lastValidX, lastValidY);
+                }
+
+                swapWith(chunkAccessor, targetCell);
+
+                return true;
+            }
         }
 
         return false;

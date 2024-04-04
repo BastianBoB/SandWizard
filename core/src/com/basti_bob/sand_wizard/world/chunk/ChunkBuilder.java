@@ -63,10 +63,9 @@ public class ChunkBuilder {
 
         int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * 5;
 
-        Color color = cell.getColor();
-        this.vertices[index + 2] = color.r;
-        this.vertices[index + 3] = color.g;
-        this.vertices[index + 4] = color.b;
+        this.vertices[index + 2] = cell.getColorR();
+        this.vertices[index + 3] = cell.getColorG();
+        this.vertices[index + 4] = cell.getColorB();
     }
 
     public Chunk buildChunk() {

@@ -4,25 +4,27 @@ package com.basti_bob.sand_wizard.cells;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cell_properties.CellProperty;
+import com.basti_bob.sand_wizard.cell_properties.PhysicalState;
+import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
-import com.basti_bob.sand_wizard.cells.other.Empty;
-import com.basti_bob.sand_wizard.world.chunk.Chunk;
-import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
+import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public abstract class Cell {
 
     public final World world;
     private final CellType cellType;
-    private Color color;
-    private Color originalColor;
 
     public int posX, posY;
     public int inChunkX, inChunkY;
 
-    public Vector2 velocity = new Vector2();
+    private float colorR, colorG, colorB;
+    private final float originalColorR, originalColorG, originalColorB;
+
     public boolean gotUpdated;
 
     private float friction;
@@ -50,8 +52,14 @@ public abstract class Cell {
         this.world = world;
         this.setPosition(posX, posY);
         this.cellType = cellType;
-        this.color = cellType.getCellColors().getColor(world, posX, posY);
-        this.originalColor = color;
+
+        Color c = cellType.getCellColors().getColor(world, posX, posY);
+        this.colorR = c.r;
+        this.colorG = c.g;
+        this.colorB = c.b;
+        this.originalColorR = colorR;
+        this.originalColorG = colorG;
+        this.originalColorB = colorB;
 
         CellProperty cellProperty = cellType.getCellProperty();
 
@@ -73,57 +81,74 @@ public abstract class Cell {
         this.temperature = WorldConstants.START_TEMPERATURE;
     }
 
-    public void cleanColor(ChunkAccessor chunkAccessor) {
-        updateColor(chunkAccessor, originalColor);
+    public PhysicalState getPhysicalState() {
+        return this.getCellType().getPhysicalState();
     }
 
-    public void cleanColor(ChunkAccessor chunkAccessor, float factor) {
-        updateColor(chunkAccessor, color.lerp(originalColor, factor));
+    public boolean isSolid() {
+        return getPhysicalState() == PhysicalState.SOLID;
     }
 
-    public void taintWithColor(ChunkAccessor chunkAccessor, Color targetColor, float factor) {
-        this.updateColor(chunkAccessor, color.cpy().lerp(targetColor, factor));
+    public boolean isLiquid() {
+        return getPhysicalState() == PhysicalState.LIQUID;
     }
 
-    public void updateColor(ChunkAccessor chunkAccessor, Color color) {
-        this.color = color;
-        chunkAccessor.updateMeshColor(this);
+    public boolean isGas() {
+        return getPhysicalState() == PhysicalState.GAS;
     }
 
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
         this.gotUpdated = true;
 
-        updateMoving(chunkAccessor, updateDirection);
-
         if (isBurning()) {
             if (++timeBurning > getMaxBurningTime()) {
-                if (finishedBurning(chunkAccessor, updateDirection)) return;
+                finishedBurning(chunkAccessor, updateDirection);
             } else {
                 updateBurning(chunkAccessor, updateDirection);
             }
         }
     }
 
-    public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
 
-    }
+    public boolean applyCorrosion(ChunkAccessor chunkAccessor, float amount) {
+        if (!this.canCorrode()) return false;
 
-    public void clampVelocity() {
-        if (velocity.x > WorldConstants.CHUNK_SIZE) velocity.x = WorldConstants.CHUNK_SIZE;
-        else if (velocity.x < -WorldConstants.CHUNK_SIZE) velocity.x = -WorldConstants.CHUNK_SIZE;
+        this.corrosionHealth -= amount;
 
-        if (velocity.y > WorldConstants.CHUNK_SIZE) velocity.y = WorldConstants.CHUNK_SIZE;
-        else if (velocity.y < -WorldConstants.CHUNK_SIZE) velocity.y = -WorldConstants.CHUNK_SIZE;
-    }
-
-    public boolean moveOrSwapDownLeftRight(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        if (updateDirection) {
-            if (chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1)) return true;
-            return chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1);
-        } else {
-            if (chunkAccessor.moveToOrSwap(this, posX - 1, posY - 1)) return true;
-            return chunkAccessor.moveToOrSwap(this, posX + 1, posY - 1);
+        if (this.corrosionHealth < 0) {
+            die(chunkAccessor);
         }
+
+        return true;
+    }
+
+    public void cleanColor(ChunkAccessor chunkAccessor) {
+        updateColor(chunkAccessor, originalColorR, originalColorG, originalColorB);
+    }
+
+    public void cleanColor(ChunkAccessor chunkAccessor, float factor) {
+        taintWithColor(chunkAccessor, originalColorR, originalColorG, originalColorB, factor);
+
+        float newR = MathUtil.lerp(colorR, originalColorR, factor);
+        float newG = MathUtil.lerp(colorG, originalColorG, factor);
+        float newB = MathUtil.lerp(colorB, originalColorB, factor);
+
+        updateColor(chunkAccessor, newR, newG, newB);
+    }
+
+    public void taintWithColor(ChunkAccessor chunkAccessor, float r, float g, float b, float factor) {
+        float newR = MathUtil.lerp(colorR, r, factor);
+        float newG = MathUtil.lerp(colorG, g, factor);
+        float newB = MathUtil.lerp(colorB, b, factor);
+
+        updateColor(chunkAccessor, newR, newG, newB);
+    }
+
+    public void updateColor(ChunkAccessor chunkAccessor, float r, float g, float b) {
+        this.colorR = r;
+        this.colorB = b;
+        this.colorG = g;
+        chunkAccessor.updateMeshColor(this);
     }
 
     public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
@@ -182,24 +207,13 @@ public abstract class Cell {
         this.changeTemperature(chunkAccessor, -cooling);
     }
 
+
     public void setPosition(int posX, int posY) {
         this.posX = posX;
         this.posY = posY;
 
         this.inChunkX = World.getInChunkPos(posX);
         this.inChunkY = World.getInChunkPos(posY);
-    }
-
-    public boolean applyCorrosion(ChunkAccessor chunkAccessor, float amount) {
-        if (!this.canCorrode()) return false;
-
-        this.corrosionHealth -= amount;
-
-        if (this.corrosionHealth < 0) {
-            die(chunkAccessor);
-        }
-
-        return true;
     }
 
     public void swapWith(ChunkAccessor chunkAccessor, Cell target) {
@@ -578,8 +592,16 @@ public abstract class Cell {
         return maxBurningTime;
     }
 
-    public Color getColor() {
-        return this.color;
+    public float getColorR() {
+        return colorR;
+    }
+
+    public float getColorG() {
+        return colorG;
+    }
+
+    public float getColorB() {
+        return colorB;
     }
 
     public float getFriction() {
