@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.player.Player;
+import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
@@ -83,17 +84,16 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         if (accumulatedTime >= fixedDeltaTime) {
-            fixedUpdate(fixedDeltaTime);
+            FunctionRunTime.timeFunction("Fixed Update", () -> fixedUpdate(fixedDeltaTime));
             accumulatedTime -= fixedDeltaTime;
         }
 
         renderGame();
-
     }
 
     public void fixedUpdate(float deltaTime) {
         world.update();
-        player.update(deltaTime);
+       player.update(deltaTime);
     }
 
     public void renderGame() {

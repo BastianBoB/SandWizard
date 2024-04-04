@@ -49,7 +49,7 @@ public class Player {
         this.yVel += WorldConstants.GRAVITY.y;
         this.xVel *= 0.95;
 
-        moveWithVelocity(deltaTime);
+        moveWithVelocity(deltaTime * 60);
         updatePosition();
 
         int chunkX = World.getChunkPos((int) this.nx);
@@ -108,9 +108,6 @@ public class Player {
     }
 
     private void moveWithVelocity(float deltaTime) {
-        if (this.xVel > 0) {
-            int a = 2;
-        }
 
         float targetX = ox + xVel;
         float targetY = oy + yVel;
@@ -211,6 +208,8 @@ public class Player {
 
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
         int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
+
+
 
 
         CompletableFuture.runAsync(() -> {

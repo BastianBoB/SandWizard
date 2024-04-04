@@ -6,6 +6,7 @@ import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 import com.basti_bob.sand_wizard.world_generation.trees.TreeGenerator;
@@ -23,7 +24,7 @@ public class World {
     private boolean updateDirection;
 
     private final ArrayList<Chunk> chunks = new ArrayList<>();
-    private final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingGrid = new TreeMap<>();
+    private final Set<ChunkAccessor> chunkUpdatingGrid = new HashSet<>();
     private final HashMap<Long, Chunk> chunkLUT = new HashMap<>();
 
     public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(0L);
@@ -63,15 +64,15 @@ public class World {
         addAndRemoveChunks();
 
         int height = (int) ChunkGenerator.getTerrainHeight(this, 0) + 100;
-        setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
-        setCell(CellType.ACID, -50, height);
-        setCell(CellType.WATER, -100, height);
-        setCell(CellType.OIL, -250, height);
-
-
-        setCell(CellType.DIRT, 25, height);
-        setCell(CellType.COAL, -25, height);
-        setCell(CellType.SAND, 50, height);
+//        setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
+//        setCell(CellType.ACID, -50, height);
+//        setCell(CellType.WATER, -100, height);
+//        setCell(CellType.OIL, -250, height);
+//
+//
+//        setCell(CellType.DIRT, 25, height);
+//        setCell(CellType.COAL, -25, height);
+//        setCell(CellType.SAND, 50, height);
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
@@ -151,17 +152,18 @@ public class World {
     private void updateAllCells(ExecutorService executor) {
         updateDirection = !updateDirection;
 
-        for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkUpdatingGrid.values()) {
-
-            for (int i = 0; i < 3; i++) {
-                ArrayList<Chunk> separatedChunks = worldUpdatingChunkRow.separateChunksList[i];
+        for (int j = -1; j <= 1; j++) {
+            for (int i = -1; i <= 1; i++) {
 
                 List<Callable<Object>> tasks = new ArrayList<>();
+                for (ChunkAccessor chunkAccessor : chunkUpdatingGrid) {
 
-                for (Chunk chunk : separatedChunks) {
-                    if (!chunk.isActive()) continue;
+                    Chunk chunk = chunkAccessor.getNeighbourChunkWithOffset(i, j);
+
+                    if (chunk == null || !chunk.isActive()) continue;
 
                     tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
+
                 }
 
                 try {
@@ -251,17 +253,13 @@ public class World {
         chunkToAdd(chunkBuilder);
     }
 
+    private boolean shouldChunkBeUsedInUpdatingGrid(Chunk chunk) {
+        return Math.abs(chunk.posX) % 3 == 0 && Math.abs(chunk.posY % 3) == 0;
+    }
+
     private void addChunk(Chunk chunk) {
         chunks.add(chunk);
         chunkLUT.put(getChunkKey(chunk.posX, chunk.posY), chunk);
-
-        WorldUpdatingChunkRow chunkRow = chunkUpdatingGrid.get(chunk.posY);
-
-        if (chunkRow == null) {
-            chunkRow = new WorldUpdatingChunkRow(chunk.posY);
-            chunkUpdatingGrid.put(chunk.posY, chunkRow);
-        }
-        chunkRow.addChunk(chunk);
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -275,18 +273,20 @@ public class World {
                 chunk.chunkAccessor.setSurroundingChunk(neighbourChunk);
             }
         }
+
+        if (shouldChunkBeUsedInUpdatingGrid(chunk)) {
+            System.out.println(chunk.posX + "," + chunk.posY);
+
+            chunkUpdatingGrid.add(chunk.chunkAccessor);
+        }
     }
 
     private void removeChunk(Chunk chunk) {
         chunks.remove(chunk);
         chunkLUT.remove(getChunkKey(chunk.posX, chunk.posY));
 
-        WorldUpdatingChunkRow chunkRow = chunkUpdatingGrid.get(chunk.posY);
-
-        chunkRow.removeChunk(chunk);
-
-        if (chunkRow.isEmpty()) {
-            chunkUpdatingGrid.remove(chunk.posY);
+        if (shouldChunkBeUsedInUpdatingGrid(chunk)) {
+            chunkUpdatingGrid.remove(chunk.chunkAccessor);
         }
     }
 
