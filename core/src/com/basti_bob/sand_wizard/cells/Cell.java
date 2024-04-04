@@ -68,7 +68,26 @@ public abstract class Cell {
         this.maxCorrosionHealth = cellProperty.maxCorrosionHealth;
         this.canCorrode = cellProperty.canCorrode;
 
-        this.corrosionHealth = maxCorrosionHealth;
+        this.corrosionHealth = cellProperty.maxCorrosionHealth;
+
+        this.temperature = WorldConstants.START_TEMPERATURE;
+    }
+
+    public void cleanColor(ChunkAccessor chunkAccessor) {
+        updateColor(chunkAccessor, originalColor);
+    }
+
+    public void cleanColor(ChunkAccessor chunkAccessor, float factor) {
+        updateColor(chunkAccessor, color.lerp(originalColor, factor));
+    }
+
+    public void taintWithColor(ChunkAccessor chunkAccessor, Color targetColor, float factor) {
+        this.updateColor(chunkAccessor, color.cpy().lerp(targetColor, factor));
+    }
+
+    public void updateColor(ChunkAccessor chunkAccessor, Color color) {
+        this.color = color;
+        chunkAccessor.updateMeshColor(this);
     }
 
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
@@ -125,6 +144,10 @@ public abstract class Cell {
         return die(chunkAccessor);
     }
 
+    public void startedBurning(ChunkAccessor chunkAccessor) {
+        this.burning = true;
+    }
+
     public boolean die(ChunkAccessor chunkAccessor) {
         chunkAccessor.setCell(CellType.EMPTY, this.posX, this.posY);
         return true;
@@ -139,10 +162,12 @@ public abstract class Cell {
         return false;
     }
 
-    private void changeTemperature(ChunkAccessor chunkAccessor, float temperatureChange) {
+    public void changeTemperature(ChunkAccessor chunkAccessor, float temperatureChange) {
         this.temperature += temperatureChange;
 
-        this.burning = canBurn() && this.getTemperature() > getBurningTemperature();
+        if (canBurn() && this.getTemperature() > getBurningTemperature()) {
+            startedBurning(chunkAccessor);
+        }
     }
 
     public void applyHeating(ChunkAccessor chunkAccessor, float heat) {
@@ -166,7 +191,7 @@ public abstract class Cell {
     }
 
     public boolean applyCorrosion(ChunkAccessor chunkAccessor, float amount) {
-        if(!this.canCorrode()) return false;
+        if (!this.canCorrode()) return false;
 
         this.corrosionHealth -= amount;
 

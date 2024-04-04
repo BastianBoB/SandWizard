@@ -38,9 +38,9 @@ public class ChunkBuilder {
 
                 vertices[vertexI] = chunkRenderX + i * WorldConstants.CELL_SIZE;
                 vertices[vertexI + 1] = chunkRenderY + j * WorldConstants.CELL_SIZE;
-                vertices[vertexI + 2] = 0;
-                vertices[vertexI + 3] = 0;
-                vertices[vertexI + 4] = 0;
+//                vertices[vertexI + 2] = 0;
+//                vertices[vertexI + 3] = 0;
+//                vertices[vertexI + 4] = 0;
             }
         }
     }

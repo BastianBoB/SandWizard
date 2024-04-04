@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.World;
@@ -14,39 +15,30 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 
 public class Chunk {
 
-    private final Array2D<Cell> grid;
     public final World world;
-    public final int posX, posY;
-    private boolean active, activeNextFrame;
+    private final Array2D<Cell> grid;
     public final ChunkAccessor chunkAccessor;
-    public Mesh mesh;
+    public final Mesh mesh;
 
-    public boolean hasBeenModified = false;
+    public final int posX, posY;
 
-    public Chunk(World world, int posX, int posY, Array2D<Cell> grid, Mesh mesh){
-        int cs = WorldConstants.CHUNK_SIZE;
+    private boolean active, activeNextFrame;
 
+    public boolean hasBeenModified;
+
+    public Chunk(World world, int posX, int posY, Array2D<Cell> grid, Mesh mesh) {
         this.world = world;
         this.posX = posX;
         this.posY = posY;
         this.grid = grid;
         this.chunkAccessor = new ChunkAccessor(this);
+        this.mesh = mesh;
+
+        this.hasBeenModified = false;
         this.active = true;
         this.activeNextFrame = true;
-        this.mesh = mesh;
     }
 
-//    public Chunk(World world, int posX, int posY) {
-//        this(world, posX, posY, new Array2D<>(Cell.class, WorldConstants.CHUNK_SIZE, WorldConstants.CHUNK_SIZE));
-//    }
-
-    public void initializeMesh() {
-
-    }
-
-    public Array2D<Cell> getGrid() {
-        return grid;
-    }
 
     public void update(boolean updateDirection) {
 
@@ -57,7 +49,7 @@ public class Chunk {
 
                 Cell cell = grid.get(xIndex, inChunkY);
 
-                if (cell == null || cell.gotUpdated) continue;
+                if (cell instanceof Empty || cell.gotUpdated) continue;
 
                 cell.update(chunkAccessor, updateDirection);
 
@@ -122,20 +114,6 @@ public class Chunk {
         return grid.get(inChunkPosX, inChunkPosY);
     }
 
-
-//    public Chunk load(int chunkX, int chunkY) {
-//
-//    }
-//
-//    public void unload() {
-//
-//    }
-//
-//    public void save() {
-//
-//    }
-
-
     public void activateChunk() {
         this.activeNextFrame = true;
     }
@@ -190,5 +168,10 @@ public class Chunk {
     public void updateActive() {
         this.active = activeNextFrame;
         this.activeNextFrame = false;
+    }
+
+
+    public Array2D<Cell> getGrid() {
+        return grid;
     }
 }

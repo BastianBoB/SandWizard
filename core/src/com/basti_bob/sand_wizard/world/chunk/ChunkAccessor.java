@@ -174,6 +174,14 @@ public class ChunkAccessor {
         targetChunk.setCell(cellType, posX, posY, targetInChunkX, targetInChunkY);
     }
 
+    public void updateMeshColor(Cell cell) {
+        Chunk targetChunk = getNeighbourChunk(cell.posX, cell.posY);
+
+        if (targetChunk == null) return;
+
+        targetChunk.updateMeshColor(cell);
+    }
+
 
     public boolean isEmpty(int targetX, int targetY) {
         return getCell(targetX, targetY) instanceof Empty;

@@ -10,9 +10,11 @@ import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.liquids.Acid;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
 import com.basti_bob.sand_wizard.cells.liquids.Water;
+import com.basti_bob.sand_wizard.cells.solids.immovable_solids.CompactSnow;
 import com.basti_bob.sand_wizard.cells.solids.immovable_solids.ImmovableSolid;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.other.Empty;
+import com.basti_bob.sand_wizard.cells.solids.movable_solids.PowderSnow;
 import com.basti_bob.sand_wizard.world.World;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ public class CellType {
     public static final CellType ICE = new CellType("ice", PhysicalState.SOLID, CellProperty.ICE, ImmovableSolid::new, CellColors.ICE);
     public static final CellType SUMMER_LEAF = new CellType("summer_leaf", PhysicalState.SOLID, CellProperty.LEAF, ImmovableSolid::new, CellColors.SUMMER_LEAF);
     public static final CellType SPRING_LEAF = new CellType("spring_leaf", PhysicalState.SOLID, CellProperty.LEAF, ImmovableSolid::new, CellColors.SPRING_LEAF);
-    public static final CellType COMPACT_SNOW = new CellType("compact_snow", PhysicalState.SOLID, CellProperty.COMPACT_SNOW, ImmovableSolid::new, CellColors.COMPACT_SNOW);
+    public static final CellType COMPACT_SNOW = new CellType("compact_snow", PhysicalState.SOLID, CellProperty.COMPACT_SNOW, CompactSnow::new, CellColors.COMPACT_SNOW);
     public static final CellType WOOD = new CellType("wood", PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.WOOD);
     public static final CellType RED_WOOD = new CellType("red_wood", PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.RED_WOOD);
 
@@ -40,7 +42,7 @@ public class CellType {
     public static final CellType DIRT = new CellType("dirt", PhysicalState.SOLID, CellProperty.DIRT, MovableSolid::new, CellColors.DIRT);
     public static final CellType COAL = new CellType("coal", PhysicalState.SOLID, CellProperty.COAL, MovableSolid::new, CellColors.COAL);
     public static final CellType GRAVEL = new CellType("gravel", PhysicalState.SOLID, CellProperty.GRAVEL, MovableSolid::new, CellColors.GRAVEL);
-    public static final CellType POWDER_SNOW = new CellType("powder_snow", PhysicalState.SOLID, CellProperty.POWDER_SNOW, MovableSolid::new, CellColors.POWDER_SNOW);
+    public static final CellType POWDER_SNOW = new CellType("powder_snow", PhysicalState.SOLID, CellProperty.POWDER_SNOW, PowderSnow::new, CellColors.POWDER_SNOW);
 
     public static final CellType WATER = new CellType("water", PhysicalState.LIQUID, CellProperty.WATER, Water::new, CellColors.WATER);
     public static final CellType OIL = new CellType("oil", PhysicalState.LIQUID, CellProperty.OIL, Liquid::new, CellColors.OIL);
