@@ -17,7 +17,7 @@ public class Gas extends MovingCell {
 
     private float dispersionRate;
     private float density;
-    private int lifeTime;
+    protected int lifeTime;
     private boolean moving;
 
     public Gas(CellType cellType, World world, int posX, int posY) {
@@ -165,7 +165,7 @@ public class Gas extends MovingCell {
         switch (targetCell.getPhysicalState()) {
 
             case OTHER -> {
-                this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
+                //this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
                 return true;
             }
 

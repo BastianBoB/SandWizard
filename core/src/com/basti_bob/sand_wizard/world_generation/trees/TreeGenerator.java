@@ -5,6 +5,7 @@ import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.FloatPredicate;
 import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world_generation.Point;
 import com.basti_bob.sand_wizard.world_generation.Region;
 
@@ -124,7 +125,7 @@ public class TreeGenerator {
 
         for (Cell cell : cells) {
             try {
-                world.setCell(cell);
+                world.setCell(cell, CellPlaceFlag.NEW);
             } catch (Exception e) {
 
             }

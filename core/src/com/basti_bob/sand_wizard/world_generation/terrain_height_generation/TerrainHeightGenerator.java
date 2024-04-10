@@ -15,15 +15,20 @@ public abstract class TerrainHeightGenerator {
     public abstract float getTerrainHeight(World world, int cellPosX);
 
     public static final TerrainHeightGenerator FANCY = WeightedMultiTerrainHeightGenerator.builder()
-            .addGeneratorAndWeight(new ScaledShiftedTerrainHeightGenerator(NORMAL.PLATEAU(0.001f), 300f, 0), 5f)
+            .addGeneratorAndWeight(new ScaledShiftedTerrainHeightGenerator(NORMAL.PLATEAU(0.001f), 300f, 0), 1f)
             .addGeneratorAndWeight(new ScaledShiftedTerrainHeightGenerator(NORMAL.EROSION(0.002f), 500f, 0), 1f)
             .addGeneratorAndWeight(new ScaledShiftedTerrainHeightGenerator(NORMAL.PEAKS_AND_VALLEYS(0.01f), 50f, 0), 1f).build();
 
-    public static TerrainHeightGenerator FLAT(int x) {
+    public static final TerrainHeightGenerator MOUNTAINS = WeightedMultiTerrainHeightGenerator.builder()
+            .addGeneratorAndWeight(ScaledShiftedTerrainHeightGenerator.normalToRange(NORMAL.PLATEAU(0.001f), 0, 100f), 1f)
+            .addGeneratorAndWeight(ScaledShiftedTerrainHeightGenerator.normalToRange(NORMAL.EROSION(0.002f), 200f, 500f), 5f)
+            .addGeneratorAndWeight(ScaledShiftedTerrainHeightGenerator.normalToRange(NORMAL.PEAKS_AND_VALLEYS(0.01f), -50f, 50f), 1f).build();
+
+    public static TerrainHeightGenerator FLAT(int y) {
         return new TerrainHeightGenerator() {
             @Override
             public float getTerrainHeight(World world, int cellPosX) {
-                return x;
+                return y;
             }
         };
     }

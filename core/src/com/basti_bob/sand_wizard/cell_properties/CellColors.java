@@ -10,7 +10,7 @@ import java.util.List;
 public class CellColors {
 
 
-    public static final CellColors EMPTY = new CellColors(hC(0x000000));
+    public static final CellColors EMPTY = new CellColors(c(35, 35, 35)); //c(255, 255, 255)); //hC(0x080808));
     public static final CellColors STONE = new CellColors(c(85, 85, 85), c(75, 71, 68), c(70, 70, 70), c(61, 55, 51), c(51, 44, 40));
     public static final CellColors GRASS = new CellColors(c(19, 109, 21), c(38, 139, 7), c(65, 152, 10));
     public static final CellColors ICE = new CellColors(c(255, 255, 255), c(185, 232, 234), c(134, 214, 216), c(63, 208, 212), c(32, 195, 208));
@@ -41,7 +41,7 @@ public class CellColors {
         return colors.get(i);
     }
 
-    private static Color hC(int hex) {
+    public static Color hC(int hex) {
         int r = (hex & 0xFF0000) >> 16;
         int g = (hex & 0xFF00) >> 8;
         int b = (hex & 0xFF);
@@ -49,7 +49,7 @@ public class CellColors {
         return new Color(r / 255f, g / 255f, b / 255f, 1);
     }
 
-    private static Color c(int r, int g, int b) {
+    public static Color c(int r, int g, int b) {
         return new Color(r / 255f, g / 255f, b / 255f, 1);
     }
 

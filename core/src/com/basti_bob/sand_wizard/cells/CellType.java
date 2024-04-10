@@ -49,6 +49,8 @@ public class CellType {
     public static final CellType STEAM = new CellType("Steam", PhysicalState.GAS, CellProperty.STEAM, Gas::new, CellColors.STEAM);
     public static final CellType METHANE = new CellType("methane", PhysicalState.GAS, CellProperty.METHANE, Gas::new, CellColors.METHANE);
 
+    public static final CellType GLOWBLOCK = new CellType("glowblock", PhysicalState.SOLID, CellProperty.GLOWBLOCK, ImmovableSolid::new, CellColors.ICE);
+
     private static Color hC(int hex) {
         int r = (hex & 0xFF0000) >> 16;
         int g = (hex & 0xFF00) >> 8;

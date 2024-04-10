@@ -41,6 +41,13 @@ public class GasProperty extends CellProperty {
             return this;
         }
 
+        public Builder allGas(float dispersionRate, float density, int lifeTime) {
+            this.dispersionRate = dispersionRate;
+            this.density = density;
+            this.lifeTime = lifeTime;
+            return this;
+        }
+
         public GasProperty build() {
             return new GasProperty(this);
         }

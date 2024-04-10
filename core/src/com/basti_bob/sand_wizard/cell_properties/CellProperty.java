@@ -1,5 +1,6 @@
 package com.basti_bob.sand_wizard.cell_properties;
 
+import com.badlogic.gdx.graphics.Color;
 import com.basti_bob.sand_wizard.cell_properties.property_types.GasProperty;
 import com.basti_bob.sand_wizard.cell_properties.property_types.LiquidProperty;
 import com.basti_bob.sand_wizard.cell_properties.property_types.MovableSolidProperty;
@@ -9,25 +10,27 @@ public class CellProperty {
     public static final CellProperty EMPTY = CellProperty.builder().build();
     public static final CellProperty STONE = CellProperty.builder().build();
     public static final CellProperty GRASS = CellProperty.builder().build();
-    public static final CellProperty ICE = CellProperty.builder().friction(0.98f).build();
-    public static final CellProperty WOOD = CellProperty.builder().burningTemperature(800).maxBurningTime(600).fireSpreadChance(0.08f).build();
-    public static final CellProperty LEAF = CellProperty.builder().burningTemperature(200).maxBurningTime(10).fireSpreadChance(0.5f).build();
+    public static final CellProperty ICE = CellProperty.builder().friction(0.98f).burningTemperature(100).maxBurningTime(0).build();
     public static final CellProperty COMPACT_SNOW = CellProperty.builder().burningTemperature(100).maxBurningTime(0).build();
+    public static final CellProperty WOOD = CellProperty.builder().allBurn(800, 600, 0.08f).build();
+    public static final CellProperty LEAF = CellProperty.builder().allBurn(200, 10, 0.5f).build();
 
-    public static final MovableSolidProperty SAND = MovableSolidProperty.builder().movingResistance(0.1f).sprayFactor(0.6f).build();
-    public static final MovableSolidProperty DIRT = MovableSolidProperty.builder().movingResistance(0.3f).sprayFactor(0.3f).build();
-    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().movingResistance(0.8f).sprayFactor(0.2f).burningTemperature(1500).maxBurningTime(6000).fireSpreadChance(0.1f).build();
-    public static final MovableSolidProperty GRAVEL = MovableSolidProperty.builder().movingResistance(0.2f).sprayFactor(0.5f).build();
-    public static final MovableSolidProperty POWDER_SNOW = MovableSolidProperty.builder().burningTemperature(100).maxBurningTime(0).movingResistance(0.05f).sprayFactor(0.8f).build();
+    public static final MovableSolidProperty SAND = MovableSolidProperty.builder().allMovableSolid(0.1f, 0.6f).build();
+    public static final MovableSolidProperty DIRT = MovableSolidProperty.builder().allMovableSolid(0.3f, 0.3f).build();
+    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().allMovableSolid(0.8f, 0.2f).allBurn(1500, 6000, 0.1f).build();
+    public static final MovableSolidProperty GRAVEL = MovableSolidProperty.builder().allMovableSolid(0.2f, 0.5f).build();
+    public static final MovableSolidProperty POWDER_SNOW = MovableSolidProperty.builder().allMovableSolid(0.05f, 0.8f).burningTemperature(100).maxBurningTime(0).build();
 
 
-    public static final LiquidProperty WATER = LiquidProperty.builder().dispersionRate(7f).density(1f).burningTemperature(100).maxBurningTime(0).build();
-    public static final LiquidProperty ACID = LiquidProperty.builder().dispersionRate(6f).density(0.75f).burningTemperature(100).maxBurningTime(50).fireSpreadChance(0.3f).build();
-    public static final LiquidProperty OIL = LiquidProperty.builder().dispersionRate(5f).density(0.5f).burningTemperature(100).maxBurningTime(5).fireSpreadChance(0.7f).build();
+    public static final LiquidProperty WATER = LiquidProperty.builder().allLiquid(6f, 1f).burningTemperature(100).maxBurningTime(0).build();
+    public static final LiquidProperty ACID = LiquidProperty.builder().allLiquid(5f, 0.75f).allLight(3f, 1f, Color.LIME).allBurn(100, 120, 0.1f).build();
+    public static final LiquidProperty OIL = LiquidProperty.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
 
-    public static final GasProperty METHANE = GasProperty.builder().dispersionRate(2f).density(1f).lifeTime(500).build();
-    public static final GasProperty STEAM = GasProperty.builder().dispersionRate(3f).density(0.5f).lifeTime(500).build();
-    public static final GasProperty FIRE = GasProperty.builder().dispersionRate(2f).density(1f).maxBurningTime(60).build();
+    public static final GasProperty METHANE = GasProperty.builder().allGas(2f, 1f, 500).build();
+    public static final GasProperty STEAM = GasProperty.builder().allGas(3f, 0.5f, 500).build();
+    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 60).allLight(12f, 0.7f, CellColors.c(255, 140, 35)).build();
+
+    public static final CellProperty GLOWBLOCK = CellProperty.builder().allLight(100f, 2f, Color.YELLOW).build();
 
     public final float friction;
     public final float speedFactor;
@@ -35,7 +38,6 @@ public class CellProperty {
 
     public final boolean canBeHeated;
     public final boolean canBeCooled;
-
     public final boolean canBurn;
     public final float burningTemperature;
     public final int maxBurningTime;
@@ -43,6 +45,11 @@ public class CellProperty {
 
     public final float maxCorrosionHealth;
     public final boolean canCorrode;
+
+    public final boolean isLightSource;
+    public final float lightRadius;
+    public final float lightIntensity;
+    public final Color lightColor;
 
     public CellProperty(CellProperty.Builder builder) {
         this.friction = builder.friction;
@@ -56,6 +63,11 @@ public class CellProperty {
         this.fireSpreadChance = builder.fireSpreadChance;
         this.maxCorrosionHealth = builder.maxCorrosionHealth;
         this.canCorrode = builder.canCorrode;
+        this.isLightSource = builder.isLightSource;
+        this.lightRadius = builder.lightRadius;
+        this.lightIntensity = builder.lightIntensity;
+        ;
+        this.lightColor = builder.lightColor;
     }
 
     public static CellProperty.Builder builder() {
@@ -70,7 +82,6 @@ public class CellProperty {
 
         protected boolean canBeHeated = true;
         protected boolean canBeCooled = true;
-
         protected boolean canBurn = false;
         protected float burningTemperature = 1000;
         protected int maxBurningTime = 100;
@@ -78,6 +89,26 @@ public class CellProperty {
 
         protected float maxCorrosionHealth = 100;
         protected boolean canCorrode = true;
+
+        protected boolean isLightSource = false;
+        protected float lightRadius = 32f;
+        protected float lightIntensity = 1f;
+        protected Color lightColor = Color.WHITE;
+
+        public T friction(float friction) {
+            this.friction = friction;
+            return (T) this;
+        }
+
+        public T speedFactor(float speedFactor) {
+            this.speedFactor = speedFactor;
+            return (T) this;
+        }
+
+        public T jumpFactor(float jumpFactor) {
+            this.jumpFactor = jumpFactor;
+            return (T) this;
+        }
 
         public T canBeHeated(boolean canBeHeated) {
             this.canBeHeated = canBeHeated;
@@ -91,6 +122,14 @@ public class CellProperty {
 
         public T canBurn(boolean canBurn) {
             this.canBurn = canBurn;
+            return (T) this;
+        }
+
+        public T allBurn(float burningTemperature, int maxBurningTime, float fireSpreadChance) {
+            this.canBurn = true;
+            this.burningTemperature = burningTemperature;
+            this.maxBurningTime = maxBurningTime;
+            this.fireSpreadChance = fireSpreadChance;
             return (T) this;
         }
 
@@ -112,11 +151,6 @@ public class CellProperty {
             return (T) this;
         }
 
-        public T friction(float friction) {
-            this.friction = friction;
-            return (T) this;
-        }
-
         public T maxCorrosionHealth(float maxCorrosionHealth) {
             this.maxCorrosionHealth = maxCorrosionHealth;
             return (T) this;
@@ -124,6 +158,32 @@ public class CellProperty {
 
         public T canCorrode(boolean canCorrode) {
             this.canCorrode = canCorrode;
+            return (T) this;
+        }
+
+        public T allLight(float lightRadius, float lightIntensity, Color lightColor) {
+            this.isLightSource = true;
+            this.lightRadius = lightRadius;
+            this.lightIntensity = lightIntensity;
+            this.lightColor = lightColor;
+            return (T) this;
+        }
+
+        public T lightRadius(float lightRadius) {
+            this.isLightSource = true;
+            this.lightRadius = lightRadius;
+            return (T) this;
+        }
+
+        public T lightIntensity(float lightIntensity) {
+            this.isLightSource = true;
+            this.lightIntensity = lightIntensity;
+            return (T) this;
+        }
+
+        public T lightColor(Color lightColor) {
+            this.isLightSource = true;
+            this.lightColor = lightColor;
             return (T) this;
         }
 

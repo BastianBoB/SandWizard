@@ -34,6 +34,12 @@ public class MovableSolidProperty extends CellProperty {
             return this;
         }
 
+        public Builder allMovableSolid(float movingResistance, float sprayFactor) {
+            this.movingResistance = movingResistance;
+            this.sprayFactor = sprayFactor;
+            return this;
+        }
+
         public MovableSolidProperty build() {
             return new MovableSolidProperty(this);
         }

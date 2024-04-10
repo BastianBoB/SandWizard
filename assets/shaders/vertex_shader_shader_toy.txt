@@ -1,0 +1,37 @@
+#version 330 core
+
+struct Light {
+    float x, y, factor;
+};
+
+layout(std430) buffer lights_data {
+    Light lights[];
+};
+
+attribute vec2 a_position;
+attribute vec3 a_color;
+varying vec3 v_color;
+varying vec2 fragCoord;
+
+uniform mat4 u_proj;
+uniform float u_pointSize;
+uniform int u_cellSize;
+
+const int xRange = 14 * 32;
+const int yRange = 8 * 32;
+const int toXRange = 640;
+const int toYRange = 360;
+
+float map(float value, float istart, float istop, float ostart, float ostop) {
+    return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+}
+
+void main() {
+
+    fragCoord = vec2(map(a_position.x, -xRange, xRange, 0, toXRange), map(a_position.y, -yRange, yRange, 0, toYRange));
+
+    gl_Position = u_proj * vec4(a_position * u_cellSize + vec2(0, 2), 0.0, 1.0);
+    gl_PointSize = u_pointSize;
+
+    v_color = a_color;
+}

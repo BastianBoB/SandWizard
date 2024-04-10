@@ -47,10 +47,19 @@ public class Player {
     }
 
     public void update(float deltaTime) {
-        this.yVel += WorldConstants.GRAVITY.y;
-        this.xVel *= 0.95;
 
-        moveWithVelocity(deltaTime * 60);
+        if(WorldConstants.PLAYER_FREE_MOVE){
+            this.moveBy(xVel, yVel);
+
+            this.xVel *= 0.95;
+            this.yVel *= 0.95;
+        } else {
+            this.yVel += WorldConstants.GRAVITY.y;
+            this.xVel *= 0.95;
+
+            moveWithVelocity(deltaTime * 60);
+        }
+
         updatePosition();
 
         int chunkX = World.getChunkPos((int) this.nx);

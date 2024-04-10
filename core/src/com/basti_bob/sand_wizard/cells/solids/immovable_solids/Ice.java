@@ -25,4 +25,13 @@ public class Ice extends ImmovableSolid {
 //            cell.transferTemperature(chunkAccessor, -5f, 0.01f);
 //        }
     }
+
+    @Override
+    public void startedBurning(ChunkAccessor chunkAccessor) {
+        super.startedBurning(chunkAccessor);
+
+        replace(CellType.WATER, chunkAccessor);
+    }
+
+
 }

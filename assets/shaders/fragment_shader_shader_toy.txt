@@ -1,0 +1,10 @@
+varying vec3 v_color;
+varying vec2 fragCoord;
+
+uniform float iTime;
+const vec2 iResolution = vec2(640, 320);
+
+void main()
+{
+    gl_FragColor = vec4(v_color, 1.);
+}

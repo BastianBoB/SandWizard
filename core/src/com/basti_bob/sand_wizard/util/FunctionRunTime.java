@@ -9,4 +9,12 @@ public class FunctionRunTime {
 
         System.out.println(text + " took: " + (System.nanoTime() - start) / 1e6 + " ms");
     }
+
+    public static float timeFunction(Runnable runnable) {
+        long start = System.nanoTime();
+
+        runnable.run();
+
+        return (float) ((System.nanoTime() - start) / 1e6);
+    }
 }

@@ -7,8 +7,11 @@ import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.Terr
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class BiomeType {
+
+    private static final Random BIOME_RANDOM = new Random();
 
     public static final List<BiomeType> biomeTypes = new ArrayList<>();
     public static final BiomeType ERROR = new BiomeTypeBuilder(0, 0, 0f).build();
@@ -16,11 +19,11 @@ public class BiomeType {
 //    public static final BiomeType GRASS_FIELD = new BiomeTypeBuilder(10, 20, 0.8f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
 //    public static final BiomeType FLOWER_FIELD = new BiomeTypeBuilder(20, 30, 0.2f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
 //
-//    public static final BiomeType ICE_MOUNTAINS = new BiomeTypeBuilder(-50, -20, 1f)
-//            .surfaceGenerator(SurfaceGenerator.ICE_MOUNTAINS)
-//            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
+    public static final BiomeType ICE_MOUNTAINS = new BiomeTypeBuilder(-50, 0, 1f)
+            .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
+            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
     
-    public static final BiomeType FANCY = new BiomeTypeBuilder(-100, 100, 1f)
+    public static final BiomeType FANCY = new BiomeTypeBuilder(0, 100, 1f)
             .surfaceGenerator(SurfaceGenerator.GRASS_FIELD)
             .terrainHeightGenerator(TerrainHeightGenerator.FANCY).build();
 
@@ -51,9 +54,9 @@ public class BiomeType {
 
 
     public static BiomeType getBiomeTypeWithChunkPos(World world, int chunkPosX) {
-        return getBiomeWithTemperature(world.getTemperatureForChunkX(chunkPosX));
+        return getBiomeWithTemperature(world, world.getTemperatureForChunkX(chunkPosX));
     }
-    public static BiomeType getBiomeWithTemperature(float temperature) {
+    public static BiomeType getBiomeWithTemperature(World world, float temperature) {
 
         List<BiomeType> potentialBiomes = new ArrayList<>();
         float totalWeight = 0;
@@ -65,7 +68,17 @@ public class BiomeType {
             }
         }
 
-        float randomWeight = (float) (Math.random() * totalWeight);
+        if(potentialBiomes.size() == 0) {
+            return BiomeType.ERROR;
+        }
+
+        if(potentialBiomes.size() == 1) {
+            return potentialBiomes.get(0);
+        }
+
+        BIOME_RANDOM.setSeed((long) temperature);
+
+        float randomWeight = BIOME_RANDOM.nextFloat() * totalWeight;
 
         float currentWeight = 0;
         for (BiomeType biomeType : potentialBiomes) {

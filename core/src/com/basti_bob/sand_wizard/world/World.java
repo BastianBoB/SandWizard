@@ -3,35 +3,37 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
-import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
+import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
-import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 import com.basti_bob.sand_wizard.world_generation.trees.TreeGenerator;
 import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.swing.text.Utilities;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class World {
 
+    public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(0L);
     private boolean updateDirection;
+    public int activeChunks;
+    public int updateTimes = 0;
 
     public final ArrayList<Chunk> chunks = new ArrayList<>();
-    public final Set<ChunkAccessor> chunkUpdatingGrid = new HashSet<>();
     public final HashMap<Long, Chunk> chunkLUT = new HashMap<>();
-    public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(0L);
+    private final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingRows = new TreeMap<>();
 
     public final ConcurrentHashMap<Long, Pair<Chunk, ChunkBuilder>> chunksToRemoveOrAdd = new ConcurrentHashMap<>();
 
-    public int activeChunks;
-
     public World() {
+
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
         int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
 
@@ -41,11 +43,14 @@ public class World {
             }
         }
 
+        TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
         TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
-        TreeGenerator.TREE_2.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
+        TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
         TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
         TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
-        TreeGenerator.TREE_5.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
+        TreeGenerator.TREE_2.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
+
+        //setCell(CellType.GLOWBLOCK, 50, 100);
 
 
         //FunctionRunTime.timeFunction("generating Tree", () -> TreeGenerator.TREE_2.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0)));
@@ -61,16 +66,31 @@ public class World {
     }
 
     public void update() {
+        updateTimes++;
+
         addAndRemoveChunks();
 
-        int height = (int) ChunkGenerator.getTerrainHeight(this, 0) + 100;
+        setCell(CellType.WATER, -50, (int) (ChunkGenerator.getTerrainHeight(this, -50) + 100));
+        setCell(CellType.ACID, -100, (int) (ChunkGenerator.getTerrainHeight(this, -100) + 100));
 
+        setCell(CellType.FIRE, -300, (int) ChunkGenerator.getTerrainHeight(this, -300));
+        setCell(CellType.FIRE, -180, (int) ChunkGenerator.getTerrainHeight(this, -180));
         setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
-        setCell(CellType.ACID, -50, height);
-        setCell(CellType.WATER, -100, height);
-        setCell(CellType.OIL, -250, height);
+        setCell(CellType.FIRE, 0, (int) ChunkGenerator.getTerrainHeight(this, 0));
+        setCell(CellType.FIRE, 100, (int) ChunkGenerator.getTerrainHeight(this, 100));
+        setCell(CellType.FIRE, 180, (int) ChunkGenerator.getTerrainHeight(this, 180));
+
+        if(updateTimes % 3600 == 0) {
+            TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
+            TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
+            TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
+            TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
+            TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
+            TreeGenerator.TREE_2.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
+        }
 
 
+        int height = (int) ChunkGenerator.getTerrainHeight(this, 25) + 100;
         setCell(CellType.DIRT, 25, height);
         setCell(CellType.COAL, -25, height);
         setCell(CellType.SAND, 50, height);
@@ -80,6 +100,7 @@ public class World {
 
         updateChunkActiveAndSetCellsNotUpdated(executor);
         updateAllCells(executor);
+        updateLighting(executor);
 
         executor.shutdown();
 
@@ -89,6 +110,11 @@ public class World {
 //            System.err.println("Executor interrupted");
 //        }
 
+        for (Chunk chunk : chunks) {
+            //if(chunk.affectedLights.size() == 0) continue;
+
+            //System.out.println(chunk.posX + "," + chunk.posY + ": " + chunk.affectedLights.size());
+        }
     }
 
     private void chunkToAdd(ChunkBuilder chunkBuilder) {
@@ -136,9 +162,12 @@ public class World {
             final Array2D<Cell> grid = chunk.getGrid();
 
             tasks.add(Executors.callable(() -> {
+
                 for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
                     for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {
-                        grid.get(inChunkX, inChunkY).gotUpdated = false;
+                        Cell cell = grid.get(inChunkX, inChunkY);
+
+                        cell.gotUpdated = false;
                     }
                 }
             }));
@@ -156,18 +185,18 @@ public class World {
     private void updateAllCells(ExecutorService executor) {
         updateDirection = !updateDirection;
 
-        for (int j = -1; j <= 1; j++) {
-            for (int i = -1; i <= 1; i++) {
+
+        for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkUpdatingRows.values()) {
+
+            for (int i = 0; i < 3; i++) {
+                ArrayList<Chunk> separatedChunks = worldUpdatingChunkRow.separateChunksList[i];
 
                 List<Callable<Object>> tasks = new ArrayList<>();
-                for (ChunkAccessor chunkAccessor : chunkUpdatingGrid) {
 
-                    Chunk chunk = chunkAccessor.getNeighbourChunkWithOffset(i, j);
+                for (Chunk chunk : separatedChunks) {
 
-                    if (chunk == null || !chunk.isActive()) continue;
-
-                    //tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
-                    chunk.update(updateDirection);
+                    if (!chunk.isActive()) continue;
+                    tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
                 }
 
                 try {
@@ -177,6 +206,23 @@ public class World {
                 }
             }
         }
+    }
+
+    private void updateLighting(ExecutorService executor) {
+//
+//        List<Callable<Object>> tasks = new ArrayList<>();
+//
+//        for (Chunk chunk : chunks) {
+//            if (!chunk.isActive()) continue;
+//
+//            tasks.add(Executors.callable(chunk::updateLighting));
+//        }
+//
+//        try {
+//            executor.invokeAll(tasks);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public float getTemperatureForChunkX(int chunkX) {
@@ -257,10 +303,6 @@ public class World {
         chunkToAdd(chunkBuilder);
     }
 
-    private boolean shouldChunkBeUsedInUpdatingGrid(Chunk chunk) {
-        return Math.abs(chunk.posX) % 3 == 0 && Math.abs(chunk.posY % 3) == 0;
-    }
-
     private void addChunk(Chunk chunk) {
         chunks.add(chunk);
         chunkLUT.put(getChunkKey(chunk.posX, chunk.posY), chunk);
@@ -278,9 +320,13 @@ public class World {
             }
         }
 
-        if (shouldChunkBeUsedInUpdatingGrid(chunk)) {
-            chunkUpdatingGrid.add(chunk.chunkAccessor);
+        WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.posY);
+
+        if (chunkRow == null) {
+            chunkRow = new WorldUpdatingChunkRow(chunk.posY);
+            chunkUpdatingRows.put(chunk.posY, chunkRow);
         }
+        chunkRow.addChunk(chunk);
     }
 
     private void removeChunk(Chunk chunk) {
@@ -300,11 +346,13 @@ public class World {
             }
         }
 
-        if (shouldChunkBeUsedInUpdatingGrid(chunk)) {
-            chunkUpdatingGrid.remove(chunk.chunkAccessor);
+        WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.posY);
+        chunkRow.removeChunk(chunk);
+        if (chunkRow.isEmpty()) {
+            chunkUpdatingRows.remove(chunk.posY);
         }
 
-        chunk.dispose();
+        chunk.gotRemoved();
     }
 
     //
@@ -329,18 +377,15 @@ public class World {
         chunk.setCell(cellType, cellPosX, cellPosY);
     }
 
-    public void setCell(Cell cell, int cellPosX, int cellPosY) {
+    public void setCell(Cell cell, int cellPosX, int cellPosY, CellPlaceFlag flag) {
         Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
         if (chunk == null) return;
 
-        chunk.setCell(cell, cellPosX, cellPosY);
+        chunk.setCell(cell, cellPosX, cellPosY, flag);
     }
 
-    public void setCell(Cell cell) {
-        Chunk chunk = getChunkFromCellPos(cell.posX, cell.posY);
-        if (chunk == null) return;
-
-        chunk.setCell(cell, cell.posX, cell.posY);
+    public void setCell(Cell cell, CellPlaceFlag flag) {
+        setCell(cell, cell.posX, cell.posY, flag);
     }
 
 //

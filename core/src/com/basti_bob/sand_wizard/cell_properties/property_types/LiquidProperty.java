@@ -34,6 +34,12 @@ public class LiquidProperty extends CellProperty {
             return this;
         }
 
+        public Builder allLiquid(float dispersionRate, float density) {
+            this.dispersionRate = dispersionRate;
+            this.density = density;
+            return this;
+        }
+
         public LiquidProperty build() {
             return new LiquidProperty(this);
         }

@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cell_properties.CellProperty;
 import com.basti_bob.sand_wizard.cell_properties.PhysicalState;
-import com.basti_bob.sand_wizard.cells.liquids.Acid;
 import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
@@ -14,6 +13,7 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
+import com.basti_bob.sand_wizard.world.lighting.Light;
 
 public abstract class Cell {
 
@@ -34,14 +34,11 @@ public abstract class Cell {
 
     private boolean canBeHeated;
     private boolean canBeCooled;
-
     private float burningTemperature;
     private boolean canBurn;
-
     private int maxBurningTime;
     private int timeBurning;
     private float fireSpreadChance;
-
     private float temperature;
     private boolean burning;
 
@@ -49,15 +46,19 @@ public abstract class Cell {
     private float corrosionHealth;
     private boolean canCorrode;
 
+    private boolean isLightSource;
+    private Light light;
+
+
     public Cell(CellType cellType, World world, int posX, int posY) {
         this.world = world;
         this.setPosition(posX, posY);
         this.cellType = cellType;
 
-        Color c = cellType.getCellColors().getColor(world, posX, posY);
-        this.colorR = c.r;
-        this.colorG = c.g;
-        this.colorB = c.b;
+        Color color = cellType.getCellColors().getColor(world, posX, posY);
+        this.colorR = color.r;
+        this.colorG = color.g;
+        this.colorB = color.b;
         this.originalColorR = colorR;
         this.originalColorG = colorG;
         this.originalColorB = colorB;
@@ -68,34 +69,57 @@ public abstract class Cell {
         this.speedFactor = cellProperty.speedFactor;
         this.jumpFactor = cellProperty.jumpFactor;
 
+        this.temperature = WorldConstants.START_TEMPERATURE;
         this.canBeHeated = cellProperty.canBeHeated;
         this.canBeCooled = cellProperty.canBeCooled;
         this.burningTemperature = cellProperty.burningTemperature;
         this.canBurn = cellProperty.canBurn;
         this.maxBurningTime = cellProperty.maxBurningTime;
         this.fireSpreadChance = cellProperty.fireSpreadChance;
+
         this.maxCorrosionHealth = cellProperty.maxCorrosionHealth;
         this.canCorrode = cellProperty.canCorrode;
-
         this.corrosionHealth = cellProperty.maxCorrosionHealth;
 
-        this.temperature = WorldConstants.START_TEMPERATURE;
+        this.isLightSource = cellProperty.isLightSource;
+
+        if (isLightSource) {
+            Color lightColor = cellProperty.lightColor;
+
+            light = new Light(posX, posY, lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
+            //light.placedInChunk(world.getChunkFromCellPos(posX, posY));
+        }
     }
 
-    public PhysicalState getPhysicalState() {
-        return this.getCellType().getPhysicalState();
+    public void removedFromChunk(Chunk chunk) {
+        if(isLightSource) {
+            light.removedFromChunk(chunk);
+        }
     }
 
-    public boolean isSolid() {
-        return getPhysicalState() == PhysicalState.SOLID;
+    public void placedInChunk(Chunk chunk) {
+        if(isLightSource) {
+            light.placedInChunk(chunk);
+        }
     }
 
-    public boolean isLiquid() {
-        return getPhysicalState() == PhysicalState.LIQUID;
+    public void movedInNewChunk(Chunk previousChunk, Chunk newChunk) {
+        if (isLightSource) {
+            this.light.moveIntoNewChunk(previousChunk, newChunk);
+        }
     }
 
-    public boolean isGas() {
-        return getPhysicalState() == PhysicalState.GAS;
+
+    public void setPosition(int posX, int posY) {
+        this.posX = posX;
+        this.posY = posY;
+
+        this.inChunkX = World.getInChunkPos(posX);
+        this.inChunkY = World.getInChunkPos(posY);
+
+        if (isLightSource) {
+            light.setNewPosition(posX, posY);
+        }
     }
 
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
@@ -109,7 +133,6 @@ public abstract class Cell {
             }
         }
     }
-
 
     public boolean applyCorrosion(ChunkAccessor chunkAccessor, float amount) {
         if (!this.canCorrode()) return false;
@@ -175,6 +198,10 @@ public abstract class Cell {
     }
 
     public boolean die(ChunkAccessor chunkAccessor) {
+        if(isLightSource) {
+            light.removedFromChunk(chunkAccessor.getNeighbourChunk(this.posX, this.posY));
+        }
+
         return replace(CellType.EMPTY, chunkAccessor);
     }
 
@@ -212,19 +239,10 @@ public abstract class Cell {
     }
 
     public void transferTemperature(ChunkAccessor chunkAccessor, float targetTemperature, float factor) {
-        if(targetTemperature > getTemperature() && !canBeHeated()) return;
-        if(targetTemperature < getTemperature() && !canBeCooled()) return;
+        if (targetTemperature > getTemperature() && !canBeHeated()) return;
+        if (targetTemperature < getTemperature() && !canBeCooled()) return;
 
         this.setTemperature(chunkAccessor, MathUtil.lerp(this.temperature, targetTemperature, factor));
-    }
-
-
-    public void setPosition(int posX, int posY) {
-        this.posX = posX;
-        this.posY = posY;
-
-        this.inChunkX = World.getInChunkPos(posX);
-        this.inChunkY = World.getInChunkPos(posY);
     }
 
     public void swapWith(ChunkAccessor chunkAccessor, Cell target) {
@@ -543,29 +561,26 @@ public abstract class Cell {
 
     public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
 
-//        Cell[][] neighbourCells = getNeighbourCells(chunkAccessor, posX, posY);
-//
-//        for (int i = -1; i <= 1; i++) {
-//            for (int j = -1; j <= 1; j++) {
-//                if (i == 0 && j == 0) continue;
-//
-//                trySetMoving(neighbourCells[i + 1][j + 1]);
-//            }
-//        }
-
         Cell[] directNeighbourCells = this.getDirectNeighbourCells(chunkAccessor, this.posX, this.posY);
         for (Cell cell : directNeighbourCells) {
             trySetMoving(cell);
         }
     }
 
-
-    public CellType getCellType() {
-        return this.cellType;
+    public PhysicalState getPhysicalState() {
+        return this.getCellType().getPhysicalState();
     }
 
-    public Vector2 getGravity() {
-        return WorldConstants.GRAVITY;
+    public boolean isSolid() {
+        return getPhysicalState() == PhysicalState.SOLID;
+    }
+
+    public boolean isLiquid() {
+        return getPhysicalState() == PhysicalState.LIQUID;
+    }
+
+    public boolean isGas() {
+        return getPhysicalState() == PhysicalState.GAS;
     }
 
     public boolean canMoveToOrSwap(Cell target) {
@@ -574,6 +589,14 @@ public abstract class Cell {
 
     public boolean canSwapWith(Cell target) {
         return false;
+    }
+
+    public CellType getCellType() {
+        return this.cellType;
+    }
+
+    public Vector2 getGravity() {
+        return WorldConstants.GRAVITY;
     }
 
     public World getWorld() {
@@ -646,5 +669,13 @@ public abstract class Cell {
 
     public boolean canCorrode() {
         return canCorrode;
+    }
+
+    public boolean isLightSource() {
+        return isLightSource;
+    }
+
+    public Light getLight() {
+        return light;
     }
 }

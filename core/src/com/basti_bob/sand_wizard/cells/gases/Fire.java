@@ -26,7 +26,7 @@ public class Fire extends Gas {
 
                 if (cell == null || cell instanceof Empty) continue;
 
-                cell.transferTemperature(chunkAccessor, 1500f, 0.1f);
+                cell.transferTemperature(chunkAccessor, 1500f, 0.05f);
             }
         }
     }
@@ -36,8 +36,4 @@ public class Fire extends Gas {
         return true;
     }
 
-    @Override
-    public int getMaxBurningTime() {
-        return super.getMaxBurningTime();
-    }
 }

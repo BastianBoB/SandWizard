@@ -154,7 +154,7 @@ public class MovableSolid extends MovingCell {
                 this.trySetNeighboursMoving(chunkAccessor, targetCell.posX, targetCell.posY);
 
                 if (this.posX != lastValidX || this.posY != lastValidY) {
-                    chunkAccessor.moveToIfEmpty(this, lastValidX, lastValidY);
+                    chunkAccessor.moveToOrSwap(this, lastValidX, lastValidY);
                 }
 
                 swapWith(chunkAccessor, targetCell);

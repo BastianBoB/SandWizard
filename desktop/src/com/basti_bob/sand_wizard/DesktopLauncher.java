@@ -10,13 +10,19 @@ import com.basti_bob.sand_wizard.SandWizard;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		//config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+		config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL31, 3, 1);
+
+		Graphics.Monitor monitor = Lwjgl3ApplicationConfiguration.getMonitors()[2];
+
+		//config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode(monitor));
 
 		//config.setForegroundFPS(60);
 		config.useVsync(false);
 		float scale = 1f;
 		config.setWindowedMode((int) (1920 * scale), (int) (1080 * scale));
-		config.setMaximizedMonitor(Lwjgl3ApplicationConfiguration.getMonitors()[2]);
+		config.setWindowPosition(monitor.virtualX, monitor.virtualY);
+		//config.setMaximizedMonitor(Lwjgl3ApplicationConfiguration.getMonitors()[2]);
+		//config.setWindowedMode((int) (1920 * scale), (int) (1080 * scale));
 
 		config.setTitle("Sand Wizard");
 		new Lwjgl3Application(new SandWizard(), config);

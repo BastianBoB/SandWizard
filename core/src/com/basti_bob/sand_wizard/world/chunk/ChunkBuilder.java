@@ -1,6 +1,6 @@
 package com.basti_bob.sand_wizard.world.chunk;
 
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -9,8 +9,6 @@ import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
-
-import java.awt.*;
 
 public class ChunkBuilder {
 
@@ -26,21 +24,15 @@ public class ChunkBuilder {
         this.posX = posX;
         this.posY = posY;
         this.grid = new Array2D<>(Cell.class, cs, cs);
-        this.vertices = new float[cs * cs * 5];
-
-        float chunkRenderX = posX * cs * WorldConstants.CELL_SIZE;
-        float chunkRenderY = posY * cs * WorldConstants.CELL_SIZE;
+        this.vertices = new float[WorldConstants.NUM_MESH_VERTICES];
 
         for (int j = 0; j < cs; j++) {
             for (int i = 0; i < cs; i++) {
 
-                int vertexI = (j * cs + i) * 5;
+                int vertexI = (j * cs + i) * WorldConstants.NUM_MESH_VERTEX_VALUES;
 
-                vertices[vertexI] = chunkRenderX + i * WorldConstants.CELL_SIZE;
-                vertices[vertexI + 1] = chunkRenderY + j * WorldConstants.CELL_SIZE;
-//                vertices[vertexI + 2] = 0;
-//                vertices[vertexI + 3] = 0;
-//                vertices[vertexI + 4] = 0;
+                vertices[vertexI] = posX * cs + i;
+                vertices[vertexI+1] = posY * cs + j;
             }
         }
     }
@@ -61,20 +53,16 @@ public class ChunkBuilder {
         Cell cell = cellType.createCell(world, cellPosX, cellPosY);
         grid.set(inChunkPosX, inChunkPosY, cell);
 
-        int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * 5;
+        int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * WorldConstants.NUM_MESH_VERTEX_VALUES;
 
-        this.vertices[index + 2] = cell.getColorR();
-        this.vertices[index + 3] = cell.getColorG();
-        this.vertices[index + 4] = cell.getColorB();
+        this.vertices[index+2] = Chunk.compressedVertexData(cell.getColorR(), cell.getColorG(),  cell.getColorB());
     }
 
     public Chunk buildChunk() {
-        int cs = WorldConstants.CHUNK_SIZE;
 
-
-        Mesh mesh = new Mesh(true, cs * cs * 5, 0,
+        Mesh mesh = new Mesh(true, WorldConstants.NUM_MESH_VERTICES, 0,
                 new VertexAttribute(VertexAttributes.Usage.Position, 2, "a_position"),
-                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_color"));
+                new VertexAttribute(VertexAttributes.Usage.Normal, 1, "a_vertexData"));
 
         mesh.setVertices(vertices);
 
