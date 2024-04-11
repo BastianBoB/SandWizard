@@ -19,13 +19,17 @@ public class BiomeType {
 //    public static final BiomeType GRASS_FIELD = new BiomeTypeBuilder(10, 20, 0.8f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
 //    public static final BiomeType FLOWER_FIELD = new BiomeTypeBuilder(20, 30, 0.2f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
 //
-    public static final BiomeType ICE_MOUNTAINS = new BiomeTypeBuilder(-50, 0, 1f)
-            .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
-            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
+//    public static final BiomeType ICE_MOUNTAINS = new BiomeTypeBuilder(-100, 0, 1f)
+//            .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
+//            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
     
-    public static final BiomeType FANCY = new BiomeTypeBuilder(0, 100, 1f)
+    public static final BiomeType HILLS = new BiomeTypeBuilder(0, 20, 1f)
             .surfaceGenerator(SurfaceGenerator.GRASS_FIELD)
-            .terrainHeightGenerator(TerrainHeightGenerator.FANCY).build();
+            .terrainHeightGenerator(TerrainHeightGenerator.HILLS).build();
+
+    public static final BiomeType DESERT = new BiomeTypeBuilder(30, 40, 1f)
+            .surfaceGenerator(SurfaceGenerator.DESERT)
+            .terrainHeightGenerator(TerrainHeightGenerator.HILLS).build();
 
 
     public final int minTemperature;
@@ -97,7 +101,7 @@ public class BiomeType {
         public final int maxTemperature;
         public final float weight;
         public SurfaceGenerator surfaceGenerator = SurfaceGenerator.STONE_ONLY;
-        public TerrainHeightGenerator terrainHeightGenerator = TerrainHeightGenerator.FANCY;
+        public TerrainHeightGenerator terrainHeightGenerator = TerrainHeightGenerator.HILLS;
 
         public BiomeTypeBuilder(int minTemperature, int maxTemperature, float weight) {
             this.minTemperature = minTemperature;

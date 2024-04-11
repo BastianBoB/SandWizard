@@ -61,8 +61,6 @@ public class Gas extends MovingCell {
 
     @Override
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        clampVelocity();
-
         Cell cellAbove = chunkAccessor.getCell(this.posX, this.posY + 1);
 
         boolean spaceAbove = canMoveToOrSwap(cellAbove);
@@ -107,6 +105,8 @@ public class Gas extends MovingCell {
 
     @Override
     public boolean moveWithVelocity(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        clampVelocity();
+
         float xDistance = Math.abs(velocityX);
         float yDistance = Math.abs(velocityY);
 

@@ -1,6 +1,7 @@
 package com.basti_bob.sand_wizard.world_generation;
 
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
@@ -11,7 +12,7 @@ import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.Terr
 
 public class ChunkGenerator {
 
-    public static final int TERRAIN_HEIGHT_BLENDING_RADIUS = 3;
+    public static final int TERRAIN_HEIGHT_BLENDING_RADIUS = 5;
 
     public static ChunkBuilder generateNew(World world, int chunkPosX, int chunkPosY) {
         ChunkBuilder chunkBuilder = new ChunkBuilder(world, chunkPosX, chunkPosY);
@@ -61,32 +62,45 @@ public class ChunkGenerator {
         return getTerrainHeight(world, chunkPosX, cellPosX, terrainHeightGenerator, terrainHeightGeneratorsToRight);
     }
 
-    public static int nextDifferentHeightGeneratorIndex(TerrainHeightGenerator heightGenerator, TerrainHeightGenerator[] heightGeneratorsToRight) {
-        for (int i = 0; i < heightGeneratorsToRight.length; i++) {
-            if (heightGenerator != heightGeneratorsToRight[i]) return i;
-        }
-        return -1;
-    }
-
     public static float getTerrainHeight(World world, int chunkPosX, int cellPosX, TerrainHeightGenerator heightGenerator, TerrainHeightGenerator[] heightGeneratorsToRight) {
-        float currentHeight = heightGenerator.getTerrainHeight(world, cellPosX);
-        int nextDifferentHeightGeneratorIndex = nextDifferentHeightGeneratorIndex(heightGenerator, heightGeneratorsToRight);
+        float baseHeight = heightGenerator.getTerrainHeight(world, cellPosX); // Base height from current chunk
 
-        if (nextDifferentHeightGeneratorIndex == -1) {
-            return currentHeight;
+        for (int i = 0; i < heightGeneratorsToRight.length; i++) {
+            TerrainHeightGenerator nextGenerator = heightGeneratorsToRight[i];
+
+            if(nextGenerator == heightGenerator) continue;
+
+            int targetX = (chunkPosX + i + 1) * WorldConstants.CHUNK_SIZE;
+            float neighborHeight = nextGenerator.getTerrainHeight(world, cellPosX);
+            float interpolationFactor = 1 - ((targetX - cellPosX) / ((float) WorldConstants.CHUNK_SIZE * TERRAIN_HEIGHT_BLENDING_RADIUS));
+
+            baseHeight = MathUtil.lerp(baseHeight, neighborHeight, interpolationFactor);
+
         }
 
-        TerrainHeightGenerator HeightGeneratorRight = heightGeneratorsToRight[nextDifferentHeightGeneratorIndex];
-
-        // Get  heights from current and adjacent biomes
-        int targetX = (chunkPosX + nextDifferentHeightGeneratorIndex + 1) * WorldConstants.CHUNK_SIZE;
-        float HeightRight = HeightGeneratorRight.getTerrainHeight(world, targetX);
-
-        float heightDifference = HeightRight - currentHeight;
-
-        float interpolationFactor = 1 - ((targetX - cellPosX) / ((float) WorldConstants.CHUNK_SIZE * TERRAIN_HEIGHT_BLENDING_RADIUS));
-
-        return currentHeight + heightDifference * interpolationFactor;
+        return baseHeight;
     }
+
+
+//    public static float getTerrainHeight(World world, int chunkPosX, int cellPosX, TerrainHeightGenerator heightGenerator, TerrainHeightGenerator[] heightGeneratorsToRight) {
+//        float currentHeight = heightGenerator.getTerrainHeight(world, cellPosX);
+//        int nextDifferentHeightGeneratorIndex = nextDifferentHeightGeneratorIndex(heightGenerator, heightGeneratorsToRight);
+//
+//        if (nextDifferentHeightGeneratorIndex == -1) {
+//            return currentHeight;
+//        }
+//
+//        TerrainHeightGenerator HeightGeneratorRight = heightGeneratorsToRight[nextDifferentHeightGeneratorIndex];
+//
+//        // Get  heights from current and adjacent biomes
+//        int targetX = (chunkPosX + nextDifferentHeightGeneratorIndex + 1) * WorldConstants.CHUNK_SIZE;
+//        float HeightRight = HeightGeneratorRight.getTerrainHeight(world, targetX);
+//
+//        float heightDifference = HeightRight - currentHeight;
+//
+//        float interpolationFactor = 1 - ((targetX - cellPosX) / ((float) WorldConstants.CHUNK_SIZE * TERRAIN_HEIGHT_BLENDING_RADIUS));
+//
+//        return currentHeight + heightDifference * interpolationFactor;
+//    }
 
 }

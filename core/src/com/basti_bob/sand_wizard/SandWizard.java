@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
+import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.debug.DebugScreen;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
@@ -18,6 +19,7 @@ import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class SandWizard extends ApplicationAdapter {
 
@@ -38,6 +40,7 @@ public class SandWizard extends ApplicationAdapter {
 
 
     public float freeMemory, maxMemory, updateTime, renderTime;
+    public boolean isUpdating = true;
 
     @Override
     public void create() {
@@ -46,7 +49,7 @@ public class SandWizard extends ApplicationAdapter {
 
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
-        player = new Player(world, 0, 120);
+        player = new Player(world, 0, 300);
 
         this.debugScreen = new DebugScreen();
     }
@@ -54,9 +57,8 @@ public class SandWizard extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        accumulatedTime += deltaTime;
-
-        camera.position.lerp(new Vector3(player.getPosition().scl(WorldConstants.CELL_SIZE), 0), 1f);
+        Gdx.graphics.getDeltaTime();
+        System.out.println("Calc fps: " + 1 / deltaTime);
 
         float speed = WorldConstants.PLAYER_SPEED;
 
@@ -85,16 +87,24 @@ public class SandWizard extends ApplicationAdapter {
             Gdx.app.exit();
         }
 
-//        if(Gdx.input.isKeyJustPressed(Input.Keys.U)) {
-//            fixedUpdate(fixedDeltaTime);
-//        }
-//
-//        if(Gdx.input.isKeyPressed(Input.Keys.I)) {
-//            fixedUpdate(fixedDeltaTime);
-//        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+            world.setCell(CellType.FIRE, 97, 100);
+        }
 
-        if (accumulatedTime >= fixedDeltaTime) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
             fixedUpdate(fixedDeltaTime);
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+            isUpdating = !isUpdating;
+        }
+
+        accumulatedTime += deltaTime;
+
+        while (accumulatedTime >= fixedDeltaTime) {
+            if (isUpdating) {
+                fixedUpdate(fixedDeltaTime);
+            }
             accumulatedTime -= fixedDeltaTime;
         }
 
@@ -105,21 +115,25 @@ public class SandWizard extends ApplicationAdapter {
         updateTimes++;
 
         updateTime = FunctionRunTime.timeFunction(() -> world.update());
-
+        if (updateTime > 5) {
+            System.out.println("UPDATE: " + updateTime);
+        }
         player.update(deltaTime);
+        camera.position.lerp(new Vector3(player.getPosition().scl(WorldConstants.CELL_SIZE), 0), 0.1f);
 
         if (updateTimes % 5 == 0) {
             Runtime runtime = Runtime.getRuntime();
             freeMemory = runtime.freeMemory() >> 20;
             maxMemory = runtime.maxMemory() >> 20;
         }
+
+        camera.update();
     }
 
     public void renderGame() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        camera.update();
         renderTime = FunctionRunTime.timeFunction(() -> worldRenderer.render(player));
 
         player.render(camera);

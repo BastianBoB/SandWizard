@@ -32,7 +32,7 @@ public class ChunkBuilder {
                 int vertexI = (j * cs + i) * WorldConstants.NUM_MESH_VERTEX_VALUES;
 
                 vertices[vertexI] = posX * cs + i;
-                vertices[vertexI+1] = posY * cs + j;
+                vertices[vertexI + 1] = posY * cs + j;
             }
         }
     }
@@ -55,14 +55,16 @@ public class ChunkBuilder {
 
         int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * WorldConstants.NUM_MESH_VERTEX_VALUES;
 
-        this.vertices[index+2] = Chunk.compressedVertexData(cell.getColorR(), cell.getColorG(),  cell.getColorB());
+        this.vertices[index + 2] = cell.getColorR();
+        this.vertices[index + 3] = cell.getColorG();
+        this.vertices[index + 4] = cell.getColorB();
     }
 
     public Chunk buildChunk() {
 
         Mesh mesh = new Mesh(true, WorldConstants.NUM_MESH_VERTICES, 0,
                 new VertexAttribute(VertexAttributes.Usage.Position, 2, "a_position"),
-                new VertexAttribute(VertexAttributes.Usage.Normal, 1, "a_vertexData"));
+                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_vertexColor"));
 
         mesh.setVertices(vertices);
 

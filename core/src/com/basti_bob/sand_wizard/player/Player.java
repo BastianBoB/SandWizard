@@ -10,6 +10,7 @@ import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.lighting.Light;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -24,12 +25,14 @@ public class Player {
     public float xVel, yVel;
     public boolean onGround;
     private int stepUpHeight = 6;
+    private int fastStepUpHeight = 2;
 
     private final Array2D<Chunk> renderingChunks = new Array2D<>(Chunk.class,
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1,
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_Y * 2 + 1);
 
     private final ShapeRenderer shapeRenderer;
+    private final Light light;
 
     public Player(World world, float x, float y) {
         this.shapeRenderer = new ShapeRenderer();
@@ -40,15 +43,17 @@ public class Player {
         this.nx = x;
         this.ny = y;
         this.hitBox = new EntityHitBox(8, 16);
-        //this.xVel = 0.1f;
 
         this.loadChunksAround(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
+
+        Color c = Color.WHITE;
+        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 100f, 1f);
     }
 
     public void update(float deltaTime) {
 
-        if(WorldConstants.PLAYER_FREE_MOVE){
+        if (WorldConstants.PLAYER_FREE_MOVE) {
             this.moveBy(xVel, yVel);
 
             this.xVel *= 0.95;
@@ -57,7 +62,7 @@ public class Player {
             this.yVel += WorldConstants.GRAVITY.y;
             this.xVel *= 0.95;
 
-            moveWithVelocity(deltaTime * 60);
+            moveWithVelocity(deltaTime);
         }
 
         updatePosition();
@@ -69,9 +74,8 @@ public class Player {
 
     public void jump() {
         this.onGround = false;
-        this.yVel = 5;
+        this.yVel = 8;
     }
-
 
     public void render(Camera camera) {
         int s = WorldConstants.CELL_SIZE;
@@ -154,8 +158,11 @@ public class Player {
 
                 int stepHeight = stepHeightAtTarget(checkX, (int) this.ny);
 
-                if (stepHeight < this.stepUpHeight) {
+                if(stepHeight < this.fastStepUpHeight) {
                     this.ny = this.ny + stepHeight;
+                } else if (stepHeight < this.stepUpHeight) {
+                    this.ny = this.ny + stepHeight;
+                    break;
                 } else {
                     this.xVel = 0;
                     break;
@@ -203,28 +210,33 @@ public class Player {
 
     private void updatePosition() {
 
-        int oldChunkX = World.getChunkPos((int) ox);
-        int oldChunkY = World.getChunkPos((int) oy);
+        Chunk previousChunk = world.getChunkFromCellPos((int) ox, (int) oy);
+        Chunk newChunk = world.getChunkFromCellPos((int) nx, (int) ny);
 
-        int newChunkX = World.getChunkPos((int) nx);
-        int newChunkY = World.getChunkPos((int) ny);
-
-        if ((newChunkX - oldChunkX != 0) || (newChunkY - oldChunkY != 0)) {
-            enteredNewChunk(oldChunkX, oldChunkY, newChunkX, newChunkY);
+        if (previousChunk != newChunk) {
+            enteredNewChunk(previousChunk, newChunk);
         }
 
         this.ox = nx;
         this.oy = ny;
+
+        this.light.setNewPosition((int) nx, (int) ny);
     }
 
-    private void enteredNewChunk(int oldChunkX, int oldChunkY, int newChunkX, int newChunkY) {
+    private void enteredNewChunk(Chunk previousChunk, Chunk newChunk) {
+        light.moveIntoNewChunk(previousChunk, newChunk);
+
+        int oldChunkX = previousChunk.posX;
+        int oldChunkY = previousChunk.posY;
+
+        int newChunkX = newChunk.posX;
+        int newChunkY = newChunk.posY;
 
         int chunkXDiff = newChunkX - oldChunkX;
         int chunkYDiff = newChunkY - oldChunkY;
 
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
         int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
-
 
         CompletableFuture.runAsync(() -> {
             if (Math.abs(chunkXDiff) == 1) {
@@ -245,6 +257,8 @@ public class Player {
                 }
             }
         });
+
+        //setRenderingChunks(newChunkX, newChunkY);
     }
 
     public void setRenderingChunks(int chunkX, int chunkY) {

@@ -70,8 +70,6 @@ public class World {
 
         addAndRemoveChunks();
 
-        setCell(CellType.WATER, -50, (int) (ChunkGenerator.getTerrainHeight(this, -50) + 100));
-        setCell(CellType.ACID, -100, (int) (ChunkGenerator.getTerrainHeight(this, -100) + 100));
 
         setCell(CellType.FIRE, -300, (int) ChunkGenerator.getTerrainHeight(this, -300));
         setCell(CellType.FIRE, -180, (int) ChunkGenerator.getTerrainHeight(this, -180));
@@ -80,7 +78,7 @@ public class World {
         setCell(CellType.FIRE, 100, (int) ChunkGenerator.getTerrainHeight(this, 100));
         setCell(CellType.FIRE, 180, (int) ChunkGenerator.getTerrainHeight(this, 180));
 
-        if(updateTimes % 3600 == 0) {
+        if (updateTimes % 3600 == 0) {
             TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
             TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
             TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
@@ -90,31 +88,22 @@ public class World {
         }
 
 
-        int height = (int) ChunkGenerator.getTerrainHeight(this, 25) + 100;
+        int height = (int) ChunkGenerator.getTerrainHeight(this, 25) + 200;
+
+        setCell(CellType.ACID, -100, height);
+        setCell(CellType.WATER, -50, height);
         setCell(CellType.DIRT, 25, height);
         setCell(CellType.COAL, -25, height);
-        setCell(CellType.SAND, 50, height);
+        setCell(CellType.SAND, 50, 300);
+        setCell(CellType.FINE_SAND, 100, 300);
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
         updateChunkActiveAndSetCellsNotUpdated(executor);
         updateAllCells(executor);
-        updateLighting(executor);
 
         executor.shutdown();
-
-//        try {
-//            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-//        } catch (InterruptedException e) {
-//            System.err.println("Executor interrupted");
-//        }
-
-        for (Chunk chunk : chunks) {
-            //if(chunk.affectedLights.size() == 0) continue;
-
-            //System.out.println(chunk.posX + "," + chunk.posY + ": " + chunk.affectedLights.size());
-        }
     }
 
     private void chunkToAdd(ChunkBuilder chunkBuilder) {
@@ -161,8 +150,7 @@ public class World {
 
             final Array2D<Cell> grid = chunk.getGrid();
 
-            tasks.add(Executors.callable(() -> {
-
+            executor.submit(() -> {
                 for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
                     for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {
                         Cell cell = grid.get(inChunkX, inChunkY);
@@ -170,7 +158,7 @@ public class World {
                         cell.gotUpdated = false;
                     }
                 }
-            }));
+            });
         }
 
         try {
@@ -208,25 +196,9 @@ public class World {
         }
     }
 
-    private void updateLighting(ExecutorService executor) {
-//
-//        List<Callable<Object>> tasks = new ArrayList<>();
-//
-//        for (Chunk chunk : chunks) {
-//            if (!chunk.isActive()) continue;
-//
-//            tasks.add(Executors.callable(chunk::updateLighting));
-//        }
-//
-//        try {
-//            executor.invokeAll(tasks);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
-    }
 
     public float getTemperatureForChunkX(int chunkX) {
-        return (float) (openSimplexNoise.eval(chunkX * 0.1f, 0, 0) * 50);
+        return (float) (openSimplexNoise.eval(chunkX * 0.01f, 0, 0) * 100);
     }
 
     public static int getChunkPos(int cellPos) {
@@ -330,6 +302,8 @@ public class World {
     }
 
     private void removeChunk(Chunk chunk) {
+        chunk.gotRemoved();
+
         chunks.remove(chunk);
         chunkLUT.remove(getChunkKey(chunk.posX, chunk.posY), chunk);
 
@@ -351,8 +325,6 @@ public class World {
         if (chunkRow.isEmpty()) {
             chunkUpdatingRows.remove(chunk.posY);
         }
-
-        chunk.gotRemoved();
     }
 
     //
@@ -385,7 +357,7 @@ public class World {
     }
 
     public void setCell(Cell cell, CellPlaceFlag flag) {
-        setCell(cell, cell.posX, cell.posY, flag);
+        setCell(cell, cell.getX(), cell.getY(), flag);
     }
 
 //

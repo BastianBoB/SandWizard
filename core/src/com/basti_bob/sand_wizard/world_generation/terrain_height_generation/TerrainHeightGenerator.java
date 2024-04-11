@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.world_generation.terrain_height_generation;
 
 import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.generators.SpikyTerrainHeightGenerator;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -14,15 +15,28 @@ public abstract class TerrainHeightGenerator {
 
     public abstract float getTerrainHeight(World world, int cellPosX);
 
-    public static final TerrainHeightGenerator FANCY = WeightedMultiTerrainHeightGenerator.builder()
-            .addGeneratorAndWeight(new ScaledShiftedTerrainHeightGenerator(NORMAL.PLATEAU(0.001f), 300f, 0), 1f)
-            .addGeneratorAndWeight(new ScaledShiftedTerrainHeightGenerator(NORMAL.EROSION(0.002f), 500f, 0), 1f)
-            .addGeneratorAndWeight(new ScaledShiftedTerrainHeightGenerator(NORMAL.PEAKS_AND_VALLEYS(0.01f), 50f, 0), 1f).build();
+    public static final TerrainHeightGenerator MOUNTAINS = ScaledShiftedTerrainHeightGenerator.normalToRange(
+            WeightedMultiTerrainHeightGenerator.builder()
+                    .addGeneratorAndWeight(NORMAL.SPIKY(0.001f, 32), 1f)
+                    .addGeneratorAndWeight(NORMAL.PLATEAU(0.001f), 1f)
+                    .addGeneratorAndWeight(NORMAL.EROSION(0.002f), 3f)
+                    .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.01f), 0.1f).build(),
+            500, 1000);
 
-    public static final TerrainHeightGenerator MOUNTAINS = WeightedMultiTerrainHeightGenerator.builder()
-            .addGeneratorAndWeight(ScaledShiftedTerrainHeightGenerator.normalToRange(NORMAL.PLATEAU(0.001f), 0, 100f), 1f)
-            .addGeneratorAndWeight(ScaledShiftedTerrainHeightGenerator.normalToRange(NORMAL.EROSION(0.002f), 200f, 500f), 5f)
-            .addGeneratorAndWeight(ScaledShiftedTerrainHeightGenerator.normalToRange(NORMAL.PEAKS_AND_VALLEYS(0.01f), -50f, 50f), 1f).build();
+    public static final TerrainHeightGenerator HILLS = ScaledShiftedTerrainHeightGenerator.normalToRange(
+            WeightedMultiTerrainHeightGenerator.builder()
+                    .addGeneratorAndWeight(NORMAL.PLATEAU(0.001f), 1f)
+                    .addGeneratorAndWeight(NORMAL.EROSION(0.0001f), 5f)
+                    .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.01f), 3f).build(),
+            100, 300);
+
+    public static final TerrainHeightGenerator DESERT = ScaledShiftedTerrainHeightGenerator.normalToRange(
+            WeightedMultiTerrainHeightGenerator.builder()
+                    .addGeneratorAndWeight(NORMAL.PLATEAU(0.001f), 1f)
+                    .addGeneratorAndWeight(NORMAL.EROSION(0.0001f), 1f)
+                    .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.01f), 0.1f).build(),
+            100, 300);
+
 
     public static TerrainHeightGenerator FLAT(int y) {
         return new TerrainHeightGenerator() {
@@ -34,6 +48,15 @@ public abstract class TerrainHeightGenerator {
     }
 
     public static class NORMAL {
+
+        public static TerrainHeightGenerator NORMAL(float frequency) {
+            return new TerrainHeightGenerator() {
+                @Override
+                public float getTerrainHeight(World world, int cellPosX) {
+                    return (float) openSimplexNoise.eval(cellPosX * frequency, 0f, 0f);
+                }
+            };
+        }
 
         public static TerrainHeightGenerator PLATEAU(float frequency) {
             return SplinePointsTerrainHeightGenerator.builder(frequency)
@@ -68,15 +91,8 @@ public abstract class TerrainHeightGenerator {
                     .build();
         }
 
-        public static TerrainHeightGenerator SPIKY(float frequency) {
-            return SplinePointsTerrainHeightGenerator.builder(frequency)
-                    .addSpline(-1f, -1f)
-                    .addSpline(-0.5f, -1f)
-                    .addSpline(-0.4f, -0.6f) // Adjusted y-value to introduce spikes
-                    .addSpline(-0.1f, 0.2f)  // Adjusted y-value to introduce spikes
-                    .addSpline(0f, 0.8f)
-                    .addSpline(1f, 1f)
-                    .build();
+        public static TerrainHeightGenerator SPIKY(float frequency, int stepSize) {
+            return new SpikyTerrainHeightGenerator(NORMAL(frequency), stepSize);
         }
     }
 

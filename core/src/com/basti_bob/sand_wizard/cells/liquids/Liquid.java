@@ -45,7 +45,6 @@ public class Liquid extends MovingCell {
 
     @Override
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        clampVelocity();
 
         Cell cellBelow = chunkAccessor.getCell(this.posX, this.posY - 1);
 
@@ -98,6 +97,8 @@ public class Liquid extends MovingCell {
 
     @Override
     public boolean moveWithVelocity(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        clampVelocity();
+
         float xDistance = Math.abs(velocityX);
         float yDistance = Math.abs(velocityY);
 

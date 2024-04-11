@@ -91,6 +91,14 @@ public abstract class Cell {
         }
     }
 
+    public int getX() {
+        return posX;
+    }
+
+    public int getY() {
+        return posY;
+    }
+
     public void removedFromChunk(Chunk chunk) {
         if(isLightSource) {
             light.removedFromChunk(chunk);
@@ -108,7 +116,6 @@ public abstract class Cell {
             this.light.moveIntoNewChunk(previousChunk, newChunk);
         }
     }
-
 
     public void setPosition(int posX, int posY) {
         this.posX = posX;
@@ -184,7 +191,7 @@ public abstract class Cell {
 
                 if (Math.random() > this.getFireSpreadChance()) continue;
 
-                chunkAccessor.setCellIfEmpty(CellType.FIRE, this.posX + i, this.posY + j);
+                chunkAccessor.setCellIfEmpty(CellType.FIRE, this.getX() + i, this.getY() + j);
             }
         }
     }
@@ -199,14 +206,14 @@ public abstract class Cell {
 
     public boolean die(ChunkAccessor chunkAccessor) {
         if(isLightSource) {
-            light.removedFromChunk(chunkAccessor.getNeighbourChunk(this.posX, this.posY));
+            light.removedFromChunk(chunkAccessor.getNeighbourChunk(this.getX(), this.getY()));
         }
 
         return replace(CellType.EMPTY, chunkAccessor);
     }
 
     public boolean replace(CellType cellType, ChunkAccessor chunkAccessor) {
-        chunkAccessor.setCell(cellType, this.posX, this.posY);
+        chunkAccessor.setCell(cellType, this.getX(), this.getY());
         return true;
     }
 
@@ -561,7 +568,7 @@ public abstract class Cell {
 
     public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
 
-        Cell[] directNeighbourCells = this.getDirectNeighbourCells(chunkAccessor, this.posX, this.posY);
+        Cell[] directNeighbourCells = this.getDirectNeighbourCells(chunkAccessor, this.getX(), this.getY());
         for (Cell cell : directNeighbourCells) {
             trySetMoving(cell);
         }

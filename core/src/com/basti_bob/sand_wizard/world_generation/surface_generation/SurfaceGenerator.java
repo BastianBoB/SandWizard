@@ -19,18 +19,25 @@ public abstract class SurfaceGenerator {
 
     public static final SurfaceGenerator GRASS_FIELD = BottomTerrainSurfaceGenerator.builder()
             .add(CellType.EMPTY)
-            .add(CellType.GRASS, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.02f), 5, 10))
-            .add(CellType.DIRT, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.1f), 20, 25))
-            .add(CellType.GRAVEL, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.5f), 0, 5))
+            .add(CellType.GRASS, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.02f, 32), 5, 10))
+            .add(CellType.DIRT, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.1f, 32), 20, 25))
+            .add(CellType.GRAVEL, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.5f, 32), 0, 5))
             .add(CellType.STONE)
             .build();
 
     public static final SurfaceGenerator SNOW_AND_ICE = BottomTerrainSurfaceGenerator.builder()
             .add(CellType.EMPTY)
-            .add(CellType.POWDER_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.02f), 1, 2))
-            .add(CellType.COMPACT_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.1f), 4, 6))
-            .add(CellType.ICE, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.5f), 20, 25))
+            .add(CellType.POWDER_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.02f, 32), 4, 8))
+            .add(CellType.COMPACT_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.05f, 32), 10, 30))
+            .add(CellType.ICE, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.1f, 16), 100, 200))
             .add(CellType.STONE)
+            .build();
+
+    public static final SurfaceGenerator DESERT = BottomTerrainSurfaceGenerator.builder()
+            .add(CellType.EMPTY)
+            .add(CellType.FINE_SAND, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.PEAKS_AND_VALLEYS(0.01f), 30, 60))
+            .add(CellType.SAND, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.PEAKS_AND_VALLEYS(0.01f), 100, 200))
+            .add(CellType.SAND_STONE)
             .build();
 
     public abstract CellType getCellType(World world, int cellX, int cellY, double terrainHeight);

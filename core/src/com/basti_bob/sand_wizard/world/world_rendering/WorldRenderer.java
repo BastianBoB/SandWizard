@@ -14,15 +14,20 @@ import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.lighting.Light;
 
 import java.nio.FloatBuffer;
+import java.util.HashMap;
 import java.util.List;
 
 public class WorldRenderer {
+
+    public static final int GL_FRAMEBUFFER_SRGB = 0x8DB9;
+
 
     private final World world;
     private final OrthographicCamera camera;
     private final ShaderProgram shader;
     private final ShapeRenderer shapeRenderer;
-    private FloatBuffer lightBuffer;
+
+    private final HashMap<Integer, FloatBuffer> lightBuffers = new HashMap<>();
 
     public WorldRenderer(World world, OrthographicCamera camera) {
         this.shapeRenderer = new ShapeRenderer();
@@ -32,6 +37,8 @@ public class WorldRenderer {
 
         ShaderProgram.pedantic = true;
         Gdx.gl.glEnable(GL32.GL_VERTEX_PROGRAM_POINT_SIZE);
+        Gdx.gl.glEnable(GL_FRAMEBUFFER_SRGB);
+
         shader = generateShader();
 
     }
@@ -60,29 +67,35 @@ public class WorldRenderer {
         Gdx.gl31.glUniformBlockBinding(shader.getHandle(), lightsIndex, 1);
 
         int lastNumLights = -1;
+
         for (Chunk chunk : chunks.getArray()) {
             if (chunk == null) continue;
 
             List<Light> affectedLights = chunk.affectedLights;
             int numAffectedLights = affectedLights.size();
 
-            if(numAffectedLights != lastNumLights) {
-                lightBuffer = BufferUtils.newFloatBuffer(numAffectedLights * Light.NUM_FLOAT_DATA);
+            FloatBuffer buffer = lightBuffers.get(numAffectedLights);
+
+            if (buffer == null) {
+                buffer = BufferUtils.newFloatBuffer(numAffectedLights * Light.NUM_FLOAT_DATA);
+                lightBuffers.put(numAffectedLights, buffer);
             }
 
-            lightBuffer.clear();
+            buffer.clear();
 
-            if(lastNumLights != 0 && numAffectedLights != 0) {
+            if (!(lastNumLights == 0 && numAffectedLights == 0)) {
                 for (int i = 0; i < numAffectedLights; i++) {
+                    if(i == affectedLights.size()) break;
+
                     Light light = (affectedLights.get(i));
                     if (light == null) continue;
 
-                    lightBuffer.put(light.getData());
+                    buffer.put(light.getData());
                 }
 
-                lightBuffer.flip();
+                buffer.flip();
 
-                Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, numAffectedLights * Light.NUM_FLOAT_DATA * 4, lightBuffer, GL31.GL_DYNAMIC_DRAW);
+                Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, numAffectedLights * Light.NUM_FLOAT_DATA * 4, buffer, GL31.GL_DYNAMIC_DRAW);
                 Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, 0, ssbo);
             }
 
@@ -122,7 +135,6 @@ public class WorldRenderer {
 
     private final Color activeColor = new Color(1f, 1f, 1f, 1);
     private final Color inActiveColor = new Color(0.1f, 0.1f, 0.1f, 1);
-
 
     public void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
 

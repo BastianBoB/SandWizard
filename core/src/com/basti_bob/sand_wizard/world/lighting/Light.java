@@ -1,9 +1,7 @@
 package com.basti_bob.sand_wizard.world.lighting;
 
-import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
-import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class Light {
 
@@ -31,23 +29,42 @@ public class Light {
     }
 
     public void placedInChunk(Chunk chunk) {
+        if(chunkRadius == 1) {
+            for(Chunk targetChunk : chunk.chunkAccessor.getSurroundingChunks()) {
+                if(targetChunk == null) continue;
+
+                targetChunk.affectedLights.add(this);
+            }
+            return;
+        }
+
         for(int i = -chunkRadius; i <= chunkRadius; i++) {
             for(int j = -chunkRadius; j <= chunkRadius; j++) {
                 Chunk targetChunk = chunk.world.getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
 
-                if(targetChunk == null) continue;;
+                if(targetChunk != null) {
 
-                targetChunk.affectedLights.add(this);
+                    targetChunk.affectedLights.add(this);
+                }
             }
         }
     }
 //
     public void removedFromChunk(Chunk chunk) {
+        if(chunkRadius == 1) {
+            for(Chunk targetChunk : chunk.chunkAccessor.getSurroundingChunks()) {
+                if(targetChunk == null) continue;
+
+                targetChunk.affectedLights.remove(this);
+            }
+            return;
+        }
+
         for(int i = -chunkRadius; i <= chunkRadius; i++) {
             for(int j = -chunkRadius; j <= chunkRadius; j++) {
                 Chunk targetChunk = chunk.world.getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
 
-                if(targetChunk == null) continue;;
+                if(targetChunk == null) continue;
 
                 targetChunk.affectedLights.remove(this);
             }
@@ -65,6 +82,11 @@ public class Light {
     public void moveIntoNewChunk(Chunk previousChunk, Chunk newChunk) {
         removedFromChunk(previousChunk);
         placedInChunk(newChunk);
+
+        int dx = newChunk.posX - previousChunk.posX;
+        int dy = newChunk.posY - previousChunk.posY;
+
+
 //
 //        previousChunk.affectedLights.remove(this);
 //        newChunk.affectedLights.add(this);

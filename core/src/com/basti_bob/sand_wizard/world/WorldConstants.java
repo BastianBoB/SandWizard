@@ -7,7 +7,7 @@ public class WorldConstants {
     public static final int CHUNK_SIZE = 32;
     public static final int CELL_SIZE = 3;
 
-    public static final int NUM_MESH_VERTEX_VALUES = 3;
+    public static final int NUM_MESH_VERTEX_VALUES = 5;
     public static final int NUM_MESH_VERTICES = CHUNK_SIZE * CHUNK_SIZE * NUM_MESH_VERTEX_VALUES;
 
     public static final boolean SAVE_CHUNK_DATA = false;

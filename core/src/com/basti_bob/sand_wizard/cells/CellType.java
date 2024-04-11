@@ -34,8 +34,10 @@ public class CellType {
     public static final CellType COMPACT_SNOW = new CellType("compact_snow", PhysicalState.SOLID, CellProperty.COMPACT_SNOW, CompactSnow::new, CellColors.COMPACT_SNOW);
     public static final CellType WOOD = new CellType("wood", PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.WOOD);
     public static final CellType RED_WOOD = new CellType("red_wood", PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.RED_WOOD);
+    public static final CellType SAND_STONE = new CellType("sand_stone", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.SAND_STONE);
 
     public static final CellType SAND = new CellType("sand", PhysicalState.SOLID, CellProperty.SAND, MovableSolid::new, CellColors.SAND);
+    public static final CellType FINE_SAND = new CellType("sand", PhysicalState.SOLID, CellProperty.SAND, MovableSolid::new, CellColors.FINE_SAND);
     public static final CellType DIRT = new CellType("dirt", PhysicalState.SOLID, CellProperty.DIRT, MovableSolid::new, CellColors.DIRT);
     public static final CellType COAL = new CellType("coal", PhysicalState.SOLID, CellProperty.COAL, MovableSolid::new, CellColors.COAL);
     public static final CellType GRAVEL = new CellType("gravel", PhysicalState.SOLID, CellProperty.GRAVEL, MovableSolid::new, CellColors.GRAVEL);

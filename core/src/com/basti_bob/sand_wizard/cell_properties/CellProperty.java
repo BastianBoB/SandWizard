@@ -28,7 +28,7 @@ public class CellProperty {
 
     public static final GasProperty METHANE = GasProperty.builder().allGas(2f, 1f, 500).build();
     public static final GasProperty STEAM = GasProperty.builder().allGas(3f, 0.5f, 500).build();
-    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 60).allLight(12f, 0.7f, CellColors.c(255, 140, 35)).build();
+    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 60).allLight(16f, 0.4f, CellColors.c(255, 140, 35)).build();
 
     public static final CellProperty GLOWBLOCK = CellProperty.builder().allLight(100f, 2f, Color.YELLOW).build();
 

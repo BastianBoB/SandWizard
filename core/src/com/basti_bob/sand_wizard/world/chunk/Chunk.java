@@ -46,7 +46,7 @@ public class Chunk {
         mesh.dispose();
         affectedLights.clear();
 
-        for(Cell cell : grid.getArray()) {
+        for (Cell cell : grid.getArray()) {
             cell.removedFromChunk(this);
         }
     }
@@ -82,7 +82,7 @@ public class Chunk {
     }
 
     private void setCellAndUpdate(Cell cell, int inChunkPosX, int inChunkPosY, CellPlaceFlag flag) {
-        if(flag == CellPlaceFlag.NEW) {
+        if (flag == CellPlaceFlag.NEW) {
             Cell oldCell = grid.get(inChunkPosX, inChunkPosY);
             oldCell.removedFromChunk(this);
 
@@ -100,7 +100,7 @@ public class Chunk {
     public void updateMeshColor(int inChunkPosX, int inChunkPosY, float r, float g, float b) {
         int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * WorldConstants.NUM_MESH_VERTEX_VALUES;
 
-        mesh.updateVertices(index + 2, new float[]{Chunk.compressedVertexData(r, g, b)});
+        mesh.updateVertices(index + 2, new float[]{r, g, b});
     }
 
     public void updateMeshColor(Cell cell) {
@@ -191,7 +191,6 @@ public class Chunk {
     public Array2D<Cell> getGrid() {
         return grid;
     }
-
 
 
 //    public void updateLighting() {
