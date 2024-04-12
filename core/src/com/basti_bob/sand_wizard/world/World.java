@@ -8,15 +8,14 @@ import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
-import com.basti_bob.sand_wizard.world_generation.trees.TreeGenerator;
+import com.basti_bob.sand_wizard.world_generation.structures.Structure;
+import com.basti_bob.sand_wizard.world_generation.structures.trees.TreeGenerator;
 import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 
 public class World {
@@ -31,6 +30,8 @@ public class World {
     private final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingRows = new TreeMap<>();
 
     public final ConcurrentHashMap<Long, Pair<Chunk, ChunkBuilder>> chunksToRemoveOrAdd = new ConcurrentHashMap<>();
+    public final Deque<Pair<Long, Structure>> unplacedStructures = new ArrayDeque<>();
+    public final HashMap<Long, List<Cell>> queuedStructureCells = new HashMap<>();
 
     public World() {
 
@@ -43,12 +44,12 @@ public class World {
             }
         }
 
-        TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
-        TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
-        TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
-        TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
-        TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
-        TreeGenerator.TREE_2.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
+//        TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
+//        TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
+//        TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
+//        TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
+//        TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
+//        TreeGenerator.TREE_2.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
 
         //setCell(CellType.GLOWBLOCK, 50, 100);
 
@@ -65,10 +66,16 @@ public class World {
 //        }
     }
 
+    public void addStructureToPlace(Structure structure, int x, int y) {
+        this.unplacedStructures.add(Pair.of(getPositionLong(x, y), structure));
+    }
+
+    public void addStructureToPlaceAsync(Supplier<Structure> structureSupplier, int x, int y) {
+        CompletableFuture.runAsync(() -> unplacedStructures.add(Pair.of(getPositionLong(x, y), structureSupplier.get())));
+    }
+
     public void update() {
         updateTimes++;
-
-        addAndRemoveChunks();
 
 
         setCell(CellType.FIRE, -300, (int) ChunkGenerator.getTerrainHeight(this, -300));
@@ -78,14 +85,14 @@ public class World {
         setCell(CellType.FIRE, 100, (int) ChunkGenerator.getTerrainHeight(this, 100));
         setCell(CellType.FIRE, 180, (int) ChunkGenerator.getTerrainHeight(this, 180));
 
-        if (updateTimes % 3600 == 0) {
-            TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
-            TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
-            TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
-            TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
-            TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
-            TreeGenerator.TREE_2.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
-        }
+//        if (updateTimes % 3600 == 0) {
+//            TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
+//            TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
+//            TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
+//            TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
+//            TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
+//            TreeGenerator.TREE_2.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
+//        }
 
 
         int height = (int) ChunkGenerator.getTerrainHeight(this, 25) + 200;
@@ -100,20 +107,23 @@ public class World {
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
-        updateChunkActiveAndSetCellsNotUpdated(executor);
-        updateAllCells(executor);
+        addAndRemoveChunks();
+        placeStructures();
+        placeCells();
+        //updateChunkActiveAndSetCellsNotUpdated(executor);
+        //updateAllCells(executor);
 
         executor.shutdown();
     }
 
     private void chunkToAdd(ChunkBuilder chunkBuilder) {
-        long key = getChunkKey(chunkBuilder.posX, chunkBuilder.posY);
+        long key = getPositionLong(chunkBuilder.posX, chunkBuilder.posY);
 
         chunksToRemoveOrAdd.put(key, Pair.of(null, chunkBuilder));
     }
 
     private void chunkToRemove(Chunk chunk) {
-        long key = getChunkKey(chunk.posX, chunk.posY);
+        long key = getPositionLong(chunk.posX, chunk.posY);
 
         chunksToRemoveOrAdd.put(key, Pair.of(chunk, null));
     }
@@ -134,6 +144,19 @@ public class World {
             }
 
             iterator.remove();
+        }
+    }
+
+    private void placeStructures() {
+        if (!unplacedStructures.isEmpty()) {
+            Pair<Long, Structure> structurePair = unplacedStructures.pop();
+
+            long positionKey = structurePair.getKey();
+            int xOff = getXFromPositionKey(positionKey);
+            int yOff = getYFromPositionKey(positionKey);
+            Structure structure = structurePair.getValue();
+
+            structure.placeInWorldAsync(this, xOff, yOff);
         }
     }
 
@@ -198,7 +221,7 @@ public class World {
 
 
     public float getTemperatureForChunkX(int chunkX) {
-        return (float) (openSimplexNoise.eval(chunkX * 0.01f, 0, 0) * 100);
+        return (float) (openSimplexNoise.eval(chunkX * 0.01f, 0, 0) * 50);
     }
 
     public static int getChunkPos(int cellPos) {
@@ -209,8 +232,16 @@ public class World {
         return Math.floorMod(cellPos, WorldConstants.CHUNK_SIZE);
     }
 
-    public long getChunkKey(int chunkPosX, int chunkPosY) {
-        return (((long) chunkPosX) << 32) | (chunkPosY & 0xffffffffL);
+    public static long getPositionLong(int x, int y) {
+        return (((long) x) << 32) | (y & 0xFFFFFFFFL);
+    }
+
+    public static int getXFromPositionKey(long key) {
+        return (int) (key >> 32);
+    }
+
+    public static int getYFromPositionKey(long key) {
+        return (int) key;
     }
 
 
@@ -227,7 +258,7 @@ public class World {
     }
 
     public Chunk getChunkFromChunkPos(int chunkPosX, int chunkPosY) {
-        return chunkLUT.get(getChunkKey(chunkPosX, chunkPosY));
+        return chunkLUT.get(getPositionLong(chunkPosX, chunkPosY));
     }
 
     public void unloadChunk(int chunkPosX, int chunkPosY) {
@@ -251,8 +282,10 @@ public class World {
         chunkToRemove(chunk);
     }
 
-    public void loadOrCreateChunk(int chunkPosX, int chunkPosY) {
-        if (this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
+    public Chunk loadOrCreateChunk(int chunkPosX, int chunkPosY) {
+        Chunk chunk = getChunkFromChunkPos(chunkPosX, chunkPosY);
+
+        if (chunk != null) return chunk;
 
         ChunkBuilder chunkBuilder = ChunkSaver.readChunk(this, chunkPosX, chunkPosY);
 
@@ -260,7 +293,11 @@ public class World {
             chunkBuilder = ChunkGenerator.generateNew(this, chunkPosX, chunkPosY);
         }
 
-        addChunk(chunkBuilder.buildChunk());
+        chunk = chunkBuilder.buildChunk();
+
+        addChunk(chunk);
+
+        return chunk;
     }
 
     public void loadOrCreateChunkAsync(int chunkPosX, int chunkPosY) {
@@ -277,7 +314,7 @@ public class World {
 
     private void addChunk(Chunk chunk) {
         chunks.add(chunk);
-        chunkLUT.put(getChunkKey(chunk.posX, chunk.posY), chunk);
+        chunkLUT.put(getPositionLong(chunk.posX, chunk.posY), chunk);
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -305,7 +342,7 @@ public class World {
         chunk.gotRemoved();
 
         chunks.remove(chunk);
-        chunkLUT.remove(getChunkKey(chunk.posX, chunk.posY), chunk);
+        chunkLUT.remove(getPositionLong(chunk.posX, chunk.posY), chunk);
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -327,13 +364,12 @@ public class World {
         }
     }
 
-    //
-//
+
     public Cell getCell(int cellPosX, int cellPosY) {
         return getCell(cellPosX, cellPosY, getChunkPos(cellPosX), getChunkPos(cellPosY));
     }
 
-    //
+
     public Cell getCell(int cellPosX, int cellPosY, int chunkPosX, int chunkPosY) {
         Chunk chunk = getChunkFromChunkPos(chunkPosX, chunkPosY);
         if (chunk == null) return null;
@@ -341,23 +377,38 @@ public class World {
         return chunk.getCellFromInChunkPos(getInChunkPos(cellPosX), getInChunkPos(cellPosY));
     }
 
-    //
-    public void setCell(CellType cellType, int cellPosX, int cellPosY) {
+
+    public boolean setCell(CellType cellType, int cellPosX, int cellPosY) {
         Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
-        if (chunk == null) return;
+        if (chunk == null) return false;
 
         chunk.setCell(cellType, cellPosX, cellPosY);
+
+        return true;
     }
 
-    public void setCell(Cell cell, int cellPosX, int cellPosY, CellPlaceFlag flag) {
+    public void setCellAndLoadChunksAsync(CellType cellType, int cellPosX, int cellPosY) {
+        int chunkX = World.getChunkPos(cellPosX);
+        int chunkY = World.getChunkPos(cellPosY);
+
+        Chunk chunk = getChunkFromChunkPos(chunkX, chunkY);
+        if (chunk == null) {
+            unplacedCells.add(cellType.createCell(this, cellPosX, cellPosY));
+        } else {
+            chunk.setCell(cellType, cellPosX, cellPosY);
+        }
+    }
+
+    public boolean setCell(Cell cell, int cellPosX, int cellPosY, CellPlaceFlag flag) {
         Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
-        if (chunk == null) return;
+        if (chunk == null) return false;
 
         chunk.setCell(cell, cellPosX, cellPosY, flag);
+        return true;
     }
 
-    public void setCell(Cell cell, CellPlaceFlag flag) {
-        setCell(cell, cell.getX(), cell.getY(), flag);
+    public boolean setCell(Cell cell) {
+        return setCell(cell, cell.getX(), cell.getY(), CellPlaceFlag.NEW);
     }
 
 //

@@ -19,9 +19,13 @@ public class BiomeType {
 //    public static final BiomeType GRASS_FIELD = new BiomeTypeBuilder(10, 20, 0.8f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
 //    public static final BiomeType FLOWER_FIELD = new BiomeTypeBuilder(20, 30, 0.2f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
 //
-//    public static final BiomeType ICE_MOUNTAINS = new BiomeTypeBuilder(-100, 0, 1f)
-//            .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
-//            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
+    public static final BiomeType ICE_MOUNTAINS = new BiomeTypeBuilder(-100, -50, 1f)
+            .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
+            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
+
+    public static final BiomeType SNOW_MOUNTAINS = new BiomeTypeBuilder(-50, -50, 1f)
+            .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
+            .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
     
     public static final BiomeType HILLS = new BiomeTypeBuilder(0, 20, 1f)
             .surfaceGenerator(SurfaceGenerator.GRASS_FIELD)

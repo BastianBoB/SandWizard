@@ -86,7 +86,7 @@ public class Chunk {
             Cell oldCell = grid.get(inChunkPosX, inChunkPosY);
             oldCell.removedFromChunk(this);
 
-            cell.placedInChunk(this);
+            cell.addedToWorld(world, this, getCellPosX(inChunkPosX), getCellPosY(inChunkPosY));
         }
 
         grid.set(inChunkPosX, inChunkPosY, cell);

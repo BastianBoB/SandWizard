@@ -1,4 +1,4 @@
-package com.basti_bob.sand_wizard.world_generation.trees;
+package com.basti_bob.sand_wizard.world_generation.structures.trees;
 
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.Cell;
@@ -6,11 +6,13 @@ import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.FloatPredicate;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
-import com.basti_bob.sand_wizard.world_generation.Point;
-import com.basti_bob.sand_wizard.world_generation.Region;
+import com.basti_bob.sand_wizard.world_generation.structures.Structure;
+import com.basti_bob.sand_wizard.world_generation.util.Region;
 
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.*;
+import java.util.List;
 
 
 public class TreeGenerator {
@@ -80,12 +82,12 @@ public class TreeGenerator {
         this.shouldAddLeaf = shouldAddLeaf;
     }
 
-    public void placeTree(World world, float posX, float posY) {
-        List<Branch> branches = generateBranches(posX, posY);
-        List<Cell> cells = new ArrayList<>();
+    public Structure generateStructure() {
+        List<Branch> branches = generateBranches();
+        HashMap<Long, CellType> cells = new HashMap<>();
 
-        Set<Point> allBranchPositions = new HashSet<>();
-        Set<Point> allLeafPositions = new HashSet<>();
+        Set<Long> allBranchPositions = new HashSet<>();
+        Set<Long> allLeafPositions = new HashSet<>();
 
         for (Branch branch : branches) {
             allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
@@ -101,13 +103,13 @@ public class TreeGenerator {
             float leafY = branch.endY;
 
             float normalizedDist = branchRegion.getDistanceToCenter(leafX, leafY) / maximumDistanceToCenter;
-            boolean isOuterBranch = isBranchOuterBranch(branch, branches, branchRegion.getCenter(), maximumDistanceToCenter);
+            boolean isOuterBranch = isBranchOuterBranch(branch, branches, branchRegion.centerX, branchRegion.centerY, maximumDistanceToCenter);
 
             int leafSize = leafSizeFunction.getLeafSize(normalizedDist, isOuterBranch);
 
             if (!shouldAddLeaf.test(normalizedDist)) continue;
 
-            for (Point leafPosition : generateLeaves(leafX, leafY, leafSize)) {
+            for (long leafPosition : generateLeaves(leafX, leafY, leafSize)) {
                 boolean overLaps = allBranchPositions.contains(leafPosition);
 
                 if (!overLaps)
@@ -115,46 +117,40 @@ public class TreeGenerator {
             }
         }
 
-        for (Point point : allBranchPositions) {
-            cells.add(branchCellType.createCell(world, point.x, point.y));
+        for (long point : allBranchPositions) {
+            cells.put(point, branchCellType);
         }
 
-        for (Point point : allLeafPositions) {
-            cells.add(leafCellType.createCell(world, point.x, point.y));
+        for (long point : allLeafPositions) {
+            cells.put(point, leafCellType);
         }
 
-        for (Cell cell : cells) {
-            try {
-                world.setCell(cell, CellPlaceFlag.NEW);
-            } catch (Exception e) {
-
-            }
-        }
+        return new Structure(cells);
     }
 
-    public List<Point> generateLeaves(float posX, float posY, int leafRadius) {
-        List<Point> leaves = new ArrayList<>();
+    public List<Long> generateLeaves(float posX, float posY, int leafRadius) {
+        List<Long> leaves = new ArrayList<>();
 
         for (int i = -leafRadius; i <= leafRadius; i++) {
             for (int j = -leafRadius; j <= leafRadius; j++) {
 
                 if (i * i + j * j > leafRadius * leafRadius) continue;
 
-                leaves.add(new Point((int) (posX + i), (int) (posY + j)));
+                leaves.add(World.getPositionLong((int) (posX + i), (int) (posY + j)));
             }
         }
 
         return leaves;
     }
 
-    public List<Branch> generateBranches(float startX, float startY) {
+    public List<Branch> generateBranches() {
         List<Branch> branches = new ArrayList<>();
         Stack<State> stateStack = new Stack<>();
 
         float length = (float) (startLength * Math.pow(lengthMultiplier, iterations));
 
-        float x = startX;
-        float y = startY;
+        float x = 0;
+        float y = 0;
         float angle = (float) (Math.PI / 2);
         int numBranching = 0;
 
@@ -190,8 +186,8 @@ public class TreeGenerator {
         return branches;
     }
 
-    public List<Point> pathBetweenPoints(float x1, float y1, float x2, float y2, int thickness) {
-        List<Point> points = new ArrayList<>();
+    public List<Long> pathBetweenPoints(float x1, float y1, float x2, float y2, int thickness) {
+        List<Long> points = new ArrayList<>();
 
         int xDistance = (int) Math.abs(x2 - x1);
         int yDistance = (int) Math.abs(y2 - y1);
@@ -212,7 +208,7 @@ public class TreeGenerator {
                 float y = positiveY ? i * slope : -i * slope;
 
                 for (int k = thickOffMin; k < thickOffMax; k++)
-                    points.add(new Point((int) (x1 + x), (int) (y1 + y) + k));
+                    points.add(World.getPositionLong((int) (x1 + x), (int) (y1 + y) + k));
 
             }
         } else {
@@ -223,23 +219,25 @@ public class TreeGenerator {
                 float y = positiveY ? i : -i;
 
                 for (int k = thickOffMin; k < thickOffMax; k++)
-                    points.add(new Point((int) (x1 + x) + k, (int) (y1 + y)));
+                    points.add(World.getPositionLong((int) (x1 + x) + k, (int) (y1 + y)));
             }
         }
 
         return points;
     }
 
-    private Region getRegionsFromPoints(List<Point> points) {
-        Point first = points.get(0);
+    private Region getRegionsFromPoints(List<Long> points) {
+        Long first = points.get(0);
+        int firstX = World.getXFromPositionKey(first);
+        int firstY = World.getYFromPositionKey(first);
 
-        int minX = first.x, minY = first.y, maxX = first.x, maxY = first.y;
+        int minX = firstX, minY = firstY, maxX = firstX, maxY = firstY;
 
         for (int i = 1; i < points.size(); i++) {
-            Point point = points.get(i);
+            Long point = points.get(i);
 
-            int x = point.x;
-            int y = point.y;
+            int x = World.getXFromPositionKey(point);
+            int y = World.getYFromPositionKey(point);
 
             if (x < minX) minX = x;
             if (x > maxX) maxX = x;
@@ -250,10 +248,9 @@ public class TreeGenerator {
         return new Region(minX, minY, maxX, maxY);
     }
 
-    public boolean isBranchOuterBranch(Branch testBranch, List<Branch> branches, Point center,
-                                       float maximumDistance) {
+    public boolean isBranchOuterBranch(Branch testBranch, List<Branch> branches, int centerX, int centerY, float maximumDistance) {
 
-        Vector2 centerBranchVector = new Vector2(testBranch.endX - center.x, testBranch.endY - center.y);
+        Vector2 centerBranchVector = new Vector2(testBranch.endX - centerX, testBranch.endY - centerY);
         float centerBranchDist = centerBranchVector.len();
 
         Vector2 branchOffsetVector = centerBranchVector.nor();
@@ -276,33 +273,6 @@ public class TreeGenerator {
         return true;
     }
 
-
-    private List<Branch> getOuterBranches(Point center, List<Branch> branches) {
-        List<Branch> availableBranches = new ArrayList<>(branches);
-
-        for (int i = 0; i < availableBranches.size(); i++) {
-            Branch branch = availableBranches.get(i);
-
-            float cblEndX = branch.endX > 0 ? branch.endX - 1 : branch.endX + 1;
-            float cblEndY = branch.endY > 0 ? branch.endY - 1 : branch.endY + 1;
-
-            Line2D centerBranchLine = new Line2D.Float(center.x, center.y, cblEndX, cblEndY);
-
-            for (int k = 0; k < availableBranches.size(); k++) {
-                Branch checkBranch = availableBranches.get(k);
-
-                if (checkBranch.equals(branch)) continue;
-
-                Line2D checkBranchLine = new Line2D.Float(checkBranch.startX, checkBranch.startY, checkBranch.endX, checkBranch.endY);
-
-                if (centerBranchLine.intersectsLine(checkBranchLine))
-                    availableBranches.remove(k--);
-
-            }
-        }
-
-        return availableBranches;
-    }
 
     private static class Branch {
         public final int startX, startY, endX, endY;

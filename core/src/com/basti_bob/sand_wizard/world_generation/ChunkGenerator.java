@@ -7,12 +7,14 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
+import com.basti_bob.sand_wizard.world_generation.structures.trees.TreeGenerator;
 import com.basti_bob.sand_wizard.world_generation.surface_generation.SurfaceGenerator;
 import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
 public class ChunkGenerator {
 
     public static final int TERRAIN_HEIGHT_BLENDING_RADIUS = 5;
+
 
     public static ChunkBuilder generateNew(World world, int chunkPosX, int chunkPosY) {
         ChunkBuilder chunkBuilder = new ChunkBuilder(world, chunkPosX, chunkPosY);
@@ -31,7 +33,7 @@ public class ChunkGenerator {
         for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
 
             int cellPosX = chunkBuilder.getCellPosX(i);
-            double terrainHeight = getTerrainHeight(world, chunkPosX, cellPosX, terrainHeightGenerator, terrainHeightGeneratorsToRight);
+            float terrainHeight = getTerrainHeight(world, chunkPosX, cellPosX, terrainHeightGenerator, terrainHeightGeneratorsToRight);
 
             float surfaceInterpolationFactor = i / (float) WorldConstants.CHUNK_SIZE;
 
@@ -43,6 +45,10 @@ public class ChunkGenerator {
                         rightSurfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight) : surfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight);
 
                 chunkBuilder.setCellWithInChunkPos(cellType, i, j);
+
+                if(i == WorldConstants.CHUNK_SIZE - 1 && cellPosY == (int) terrainHeight && Math.random() < 0.1) {
+                    world.addStructureToPlaceAsync(() -> TreeGenerator.TREE_5.generateStructure(), cellPosX, cellPosY);
+                }
             }
         }
 

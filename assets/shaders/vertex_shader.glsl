@@ -23,7 +23,7 @@ void main() {
     gl_Position = u_proj * vec4(a_position * u_cellSize + vec2(0, 2), 0.0, 1.0);
     gl_PointSize = u_pointSize;
 
-    vec3 sumColor = vec3(0.2);
+    vec3 sumColor = vec3(0.8);
 
     //light Calculation
     for (int i = 0; i < lights.length(); i++) {

@@ -17,7 +17,7 @@ import com.basti_bob.sand_wizard.world.lighting.Light;
 
 public abstract class Cell {
 
-    public final World world;
+    public World world;
     private final CellType cellType;
 
     public int posX, posY;
@@ -105,7 +105,10 @@ public abstract class Cell {
         }
     }
 
-    public void placedInChunk(Chunk chunk) {
+    public void addedToWorld(World world, Chunk chunk, int posX, int posY) {
+        this.world = world;
+        this.setPosition(posX, posY);
+
         if(isLightSource) {
             light.placedInChunk(chunk);
         }

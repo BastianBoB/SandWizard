@@ -258,7 +258,7 @@ public class Player {
             }
         });
 
-        //setRenderingChunks(newChunkX, newChunkY);
+        setRenderingChunks(newChunkX, newChunkY);
     }
 
     public void setRenderingChunks(int chunkX, int chunkY) {

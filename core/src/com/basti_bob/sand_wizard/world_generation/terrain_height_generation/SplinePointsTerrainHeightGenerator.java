@@ -2,9 +2,7 @@ package com.basti_bob.sand_wizard.world_generation.terrain_height_generation;
 
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.world.World;
-import com.basti_bob.sand_wizard.world_generation.Point;
 
-import java.awt.geom.Arc2D;
 import java.util.*;
 
 public class SplinePointsTerrainHeightGenerator extends TerrainHeightGenerator {

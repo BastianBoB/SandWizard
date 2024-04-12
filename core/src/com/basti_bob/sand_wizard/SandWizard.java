@@ -58,7 +58,6 @@ public class SandWizard extends ApplicationAdapter {
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
         Gdx.graphics.getDeltaTime();
-        System.out.println("Calc fps: " + 1 / deltaTime);
 
         float speed = WorldConstants.PLAYER_SPEED;
 
@@ -115,11 +114,9 @@ public class SandWizard extends ApplicationAdapter {
         updateTimes++;
 
         updateTime = FunctionRunTime.timeFunction(() -> world.update());
-        if (updateTime > 5) {
-            System.out.println("UPDATE: " + updateTime);
-        }
+
         player.update(deltaTime);
-        camera.position.lerp(new Vector3(player.getPosition().scl(WorldConstants.CELL_SIZE), 0), 0.1f);
+        camera.position.lerp(new Vector3(player.getPosition().scl(WorldConstants.CELL_SIZE), 0), 0.2f);
 
         if (updateTimes % 5 == 0) {
             Runtime runtime = Runtime.getRuntime();
