@@ -8,8 +8,8 @@ public class Empty extends Cell {
 
     //public static Empty INSTANCE;
 
-    public Empty(CellType cellType, World world, int posX, int posY) {
-        super(cellType, world, posX, posY);
+    public Empty(CellType cellType) {
+        super(cellType);
     }
 
 //    public Empty getInstance(){

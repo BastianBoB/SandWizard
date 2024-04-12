@@ -50,9 +50,7 @@ public abstract class Cell {
     private Light light;
 
 
-    public Cell(CellType cellType, World world, int posX, int posY) {
-        this.world = world;
-        this.setPosition(posX, posY);
+    public Cell(CellType cellType) {
         this.cellType = cellType;
 
         Color color = cellType.getCellColors().getColor(world, posX, posY);
@@ -112,6 +110,11 @@ public abstract class Cell {
         if(isLightSource) {
             light.placedInChunk(chunk);
         }
+    }
+
+    public void addedToWorld(World world, int posX, int posY) {
+        this.world = world;
+        this.setPosition(posX, posY);
     }
 
     public void movedInNewChunk(Chunk previousChunk, Chunk newChunk) {

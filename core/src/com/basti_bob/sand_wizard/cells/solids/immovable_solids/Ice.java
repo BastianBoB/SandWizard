@@ -7,8 +7,8 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class Ice extends ImmovableSolid {
-    public Ice(CellType cellType, World world, int x, int y) {
-        super(cellType, world, x, y);
+    public Ice(CellType cellType) {
+        super(cellType);
     }
 
     @Override

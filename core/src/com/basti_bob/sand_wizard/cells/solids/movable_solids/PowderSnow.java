@@ -7,8 +7,8 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class PowderSnow extends MovableSolid {
-    public PowderSnow(CellType cellType, World world, int x, int y) {
-        super(cellType, world, x, y);
+    public PowderSnow(CellType cellType) {
+        super(cellType);
     }
 
     @Override

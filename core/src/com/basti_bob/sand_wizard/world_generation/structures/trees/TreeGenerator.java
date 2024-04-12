@@ -83,49 +83,50 @@ public class TreeGenerator {
     }
 
     public Structure generateStructure() {
-        List<Branch> branches = generateBranches();
-        HashMap<Long, CellType> cells = new HashMap<>();
-
-        Set<Long> allBranchPositions = new HashSet<>();
-        Set<Long> allLeafPositions = new HashSet<>();
-
-        for (Branch branch : branches) {
-            allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
-        }
-
-        Region branchRegion = getRegionsFromPoints(new ArrayList<>(allBranchPositions));
-        float maximumDistanceToCenter = branchRegion.getMaximumDistanceToCenter();
-
-        for (Branch branch : branches) {
-            if (!branch.hasLeaf) continue;
-
-            float leafX = branch.endX;
-            float leafY = branch.endY;
-
-            float normalizedDist = branchRegion.getDistanceToCenter(leafX, leafY) / maximumDistanceToCenter;
-            boolean isOuterBranch = isBranchOuterBranch(branch, branches, branchRegion.centerX, branchRegion.centerY, maximumDistanceToCenter);
-
-            int leafSize = leafSizeFunction.getLeafSize(normalizedDist, isOuterBranch);
-
-            if (!shouldAddLeaf.test(normalizedDist)) continue;
-
-            for (long leafPosition : generateLeaves(leafX, leafY, leafSize)) {
-                boolean overLaps = allBranchPositions.contains(leafPosition);
-
-                if (!overLaps)
-                    allLeafPositions.add(leafPosition);
-            }
-        }
-
-        for (long point : allBranchPositions) {
-            cells.put(point, branchCellType);
-        }
-
-        for (long point : allLeafPositions) {
-            cells.put(point, leafCellType);
-        }
-
-        return new Structure(cells);
+//        List<Branch> branches = generateBranches();
+//        HashMap<Long, CellType> cells = new HashMap<>();
+//
+//        Set<Long> allBranchPositions = new HashSet<>();
+//        Set<Long> allLeafPositions = new HashSet<>();
+//
+//        for (Branch branch : branches) {
+//            allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
+//        }
+//
+//        Region branchRegion = getRegionsFromPoints(new ArrayList<>(allBranchPositions));
+//        float maximumDistanceToCenter = branchRegion.getMaximumDistanceToCenter();
+//
+//        for (Branch branch : branches) {
+//            if (!branch.hasLeaf) continue;
+//
+//            float leafX = branch.endX;
+//            float leafY = branch.endY;
+//
+//            float normalizedDist = branchRegion.getDistanceToCenter(leafX, leafY) / maximumDistanceToCenter;
+//            boolean isOuterBranch = isBranchOuterBranch(branch, branches, branchRegion.centerX, branchRegion.centerY, maximumDistanceToCenter);
+//
+//            int leafSize = leafSizeFunction.getLeafSize(normalizedDist, isOuterBranch);
+//
+//            if (!shouldAddLeaf.test(normalizedDist)) continue;
+//
+//            for (long leafPosition : generateLeaves(leafX, leafY, leafSize)) {
+//                boolean overLaps = allBranchPositions.contains(leafPosition);
+//
+//                if (!overLaps)
+//                    allLeafPositions.add(leafPosition);
+//            }
+//        }
+//
+//        for (long point : allBranchPositions) {
+//            cells.put(point, branchCellType);
+//        }
+//
+//        for (long point : allLeafPositions) {
+//            cells.put(point, leafCellType);
+//        }
+//
+//        return new Structure(cells);
+        return null;
     }
 
     public List<Long> generateLeaves(float posX, float posY, int leafRadius) {

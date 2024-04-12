@@ -5,8 +5,8 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class CompactSnow extends ImmovableSolid {
-    public CompactSnow(CellType cellType, World world, int x, int y) {
-        super(cellType, world, x, y);
+    public CompactSnow(CellType cellType) {
+        super(cellType);
     }
 
     @Override

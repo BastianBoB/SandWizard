@@ -8,8 +8,8 @@ public abstract class MovingCell extends Cell {
 
     public float velocityX, velocityY;
 
-    public MovingCell(CellType cellType, World world, int posX, int posY) {
-        super(cellType, world, posX, posY);
+    public MovingCell(CellType cellType) {
+        super(cellType);
     }
 
     @Override

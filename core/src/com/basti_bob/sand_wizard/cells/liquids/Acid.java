@@ -9,8 +9,8 @@ import com.basti_bob.sand_wizard.world.World;
 public class Acid extends Liquid {
 
     private boolean didCorrodeInUpdate;
-    public Acid(CellType cellType, World world, int posX, int posY) {
-        super(cellType, world, posX, posY);
+    public Acid(CellType cellType) {
+        super(cellType);
     }
 
     @Override

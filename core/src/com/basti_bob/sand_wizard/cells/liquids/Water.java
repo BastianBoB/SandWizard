@@ -8,8 +8,8 @@ import com.basti_bob.sand_wizard.world.World;
 
 public class Water extends Liquid {
 
-    public Water(CellType cellType, World world, int posX, int posY) {
-        super(cellType, world, posX, posY);
+    public Water(CellType cellType) {
+        super(cellType);
     }
 
     @Override

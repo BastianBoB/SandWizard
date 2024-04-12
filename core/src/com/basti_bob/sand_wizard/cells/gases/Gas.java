@@ -20,8 +20,8 @@ public class Gas extends MovingCell {
     protected int lifeTime;
     private boolean moving;
 
-    public Gas(CellType cellType, World world, int posX, int posY) {
-        super(cellType, world, posX, posY);
+    public Gas(CellType cellType) {
+        super(cellType);
         this.velocityY = 1;
 
         GasProperty cellProperty = (GasProperty) cellType.getCellProperty();

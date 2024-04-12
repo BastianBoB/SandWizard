@@ -70,23 +70,23 @@ public class Chunk {
     }
 
     public void setCell(CellType cellType, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
-        Cell cell = cellType.createCell(world, cellPosX, cellPosY);
+        Cell cell = cellType.createCell();
 
-        setCellAndUpdate(cell, inChunkPosX, inChunkPosY, CellPlaceFlag.NEW);
+        setCellAndUpdate(cell, cellPosX, cellPosY, inChunkPosX, inChunkPosY, CellPlaceFlag.NEW);
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY, CellPlaceFlag flag) {
         cell.setPosition(cellPosX, cellPosY);
 
-        setCellAndUpdate(cell, inChunkPosX, inChunkPosY, flag);
+        setCellAndUpdate(cell, cellPosX, cellPosY, inChunkPosX, inChunkPosY, flag);
     }
 
-    private void setCellAndUpdate(Cell cell, int inChunkPosX, int inChunkPosY, CellPlaceFlag flag) {
+    private void setCellAndUpdate(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY, CellPlaceFlag flag) {
         if (flag == CellPlaceFlag.NEW) {
             Cell oldCell = grid.get(inChunkPosX, inChunkPosY);
             oldCell.removedFromChunk(this);
 
-            cell.addedToWorld(world, this, getCellPosX(inChunkPosX), getCellPosY(inChunkPosY));
+            cell.addedToWorld(world, this, cellPosX, cellPosY);
         }
 
         grid.set(inChunkPosX, inChunkPosY, cell);

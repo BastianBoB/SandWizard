@@ -17,8 +17,8 @@ public class MovableSolid extends MovingCell {
     private float movingResistance;
     private float sprayFactor;
 
-    public MovableSolid(CellType cellType, World world, int x, int y) {
-        super(cellType, world, x, y);
+    public MovableSolid(CellType cellType) {
+        super(cellType);
         this.velocityY = -1;
 
         MovableSolidProperty cellProperty = (MovableSolidProperty) cellType.getCellProperty();

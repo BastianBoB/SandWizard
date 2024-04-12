@@ -109,9 +109,9 @@ public class World {
 
         addAndRemoveChunks();
         placeStructures();
-        placeCells();
-        //updateChunkActiveAndSetCellsNotUpdated(executor);
-        //updateAllCells(executor);
+        //placeCells();
+        updateChunkActiveAndSetCellsNotUpdated(executor);
+        updateAllCells(executor);
 
         executor.shutdown();
     }
@@ -156,7 +156,7 @@ public class World {
             int yOff = getYFromPositionKey(positionKey);
             Structure structure = structurePair.getValue();
 
-            structure.placeInWorldAsync(this, xOff, yOff);
+           // structure.placeInWorldAsync(this, xOff, yOff);
         }
     }
 
@@ -378,37 +378,19 @@ public class World {
     }
 
 
-    public boolean setCell(CellType cellType, int cellPosX, int cellPosY) {
+    public void setCell(CellType cellType, int cellPosX, int cellPosY) {
         Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
-        if (chunk == null) return false;
+        if (chunk == null) return;
 
         chunk.setCell(cellType, cellPosX, cellPosY);
-
-        return true;
     }
 
-    public void setCellAndLoadChunksAsync(CellType cellType, int cellPosX, int cellPosY) {
-        int chunkX = World.getChunkPos(cellPosX);
-        int chunkY = World.getChunkPos(cellPosY);
 
-        Chunk chunk = getChunkFromChunkPos(chunkX, chunkY);
-        if (chunk == null) {
-            unplacedCells.add(cellType.createCell(this, cellPosX, cellPosY));
-        } else {
-            chunk.setCell(cellType, cellPosX, cellPosY);
-        }
-    }
-
-    public boolean setCell(Cell cell, int cellPosX, int cellPosY, CellPlaceFlag flag) {
+    public void setCell(Cell cell, int cellPosX, int cellPosY, CellPlaceFlag flag) {
         Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
-        if (chunk == null) return false;
+        if (chunk == null) return;
 
         chunk.setCell(cell, cellPosX, cellPosY, flag);
-        return true;
-    }
-
-    public boolean setCell(Cell cell) {
-        return setCell(cell, cell.getX(), cell.getY(), CellPlaceFlag.NEW);
     }
 
 //

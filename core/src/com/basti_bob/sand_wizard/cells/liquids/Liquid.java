@@ -15,8 +15,8 @@ public class Liquid extends MovingCell {
     private float density;
     private boolean moving;
 
-    public Liquid(CellType cellType, World world, int posX, int posY) {
-        super(cellType, world, posX, posY);
+    public Liquid(CellType cellType) {
+        super(cellType);
         this.velocityY = -1;
 
         LiquidProperty cellProperty = (LiquidProperty) cellType.getCellProperty();

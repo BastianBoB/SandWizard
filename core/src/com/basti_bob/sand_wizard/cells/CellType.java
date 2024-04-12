@@ -19,6 +19,7 @@ import com.basti_bob.sand_wizard.world.World;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class CellType {
 
@@ -99,11 +100,11 @@ public class CellType {
     }
 
     public interface CellSupplier {
-        Cell create(CellType cellType, World world, int x, int y);
+        Cell create(CellType cellType);
     }
 
-    public Cell createCell(World world, int x, int y) {
-        return cellSupplier.create(this, world, x, y);
+    public Cell createCell() {
+        return cellSupplier.create(this);
     }
 }
 

@@ -50,7 +50,8 @@ public class ChunkBuilder {
     }
 
     public void setCell(CellType cellType, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
-        Cell cell = cellType.createCell(world, cellPosX, cellPosY);
+        Cell cell = cellType.createCell();
+        cell.addedToWorld(world, cellPosX, cellPosY);
         grid.set(inChunkPosX, inChunkPosY, cell);
 
         int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * WorldConstants.NUM_MESH_VERTEX_VALUES;

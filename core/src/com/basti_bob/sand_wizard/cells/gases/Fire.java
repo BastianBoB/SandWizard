@@ -7,8 +7,8 @@ import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.World;
 
 public class Fire extends Gas {
-    public Fire(CellType cellType, World world, int posX, int posY) {
-        super(cellType, world, posX, posY);
+    public Fire(CellType cellType) {
+        super(cellType);
     }
 
     @Override

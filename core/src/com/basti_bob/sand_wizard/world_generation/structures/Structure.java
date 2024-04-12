@@ -20,15 +20,15 @@ public class Structure {
     }
 
     public void placeInWorld(World world, int xOffset, int yOffset) {
-        for(Map.Entry<Long, CellType> entry : cells.entrySet()) {
-
-            long positionKey = entry.getKey();
-            int cellX = World.getXFromPositionKey(positionKey) + xOffset;
-            int cellY = World.getYFromPositionKey(positionKey) + yOffset;
-            CellType cellType = entry.getValue();
-
-            world.setCellAndLoadChunksAsync(cellType, cellX, cellY);
-        }
+//        for (Map.Entry<Long, CellType> entry : cells.entrySet()) {
+//
+//            long positionKey = entry.getKey();
+//            int cellX = World.getXFromPositionKey(positionKey) + xOffset;
+//            int cellY = World.getYFromPositionKey(positionKey) + yOffset;
+//            CellType cellType = entry.getValue();
+//
+//            world.setCellAndLoadChunksAsync(cellType, cellX, cellY);
+//        }
     }
 
     public static class StructureGenerator {
@@ -44,7 +44,7 @@ public class Structure {
             int chunkY = World.getChunkPos(cellY);
             long chunkKey = World.getPositionLong(chunkX, chunkY);
 
-            chunksWithCells.get(chunkKey).add(cellType.cre)
+            chunksWithCells.get(chunkKey).add(cellType.createCell());
         }
     }
 }
