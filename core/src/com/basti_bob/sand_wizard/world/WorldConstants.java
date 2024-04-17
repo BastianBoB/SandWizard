@@ -12,7 +12,7 @@ public class WorldConstants {
 
     public static final boolean SAVE_CHUNK_DATA = false;
     public static final boolean PLAYER_FREE_MOVE = true;
-    public static final float PLAYER_SPEED = 5f;
+    public static final float PLAYER_SPEED = 3f;
 
     public static final float START_TEMPERATURE = 30f;
 
@@ -21,9 +21,9 @@ public class WorldConstants {
 
     public static final float M = 1f;
 
-    public static final int PLAYER_CHUNK_RENDER_RADIUS_X = (int) (200 * M);
-    public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = (int) (8 * M);
+    public static final int PLAYER_CHUNK_RENDER_RADIUS_X = (int) (12 * M);
+    public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = (int) (7 * M);
 
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = (int) (14 * M);
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = (int) (8 * M);
+    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = (int) (12 * M);
+    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = (int) (7 * M);
 }

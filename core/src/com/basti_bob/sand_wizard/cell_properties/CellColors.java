@@ -15,7 +15,8 @@ public class CellColors {
     public static final CellColors GRASS = new CellColors(c(19, 109, 21), c(38, 139, 7), c(65, 152, 10));
     public static final CellColors ICE = new CellColors(c(255, 255, 255), c(185, 232, 234), c(134, 214, 216), c(63, 208, 212), c(32, 195, 208));
     public static final CellColors SUMMER_LEAF = new CellColors(c(119, 163, 122), c(95, 146, 106), c(88, 126, 96));
-    public static final CellColors SPRING_LEAF = new CellColors(c(197, 227, 175), c(154, 195, 123), c(114, 162, 78), c(84, 134, 46));
+    public static final CellColors SPRING_LEAF = new CellColors(c(154,195,123), c(114,162,78), c(84,134,46));
+    public static final CellColors AUTUMN_LEAF = new CellColors(c(245,206,137), c(228,163,49), c(204,128,20), c(177,121,0), c(153,97,0));
     public static final CellColors COMPACT_SNOW = new CellColors(c(240, 240, 240), c(235, 235, 235), c(245, 245, 245), c(230, 230, 230), c(250, 250, 250));
     public static final CellColors WOOD = new CellColors(hC(0x6E470B), hC(0x785115), hC(0x643D10));
     public static final CellColors RED_WOOD = new CellColors(c(70, 31, 0), c(80, 41, 0), c(90, 51, 0));

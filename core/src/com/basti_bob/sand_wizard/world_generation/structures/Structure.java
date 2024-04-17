@@ -4,38 +4,59 @@ import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
-import com.basti_bob.sand_wizard.world_generation.util.Region;
-import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class Structure {
 
-    private final HashMap<Long, List<Cell>> chunksWithCells;
+    private final HashMap<Long, HashMap<Long, Cell>> chunksWithCells;
 
-    public Structure(HashMap<Long, List<Cell>> chunksWithCells) {
+    private Structure(HashMap<Long, HashMap<Long, Cell>> chunksWithCells) {
         this.chunksWithCells = chunksWithCells;
     }
 
-    public void placeInWorld(World world, int xOffset, int yOffset) {
-//        for (Map.Entry<Long, CellType> entry : cells.entrySet()) {
-//
-//            long positionKey = entry.getKey();
-//            int cellX = World.getXFromPositionKey(positionKey) + xOffset;
-//            int cellY = World.getYFromPositionKey(positionKey) + yOffset;
-//            CellType cellType = entry.getValue();
-//
-//            world.setCellAndLoadChunksAsync(cellType, cellX, cellY);
-//        }
+    public void placeInWorld(World world) {
+
+        List<Long> toLoadChunks = new ArrayList<>();
+
+        for (Map.Entry<Long, HashMap<Long, Cell>> entry : chunksWithCells.entrySet()) {
+
+            long chunkKey = entry.getKey();
+            Chunk chunk = world.chunkProvider.getChunk(chunkKey);
+            HashMap<Long, Cell> toPlaceCells = entry.getValue();
+
+            if (chunk == null) {
+                toLoadChunks.add(chunkKey);
+                world.unloadedStructureCells.put(chunkKey, toPlaceCells);
+            } else {
+                world.placeStructureCellsInChunk(toPlaceCells, chunk);
+            }
+        }
+
+        CompletableFuture.runAsync(() -> {
+            for (long chunkKey : toLoadChunks) {
+
+                int chunkX = World.getXFromPositionKey(chunkKey);
+                int chunkY = World.getYFromPositionKey(chunkKey);
+
+                world.loadChunkAsync(chunkX, chunkY);
+            }
+        });
     }
 
-    public static class StructureGenerator {
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        private final HashMap<Long, List<Cell>> chunksWithCells = new HashMap<>();
+    public static class Builder {
 
-        public StructureGenerator() {
+        private final HashMap<Long, HashMap<Long, Cell>> chunksWithCells = new HashMap<>();
+
+        public Builder() {
 
         }
 
@@ -44,7 +65,14 @@ public class Structure {
             int chunkY = World.getChunkPos(cellY);
             long chunkKey = World.getPositionLong(chunkX, chunkY);
 
-            chunksWithCells.get(chunkKey).add(cellType.createCell());
+            HashMap<Long, Cell> chunkCells = chunksWithCells.computeIfAbsent(chunkKey, k -> new HashMap<>());
+
+            long positionKey = World.getPositionLong(cellX, cellY);
+            chunkCells.put(positionKey, cellType.createCell());
+        }
+
+        public Structure build() {
+            return new Structure(chunksWithCells);
         }
     }
 }

@@ -27,9 +27,9 @@ public class Acid extends Liquid {
 
             didCorrodeInUpdate = cell.applyCorrosion(chunkAccessor, (float) (1f * Math.random()));
 
-            if(didCorrodeInUpdate) {
-                cell.taintWithColor(chunkAccessor, this.getColorR(), this.getColorG(), this.getColorB(), 0.01f);
-            }
+//            if(didCorrodeInUpdate) {
+//                cell.taintWithColor(chunkAccessor, this.getColorR(), this.getColorG(), this.getColorB(), 0.01f);
+//            }
         }
     }
 

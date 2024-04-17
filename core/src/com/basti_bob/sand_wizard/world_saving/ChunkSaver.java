@@ -17,6 +17,7 @@ public class ChunkSaver {
     }
 
     public static void writeChunk(Chunk chunk) {
+
         System.out.println("Saved chunk: " + chunk.posX + " , " + chunk.posY);
 
         FileHandle file = Gdx.files.local(getChunkFileLocation(chunk.posX, chunk.posY));
@@ -49,13 +50,12 @@ public class ChunkSaver {
     }
 
 
-    public static ChunkBuilder readChunk(World world, int chunkX, int chunkY) {
+    public static ChunkBuilder readChunk(World world, Chunk oldChunk, int chunkX, int chunkY) {
         try {
-
             FileHandle file = Gdx.files.local(getChunkFileLocation(chunkX, chunkY));
             if (!file.exists()) return null;
 
-            ChunkBuilder chunkBuilder = new ChunkBuilder(world, chunkX, chunkY);
+            ChunkBuilder chunkBuilder = new ChunkBuilder(world, oldChunk, chunkX, chunkY);
 
             String[] cellsAndNumbers = file.readString().split(",");
 
@@ -75,7 +75,7 @@ public class ChunkSaver {
                         numRepeatingCells = Integer.parseInt(cellsAndNumbers[arrayIndex + 1]);
                     }
 
-                    chunkBuilder.setCellWithInChunkPos(currentCellType, i, j);
+                    chunkBuilder.setCell(currentCellType, i, j);
 
                     repeatedCellIteration++;
                 }

@@ -26,9 +26,10 @@ public abstract class TerrainHeightGenerator {
     public static final TerrainHeightGenerator HILLS = ScaledShiftedTerrainHeightGenerator.normalToRange(
             WeightedMultiTerrainHeightGenerator.builder()
                     .addGeneratorAndWeight(NORMAL.PLATEAU(0.001f), 1f)
-                    .addGeneratorAndWeight(NORMAL.EROSION(0.0001f), 5f)
-                    .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.01f), 3f).build(),
-            100, 300);
+                    .addGeneratorAndWeight(NORMAL.EROSION(0.0005f), 1f)
+                    .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.01f), 0.5f)
+                    .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.001f), 5f).build(),
+            100, 700);
 
     public static final TerrainHeightGenerator DESERT = ScaledShiftedTerrainHeightGenerator.normalToRange(
             WeightedMultiTerrainHeightGenerator.builder()

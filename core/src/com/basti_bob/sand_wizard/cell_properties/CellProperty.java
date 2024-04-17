@@ -12,8 +12,8 @@ public class CellProperty {
     public static final CellProperty GRASS = CellProperty.builder().build();
     public static final CellProperty ICE = CellProperty.builder().friction(0.98f).burningTemperature(100).maxBurningTime(0).build();
     public static final CellProperty COMPACT_SNOW = CellProperty.builder().burningTemperature(100).maxBurningTime(0).build();
-    public static final CellProperty WOOD = CellProperty.builder().allBurn(800, 600, 0.08f).build();
-    public static final CellProperty LEAF = CellProperty.builder().allBurn(200, 10, 0.5f).build();
+    public static final CellProperty WOOD = CellProperty.builder().allBurn(500, 400, 0.1f).build();
+    public static final CellProperty LEAF = CellProperty.builder().allBurn(100, 10, 0.5f).build();
 
     public static final MovableSolidProperty SAND = MovableSolidProperty.builder().allMovableSolid(0.1f, 0.6f).build();
     public static final MovableSolidProperty DIRT = MovableSolidProperty.builder().allMovableSolid(0.3f, 0.3f).build();
@@ -23,12 +23,12 @@ public class CellProperty {
 
 
     public static final LiquidProperty WATER = LiquidProperty.builder().allLiquid(6f, 1f).burningTemperature(100).maxBurningTime(0).build();
-    public static final LiquidProperty ACID = LiquidProperty.builder().allLiquid(5f, 0.75f).allLight(3f, 1f, Color.LIME).allBurn(100, 120, 0.1f).build();
+    public static final LiquidProperty ACID = LiquidProperty.builder().allLiquid(5f, 0.75f).allLight(5f, 1f, Color.LIME).allBurn(100, 120, 0.1f).build();
     public static final LiquidProperty OIL = LiquidProperty.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
 
     public static final GasProperty METHANE = GasProperty.builder().allGas(2f, 1f, 500).build();
     public static final GasProperty STEAM = GasProperty.builder().allGas(3f, 0.5f, 500).build();
-    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 60).allLight(16f, 0.4f, CellColors.c(255, 140, 35)).build();
+    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 60).allLight(16f, 0.6f, CellColors.c(255, 128, 0)).build();
 
     public static final CellProperty GLOWBLOCK = CellProperty.builder().allLight(100f, 2f, Color.YELLOW).build();
 

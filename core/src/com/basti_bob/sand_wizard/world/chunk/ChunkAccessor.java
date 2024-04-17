@@ -10,15 +10,23 @@ import com.basti_bob.sand_wizard.world.chunk.Chunk;
 public class ChunkAccessor {
 
     private final Array2D<Chunk> surroundingChunks;
-    public final int centerChunkX, centerChunkY;
+    public final Chunk centerChunk;
 
     public ChunkAccessor(Chunk centerChunk) {
         this.surroundingChunks = new Array2D<>(Chunk.class, 3, 3);
         this.surroundingChunks.set(1, 1, centerChunk);
-
-        this.centerChunkX = centerChunk.posX;
-        this.centerChunkY = centerChunk.posY;
+        this.centerChunk = centerChunk;
     }
+
+//    public void resetSurroundingChunks() {
+//        for (int i = 0; i < 3; i++) {
+//            for (int j = 0; j < 3; j++) {
+//                if (i == 1 && j == 1) continue;
+//
+//                surroundingChunks.set(i, j, null);
+//            }
+//        }
+//    }
 
     public Chunk[] getSurroundingChunks() {
         return surroundingChunks.getArray();
@@ -29,15 +37,15 @@ public class ChunkAccessor {
     }
 
     public void setSurroundingChunk(Chunk chunk) {
-        int gridX = chunk.posX - centerChunkX + 1;
-        int gridY = chunk.posY - centerChunkY + 1;
+        int gridX = chunk.posX - centerChunk.posX + 1;
+        int gridY = chunk.posY - centerChunk.posY + 1;
 
         surroundingChunks.set(gridX, gridY, chunk);
     }
 
     public void removeSurroundingChunk(Chunk chunk) {
-        int gridX = chunk.posX - centerChunkX + 1;
-        int gridY = chunk.posY - centerChunkY + 1;
+        int gridX = chunk.posX - centerChunk.posX + 1;
+        int gridY = chunk.posY - centerChunk.posY + 1;
 
         surroundingChunks.set(gridX, gridY, null);
     }
@@ -46,8 +54,8 @@ public class ChunkAccessor {
         int targetChunkX = World.getChunkPos(targetX);
         int targetChunkY = World.getChunkPos(targetY);
 
-        int gridX = targetChunkX - centerChunkX + 1;
-        int gridY = targetChunkY - centerChunkY + 1;
+        int gridX = targetChunkX - centerChunk.posX + 1;
+        int gridY = targetChunkY - centerChunk.posY + 1;
 
         return surroundingChunks.get(gridX, gridY);
     }

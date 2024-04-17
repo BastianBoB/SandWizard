@@ -7,6 +7,7 @@ import com.basti_bob.sand_wizard.util.FloatPredicate;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world_generation.structures.Structure;
+import com.basti_bob.sand_wizard.world_generation.structures.StructureGenerater;
 import com.basti_bob.sand_wizard.world_generation.util.Region;
 
 import java.awt.*;
@@ -15,7 +16,7 @@ import java.util.*;
 import java.util.List;
 
 
-public class TreeGenerator {
+public class TreeGenerator implements StructureGenerater {
 
     public static final TreeGenerator TREE_1 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[-F+F+F]").iterations(2)
             .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
@@ -23,7 +24,7 @@ public class TreeGenerator {
                 return 2;
             }).branchThicknessFunction(i -> Math.max(1, 3 - i)).build();
 
-    public static final TreeGenerator TREE_2 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[--F+F+F+F]").iterations(3).startLength(50f).angleIncrement((float) (Math.PI / 7f))
+    public static final TreeGenerator TREE_2 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[--F+F+F+F]").iterations(3).startLength(40f).angleIncrement((float) (Math.PI / 7f))
             .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
                 if (isOuterBranch) return 5;
                 return 2;
@@ -82,51 +83,59 @@ public class TreeGenerator {
         this.shouldAddLeaf = shouldAddLeaf;
     }
 
-    public Structure generateStructure() {
-//        List<Branch> branches = generateBranches();
-//        HashMap<Long, CellType> cells = new HashMap<>();
-//
-//        Set<Long> allBranchPositions = new HashSet<>();
-//        Set<Long> allLeafPositions = new HashSet<>();
-//
-//        for (Branch branch : branches) {
-//            allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
-//        }
-//
-//        Region branchRegion = getRegionsFromPoints(new ArrayList<>(allBranchPositions));
-//        float maximumDistanceToCenter = branchRegion.getMaximumDistanceToCenter();
-//
-//        for (Branch branch : branches) {
-//            if (!branch.hasLeaf) continue;
-//
-//            float leafX = branch.endX;
-//            float leafY = branch.endY;
-//
-//            float normalizedDist = branchRegion.getDistanceToCenter(leafX, leafY) / maximumDistanceToCenter;
-//            boolean isOuterBranch = isBranchOuterBranch(branch, branches, branchRegion.centerX, branchRegion.centerY, maximumDistanceToCenter);
-//
-//            int leafSize = leafSizeFunction.getLeafSize(normalizedDist, isOuterBranch);
-//
-//            if (!shouldAddLeaf.test(normalizedDist)) continue;
-//
-//            for (long leafPosition : generateLeaves(leafX, leafY, leafSize)) {
-//                boolean overLaps = allBranchPositions.contains(leafPosition);
+    @Override
+    public Structure generate(World world, int startX, int startY) {
+
+        Structure.Builder structureBuilder = Structure.builder();
+
+        List<Branch> branches = generateBranches();
+
+        Set<Long> allBranchPositions = new HashSet<>();
+        Set<Long> allLeafPositions = new HashSet<>();
+
+        for (Branch branch : branches) {
+            allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
+        }
+
+        Region branchRegion = getRegionsFromPoints(new ArrayList<>(allBranchPositions));
+        float maximumDistanceToCenter = branchRegion.getMaximumDistanceToCenter();
+
+        for (Branch branch : branches) {
+            if (!branch.hasLeaf) continue;
+
+            float leafX = branch.endX;
+            float leafY = branch.endY;
+
+            float normalizedDist = branchRegion.getDistanceToCenter(leafX, leafY) / maximumDistanceToCenter;
+            boolean isOuterBranch = isBranchOuterBranch(branch, branches, branchRegion.centerX, branchRegion.centerY, maximumDistanceToCenter);
+
+            int leafSize = leafSizeFunction.getLeafSize(normalizedDist, isOuterBranch);
+
+            if (!shouldAddLeaf.test(normalizedDist)) continue;
+
+            for (long leafPosition : generateLeaves(leafX, leafY, leafSize)) {
+                boolean overLaps = allBranchPositions.contains(leafPosition);
 //
 //                if (!overLaps)
-//                    allLeafPositions.add(leafPosition);
-//            }
-//        }
-//
-//        for (long point : allBranchPositions) {
-//            cells.put(point, branchCellType);
-//        }
-//
-//        for (long point : allLeafPositions) {
-//            cells.put(point, leafCellType);
-//        }
-//
-//        return new Structure(cells);
-        return null;
+//                    structureBuilder.addCell(leafCellType, x + startX, y + startY);
+            }
+        }
+
+        for (long point : allBranchPositions) {
+            int x = World.getXFromPositionKey(point);
+            int y = World.getYFromPositionKey(point);
+
+            structureBuilder.addCell(branchCellType, x + startX, y + startY);
+        }
+
+        for (long point : allLeafPositions) {
+            int x = World.getXFromPositionKey(point);
+            int y = World.getYFromPositionKey(point);
+
+            structureBuilder.addCell(leafCellType, x + startX, y + startY);
+        }
+
+        return structureBuilder.build();
     }
 
     public List<Long> generateLeaves(float posX, float posY, int leafRadius) {
@@ -145,6 +154,7 @@ public class TreeGenerator {
     }
 
     public List<Branch> generateBranches() {
+
         List<Branch> branches = new ArrayList<>();
         Stack<State> stateStack = new Stack<>();
 

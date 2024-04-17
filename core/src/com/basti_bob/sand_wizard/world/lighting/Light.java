@@ -83,8 +83,8 @@ public class Light {
         removedFromChunk(previousChunk);
         placedInChunk(newChunk);
 
-        int dx = newChunk.posX - previousChunk.posX;
-        int dy = newChunk.posY - previousChunk.posY;
+//        int dx = newChunk.posX - previousChunk.posX;
+//        int dy = newChunk.posY - previousChunk.posY;
 
 
 //

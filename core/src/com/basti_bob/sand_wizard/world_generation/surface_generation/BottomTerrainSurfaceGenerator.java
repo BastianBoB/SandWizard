@@ -6,31 +6,32 @@ import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.Terr
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class BottomTerrainSurfaceGenerator extends SurfaceGenerator {
 
-    private final List<Pair<CellType, TerrainHeightGenerator>> cellsAndGenerators;
+    private final Pair<CellType, TerrainHeightGenerator>[] cellsAndGenerators;
 
     private BottomTerrainSurfaceGenerator(BottomTerrainSurfaceGeneratorBuilder builder) {
-        this.cellsAndGenerators = builder.cellsAndGenerators;
+        this.cellsAndGenerators = builder.cellsAndGenerators.toArray(new Pair[0]);
     }
 
     @Override
     public CellType getCellType(World world, int cellX, int cellY, double terrainHeight) {
 
         float totalOffset = 0;
-        for (Pair<CellType, TerrainHeightGenerator> triplet : cellsAndGenerators) {
+        for (Pair<CellType, TerrainHeightGenerator> pair : cellsAndGenerators) {
 
-            TerrainHeightGenerator generator = triplet.getRight();
+            TerrainHeightGenerator generator = pair.getRight();
             if (generator != null) {
                 totalOffset -= generator.getTerrainHeight(world, cellX);
             }
 
-            if (cellY - terrainHeight >= totalOffset) return triplet.getLeft();
+            if (cellY - terrainHeight >= totalOffset) return pair.getLeft();
         }
 
-        return cellsAndGenerators.get(cellsAndGenerators.size() - 1).getLeft();
+        return cellsAndGenerators[cellsAndGenerators.length - 1].getLeft();
     }
 
     public static BottomTerrainSurfaceGeneratorBuilder builder() {

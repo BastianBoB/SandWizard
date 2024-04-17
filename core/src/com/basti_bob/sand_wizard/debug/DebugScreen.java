@@ -30,7 +30,7 @@ public class DebugScreen {
         spriteBatch.setProjectionMatrix(hudCamera.combined);
         spriteBatch.begin();
         font.draw(spriteBatch, "fps: " + Gdx.graphics.getFramesPerSecond(), 50, hudCamera.viewportHeight - 50);
-        font.draw(spriteBatch, "existing chunks: " + world.chunks.size(), 50, hudCamera.viewportHeight - 80);
+        font.draw(spriteBatch, "existing chunks: " + world.chunkProvider.chunks.size(), 50, hudCamera.viewportHeight - 80);
         font.draw(spriteBatch, "loaded chunks: " + world.activeChunks, 50, hudCamera.viewportHeight - 110);
 
         font.draw(spriteBatch, "player pos: " + String.format("%.1f", player.nx) + ", " + String.format("%.1f", player.ny), 50, hudCamera.viewportHeight - 140);

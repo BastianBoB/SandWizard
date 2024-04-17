@@ -32,6 +32,7 @@ public class CellType {
     public static final CellType ICE = new CellType("ice", PhysicalState.SOLID, CellProperty.ICE, Ice::new, CellColors.ICE);
     public static final CellType SUMMER_LEAF = new CellType("summer_leaf", PhysicalState.SOLID, CellProperty.LEAF, ImmovableSolid::new, CellColors.SUMMER_LEAF);
     public static final CellType SPRING_LEAF = new CellType("spring_leaf", PhysicalState.SOLID, CellProperty.LEAF, ImmovableSolid::new, CellColors.SPRING_LEAF);
+
     public static final CellType COMPACT_SNOW = new CellType("compact_snow", PhysicalState.SOLID, CellProperty.COMPACT_SNOW, CompactSnow::new, CellColors.COMPACT_SNOW);
     public static final CellType WOOD = new CellType("wood", PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.WOOD);
     public static final CellType RED_WOOD = new CellType("red_wood", PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.RED_WOOD);

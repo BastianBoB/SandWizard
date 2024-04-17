@@ -74,16 +74,16 @@ public class WorldRenderer {
             List<Light> affectedLights = chunk.affectedLights;
             int numAffectedLights = affectedLights.size();
 
-            FloatBuffer buffer = lightBuffers.get(numAffectedLights);
+            if (!(lastNumLights == 0 && numAffectedLights == 0)) { //dont have to modify the buffer with 2 empty light chunks
+                FloatBuffer buffer = lightBuffers.get(numAffectedLights);
 
-            if (buffer == null) {
-                buffer = BufferUtils.newFloatBuffer(numAffectedLights * Light.NUM_FLOAT_DATA);
-                lightBuffers.put(numAffectedLights, buffer);
-            }
+                if (buffer == null) {
+                    buffer = BufferUtils.newFloatBuffer(numAffectedLights * Light.NUM_FLOAT_DATA);
+                    lightBuffers.put(numAffectedLights, buffer);
+                }
 
-            buffer.clear();
+                buffer.clear();
 
-            if (!(lastNumLights == 0 && numAffectedLights == 0)) {
                 for (int i = 0; i < numAffectedLights; i++) {
                     if(i == affectedLights.size()) break;
 

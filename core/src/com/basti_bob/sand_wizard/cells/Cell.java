@@ -275,8 +275,8 @@ public abstract class Cell {
         int targetChunkX = World.getChunkPos(posX);
         int targetChunkY = World.getChunkPos(posY);
 
-        int chunkOffsetX = targetChunkX - chunkAccessor.centerChunkX;
-        int chunkOffsetY = targetChunkY - chunkAccessor.centerChunkY;
+        int chunkOffsetX = targetChunkX - chunkAccessor.centerChunk.posX;
+        int chunkOffsetY = targetChunkY - chunkAccessor.centerChunk.posY;
 
         Chunk cellChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY);
 
@@ -409,8 +409,8 @@ public abstract class Cell {
         int targetChunkX = World.getChunkPos(posX);
         int targetChunkY = World.getChunkPos(posY);
 
-        int chunkOffsetX = targetChunkX - chunkAccessor.centerChunkX;
-        int chunkOffsetY = targetChunkY - chunkAccessor.centerChunkY;
+        int chunkOffsetX = targetChunkX - chunkAccessor.centerChunk.posX;
+        int chunkOffsetY = targetChunkY - chunkAccessor.centerChunk.posY;
 
         Chunk cellChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY);
 

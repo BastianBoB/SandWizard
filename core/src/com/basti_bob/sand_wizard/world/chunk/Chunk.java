@@ -1,6 +1,8 @@
 package com.basti_bob.sand_wizard.world.chunk;
 
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.other.Empty;
@@ -15,35 +17,31 @@ import java.util.List;
 
 public class Chunk {
 
-    public final World world;
-    private final Array2D<Cell> grid;
-    public final ChunkAccessor chunkAccessor;
-    public final Mesh mesh;
-    public final int posX, posY;
+    public World world;
+    public Array2D<Cell> grid;
+    public ChunkAccessor chunkAccessor;
+    public Mesh mesh;
+    public int posX, posY;
     private boolean active, activeNextFrame;
     public boolean hasBeenModified;
-
     public final List<Light> affectedLights = new ArrayList<>();
 
-    public Chunk(World world, int posX, int posY, Array2D<Cell> grid, Mesh mesh) {
-        this.world = world;
-        this.posX = posX;
-        this.posY = posY;
-        this.grid = grid;
-        this.chunkAccessor = new ChunkAccessor(this);
-        this.mesh = mesh;
+    public Chunk() {
+        mesh = new Mesh(true, WorldConstants.NUM_MESH_VERTICES, 0,
+                new VertexAttribute(VertexAttributes.Usage.Position, 2, "a_position"),
+                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_vertexColor"));
 
+        this.chunkAccessor = new ChunkAccessor(this);
+        this.grid = new Array2D<>(Cell.class, WorldConstants.CHUNK_SIZE, WorldConstants.CHUNK_SIZE);
+    }
+
+    public void gotAddedToWorld() {
         this.hasBeenModified = false;
         this.active = true;
         this.activeNextFrame = true;
     }
 
-    public static float compressedVertexData(float r, float g, float b) {
-        return Float.intBitsToFloat(((int) (r * 127) | ((int) (g * 127) << 8) | (int) (b * 127) << 16));
-    }
-
-    public void gotRemoved() {
-        mesh.dispose();
+    public void gotRemovedFromWorld() {
         affectedLights.clear();
 
         for (Cell cell : grid.getArray()) {
@@ -79,6 +77,7 @@ public class Chunk {
         cell.setPosition(cellPosX, cellPosY);
 
         setCellAndUpdate(cell, cellPosX, cellPosY, inChunkPosX, inChunkPosY, flag);
+
     }
 
     private void setCellAndUpdate(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY, CellPlaceFlag flag) {

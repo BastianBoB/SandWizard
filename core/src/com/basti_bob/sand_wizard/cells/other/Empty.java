@@ -12,7 +12,8 @@ public class Empty extends Cell {
         super(cellType);
     }
 
-//    public Empty getInstance(){
+
+    //    public Empty getInstance(){
 //        if(INSTANCE == null) {
 //            INSTANCE = new Empty(CellType.EMPTY, null, po)
 //        }

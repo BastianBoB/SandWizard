@@ -12,18 +12,17 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 
 public class ChunkBuilder {
 
-    private final World world;
-    public final int posX, posY;
+    private final Chunk chunk;
     private final float[] vertices;
-    private final Array2D<Cell> grid;
 
-    public ChunkBuilder(World world, int posX, int posY) {
+    public ChunkBuilder(World world, Chunk oldChunk, int posX, int posY) {
+        this.chunk = oldChunk;
+
         int cs = WorldConstants.CHUNK_SIZE;
 
-        this.world = world;
-        this.posX = posX;
-        this.posY = posY;
-        this.grid = new Array2D<>(Cell.class, cs, cs);
+        this.chunk.world = world;
+        this.chunk.posX = posX;
+        this.chunk.posY = posY;
         this.vertices = new float[WorldConstants.NUM_MESH_VERTICES];
 
         for (int j = 0; j < cs; j++) {
@@ -37,39 +36,42 @@ public class ChunkBuilder {
         }
     }
 
-    public void setCellWithInChunkPos(CellType cellType, int inChunkPosX, int inChunkPosY) {
-        setCell(cellType, getCellPosX(inChunkPosX), getCellPosY(inChunkPosY), inChunkPosX, inChunkPosY);
-    }
+//    public void setCell(CellType cellType, int inChunkPosX, int inChunkPosY) {
+//        setCell(cellType, getCellPosX(inChunkPosX), getCellPosY(inChunkPosY), inChunkPosX, inChunkPosY);
+//    }
 
     public int getCellPosX(int inChunkPosX) {
-        return inChunkPosX + WorldConstants.CHUNK_SIZE * this.posX;
+        return inChunkPosX + WorldConstants.CHUNK_SIZE * chunk.posX;
     }
 
     public int getCellPosY(int inChunkPosY) {
-        return inChunkPosY + WorldConstants.CHUNK_SIZE * this.posY;
+        return inChunkPosY + WorldConstants.CHUNK_SIZE * chunk.posY;
+    }
+
+    public void setCell(CellType cellType, int inChunkPosX, int inChunkPosY) {
+        setCell(cellType.createCell(), getCellPosX(inChunkPosX), getCellPosY(inChunkPosY), inChunkPosX, inChunkPosY);
     }
 
     public void setCell(CellType cellType, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
-        Cell cell = cellType.createCell();
-        cell.addedToWorld(world, cellPosX, cellPosY);
-        grid.set(inChunkPosX, inChunkPosY, cell);
+        setCell(cellType.createCell(), cellPosX, cellPosY, inChunkPosX, inChunkPosY);
+    }
+
+    public void setCell(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY) {
+        cell.addedToWorld(chunk.world, chunk, cellPosX, cellPosY);
+
+        chunk.grid.set(inChunkPosX, inChunkPosY, cell);
 
         int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * WorldConstants.NUM_MESH_VERTEX_VALUES;
-
         this.vertices[index + 2] = cell.getColorR();
         this.vertices[index + 3] = cell.getColorG();
         this.vertices[index + 4] = cell.getColorB();
     }
 
     public Chunk buildChunk() {
+        chunk.mesh.setVertices(vertices);
 
-        Mesh mesh = new Mesh(true, WorldConstants.NUM_MESH_VERTICES, 0,
-                new VertexAttribute(VertexAttributes.Usage.Position, 2, "a_position"),
-                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_vertexColor"));
-
-        mesh.setVertices(vertices);
-
-        return new Chunk(world, posX, posY, grid, mesh);
+        return chunk;
     }
+
 
 }

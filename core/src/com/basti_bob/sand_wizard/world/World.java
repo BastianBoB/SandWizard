@@ -6,12 +6,9 @@ import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
-import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
-import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
+import com.basti_bob.sand_wizard.world.chunk.ChunkProvider;
 import com.basti_bob.sand_wizard.world_generation.structures.Structure;
-import com.basti_bob.sand_wizard.world_generation.structures.trees.TreeGenerator;
 import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -25,138 +22,109 @@ public class World {
     public int activeChunks;
     public int updateTimes = 0;
 
-    public final ArrayList<Chunk> chunks = new ArrayList<>();
-    public final HashMap<Long, Chunk> chunkLUT = new HashMap<>();
+    public final ChunkProvider chunkProvider;
+
     private final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingRows = new TreeMap<>();
 
-    public final ConcurrentHashMap<Long, Pair<Chunk, ChunkBuilder>> chunksToRemoveOrAdd = new ConcurrentHashMap<>();
-    public final Deque<Pair<Long, Structure>> unplacedStructures = new ArrayDeque<>();
-    public final HashMap<Long, List<Cell>> queuedStructureCells = new HashMap<>();
+    public final ConcurrentHashMap<Long, Supplier<Chunk>> chunksToAdd = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Long, Chunk> chunksToRemove = new ConcurrentHashMap<>();
+
+
+    public final Deque<Structure> unplacedStructures = new ArrayDeque<>();
+    public final HashMap<Long, HashMap<Long, Cell>> unloadedStructureCells = new HashMap<>();
 
     public World() {
-
-        int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
-        int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
-
-        for (int i = -loadX; i <= loadX; i++) {
-            for (int j = -loadY; j <= loadY; j++) {
-                this.loadOrCreateChunk(i, j);
-            }
-        }
-
-//        TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
-//        TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
-//        TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
-//        TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
-//        TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
-//        TreeGenerator.TREE_2.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
-
-        //setCell(CellType.GLOWBLOCK, 50, 100);
-
-
-        //FunctionRunTime.timeFunction("generating Tree", () -> TreeGenerator.TREE_2.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0)));
-//
-//
-//        for (int i = -50; i <= 100; i++) {
-//            setCell(CellType.STONE, -50, i);
-//
-//            setCell(CellType.STONE, i, i > 0 ? 50 : 51);
-////            if(i < 45)
-////                setCell(CellType.STONE, 0, i);
-//        }
+        this.chunkProvider = new ChunkProvider(this);
     }
 
-    public void addStructureToPlace(Structure structure, int x, int y) {
-        this.unplacedStructures.add(Pair.of(getPositionLong(x, y), structure));
+    public void addStructureToPlace(Structure structure) {
+        this.unplacedStructures.add(structure);
     }
 
-    public void addStructureToPlaceAsync(Supplier<Structure> structureSupplier, int x, int y) {
-        CompletableFuture.runAsync(() -> unplacedStructures.add(Pair.of(getPositionLong(x, y), structureSupplier.get())));
+    public void addStructureToPlaceAsync(Supplier<Structure> structureSupplier) {
+        CompletableFuture.runAsync(() -> unplacedStructures.add(structureSupplier.get()));
     }
 
     public void update() {
         updateTimes++;
-
-
-        setCell(CellType.FIRE, -300, (int) ChunkGenerator.getTerrainHeight(this, -300));
-        setCell(CellType.FIRE, -180, (int) ChunkGenerator.getTerrainHeight(this, -180));
-        setCell(CellType.FIRE, -100, (int) ChunkGenerator.getTerrainHeight(this, -100));
-        setCell(CellType.FIRE, 0, (int) ChunkGenerator.getTerrainHeight(this, 0));
-        setCell(CellType.FIRE, 100, (int) ChunkGenerator.getTerrainHeight(this, 100));
-        setCell(CellType.FIRE, 180, (int) ChunkGenerator.getTerrainHeight(this, 180));
-
-//        if (updateTimes % 3600 == 0) {
-//            TreeGenerator.TREE_5.placeTree(this, -300, ChunkGenerator.getTerrainHeight(this, -300));
-//            TreeGenerator.TREE_1.placeTree(this, -180, ChunkGenerator.getTerrainHeight(this, -180));
-//            TreeGenerator.TREE_5.placeTree(this, -100, ChunkGenerator.getTerrainHeight(this, -100));
-//            TreeGenerator.TREE_3.placeTree(this, 0, ChunkGenerator.getTerrainHeight(this, 0));
-//            TreeGenerator.TREE_4.placeTree(this, 100, ChunkGenerator.getTerrainHeight(this, 100));
-//            TreeGenerator.TREE_2.placeTree(this, 180, ChunkGenerator.getTerrainHeight(this, 180));
-//        }
-
-
-        int height = (int) ChunkGenerator.getTerrainHeight(this, 25) + 200;
-
-        setCell(CellType.ACID, -100, height);
-        setCell(CellType.WATER, -50, height);
-        setCell(CellType.DIRT, 25, height);
-        setCell(CellType.COAL, -25, height);
-        setCell(CellType.SAND, 50, 300);
-        setCell(CellType.FINE_SAND, 100, 300);
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
         addAndRemoveChunks();
         placeStructures();
-        //placeCells();
+
         updateChunkActiveAndSetCellsNotUpdated(executor);
         updateAllCells(executor);
 
         executor.shutdown();
-    }
-
-    private void chunkToAdd(ChunkBuilder chunkBuilder) {
-        long key = getPositionLong(chunkBuilder.posX, chunkBuilder.posY);
-
-        chunksToRemoveOrAdd.put(key, Pair.of(null, chunkBuilder));
-    }
-
-    private void chunkToRemove(Chunk chunk) {
-        long key = getPositionLong(chunk.posX, chunk.posY);
-
-        chunksToRemoveOrAdd.put(key, Pair.of(chunk, null));
-    }
-
-    private void addAndRemoveChunks() {
-        Iterator<Map.Entry<Long, Pair<Chunk, ChunkBuilder>>> iterator = chunksToRemoveOrAdd.entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<Long, Pair<Chunk, ChunkBuilder>> entry = iterator.next();
-
-            Pair<Chunk, ChunkBuilder> pair = entry.getValue();
-
-            Chunk chunk = pair.getLeft();
-            if (chunk != null) {
-                removeChunk(pair.getLeft());
-            } else {
-                addChunk(pair.getRight().buildChunk());
-            }
-
-            iterator.remove();
+        try {
+            executor.awaitTermination(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
+    private void chunkToAdd(Supplier<Chunk> supplier, int chunkX, int chunkY) {
+        chunksToAdd.put(getPositionLong(chunkX, chunkY), supplier);
+    }
+
+    private void chunkToRemove(Chunk chunk) {
+        chunksToRemove.put(getPositionLong(chunk.posX, chunk.posY), chunk);
+    }
+
+    private void addAndRemoveChunks() {
+        if (!chunksToAdd.isEmpty()) {
+
+            Iterator<Map.Entry<Long, Supplier<Chunk>>> iterator = chunksToAdd.entrySet().iterator();
+
+            while (iterator.hasNext()) {
+
+                Map.Entry<Long, Supplier<Chunk>> entry = iterator.next();
+                long chunkKey = entry.getKey();
+                Chunk chunk = entry.getValue().get();
+                addChunk(chunk);
+
+                HashMap<Long, Cell> toPlaceCells = unloadedStructureCells.get(chunkKey);
+                if (toPlaceCells != null) {
+                    placeStructureCellsInChunk(toPlaceCells, chunk);
+                    unloadedStructureCells.remove(chunkKey);
+                }
+
+                iterator.remove();
+            }
+        }
+
+        if (!chunksToRemove.isEmpty()) {
+
+            Iterator<Map.Entry<Long, Chunk>> iterator = chunksToRemove.entrySet().iterator();
+
+            while (iterator.hasNext()) {
+
+                Map.Entry<Long, Chunk> entry = iterator.next();
+                removeChunk(entry.getValue());
+
+                iterator.remove();
+            }
+        }
+    }
+
+    public void placeStructureCellsInChunk(HashMap<Long, Cell> toPlaceCells, Chunk chunk) {
+
+        for (Map.Entry<Long, Cell> cellEntry : toPlaceCells.entrySet()) {
+            long cellPosKey = cellEntry.getKey();
+            int cellX = World.getXFromPositionKey(cellPosKey);
+            int cellY = World.getYFromPositionKey(cellPosKey);
+            chunk.setCell(cellEntry.getValue(), cellX, cellY, CellPlaceFlag.NEW);
+        }
+    }
+
+
     private void placeStructures() {
         if (!unplacedStructures.isEmpty()) {
-            Pair<Long, Structure> structurePair = unplacedStructures.pop();
+            Structure structure = unplacedStructures.pop();
 
-            long positionKey = structurePair.getKey();
-            int xOff = getXFromPositionKey(positionKey);
-            int yOff = getYFromPositionKey(positionKey);
-            Structure structure = structurePair.getValue();
-
-           // structure.placeInWorldAsync(this, xOff, yOff);
+            structure.placeInWorld(this);
         }
     }
 
@@ -165,7 +133,7 @@ public class World {
 
         List<Callable<Object>> tasks = new ArrayList<>();
 
-        for (Chunk chunk : chunks) {
+        for (Chunk chunk : chunkProvider.chunks) {
             chunk.updateActive();
 
             if (!chunk.isActive()) continue;
@@ -244,11 +212,6 @@ public class World {
         return (int) key;
     }
 
-
-    public boolean hasChunkFromCellPos(int cellPosX, int cellPosY) {
-        return getChunkFromCellPos(cellPosX, cellPosY) != null;
-    }
-
     public boolean hasChunkFromChunkPos(int chunkPosX, int chunkPosY) {
         return getChunkFromChunkPos(chunkPosX, chunkPosY) != null;
     }
@@ -258,15 +221,14 @@ public class World {
     }
 
     public Chunk getChunkFromChunkPos(int chunkPosX, int chunkPosY) {
-        return chunkLUT.get(getPositionLong(chunkPosX, chunkPosY));
+        return chunkProvider.getChunk(chunkPosX, chunkPosY);
     }
 
     public void unloadChunk(int chunkPosX, int chunkPosY) {
         Chunk chunk = this.getChunkFromChunkPos(chunkPosX, chunkPosY);
         if (chunk == null) return;
 
-
-        if (WorldConstants.SAVE_CHUNK_DATA)
+        if (WorldConstants.SAVE_CHUNK_DATA && chunk.hasBeenModified)
             ChunkSaver.writeChunk(chunk);
 
         removeChunk(chunk);
@@ -282,39 +244,20 @@ public class World {
         chunkToRemove(chunk);
     }
 
-    public Chunk loadOrCreateChunk(int chunkPosX, int chunkPosY) {
-        Chunk chunk = getChunkFromChunkPos(chunkPosX, chunkPosY);
-
-        if (chunk != null) return chunk;
-
-        ChunkBuilder chunkBuilder = ChunkSaver.readChunk(this, chunkPosX, chunkPosY);
-
-        if (chunkBuilder == null) {
-            chunkBuilder = ChunkGenerator.generateNew(this, chunkPosX, chunkPosY);
-        }
-
-        chunk = chunkBuilder.buildChunk();
-
-        addChunk(chunk);
-
-        return chunk;
+    public void loadChunk(int chunkPosX, int chunkPosY) {
+        addChunk(chunkProvider.createChunk(chunkPosX, chunkPosY).get());
     }
 
-    public void loadOrCreateChunkAsync(int chunkPosX, int chunkPosY) {
+    public void loadChunkAsync(int chunkPosX, int chunkPosY) {
         if (this.hasChunkFromChunkPos(chunkPosX, chunkPosY)) return;
 
-        ChunkBuilder chunkBuilder = ChunkSaver.readChunk(this, chunkPosX, chunkPosY);
+        Supplier<Chunk> chunkSupplier = chunkProvider.createChunk(chunkPosX, chunkPosY);
 
-        if (chunkBuilder == null) {
-            chunkBuilder = ChunkGenerator.generateNew(this, chunkPosX, chunkPosY);
-        }
-
-        chunkToAdd(chunkBuilder);
+        chunkToAdd(chunkSupplier, chunkPosX, chunkPosY);
     }
 
     private void addChunk(Chunk chunk) {
-        chunks.add(chunk);
-        chunkLUT.put(getPositionLong(chunk.posX, chunk.posY), chunk);
+        chunk.gotAddedToWorld();
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -336,13 +279,12 @@ public class World {
             chunkUpdatingRows.put(chunk.posY, chunkRow);
         }
         chunkRow.addChunk(chunk);
+
+        chunkProvider.addChunk(chunk);
     }
 
     private void removeChunk(Chunk chunk) {
-        chunk.gotRemoved();
-
-        chunks.remove(chunk);
-        chunkLUT.remove(getPositionLong(chunk.posX, chunk.posY), chunk);
+        chunk.gotRemovedFromWorld();
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -362,6 +304,8 @@ public class World {
         if (chunkRow.isEmpty()) {
             chunkUpdatingRows.remove(chunk.posY);
         }
+
+        chunkProvider.removeChunk(chunk);
     }
 
 
@@ -392,17 +336,5 @@ public class World {
 
         chunk.setCell(cell, cellPosX, cellPosY, flag);
     }
-
-//
-//    public boolean isEmpty(int cellPosX, int cellPosY) {
-//        int chunkPosX = getChunkPos(cellPosX);
-//        int chunkPosY = getChunkPos(cellPosY);
-//
-//        if (!hasChunkFromChunkPos(chunkPosX, chunkPosY)) return false;
-//
-//        return false;
-//
-//        //return getCell(cellPosX, cellPosY, chunkPosX, chunkPosY) instanceof Empty;
-//    }
 
 }

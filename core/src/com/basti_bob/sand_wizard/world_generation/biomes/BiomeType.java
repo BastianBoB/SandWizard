@@ -23,15 +23,15 @@ public class BiomeType {
             .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
             .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
 
-    public static final BiomeType SNOW_MOUNTAINS = new BiomeTypeBuilder(-50, -50, 1f)
+    public static final BiomeType SNOW_MOUNTAINS = new BiomeTypeBuilder(-50, 0, 1f)
             .surfaceGenerator(SurfaceGenerator.SNOW_AND_ICE)
             .terrainHeightGenerator(TerrainHeightGenerator.MOUNTAINS).build();
     
-    public static final BiomeType HILLS = new BiomeTypeBuilder(0, 20, 1f)
+    public static final BiomeType HILLS = new BiomeTypeBuilder(0, 30, 1f)
             .surfaceGenerator(SurfaceGenerator.GRASS_FIELD)
             .terrainHeightGenerator(TerrainHeightGenerator.HILLS).build();
 
-    public static final BiomeType DESERT = new BiomeTypeBuilder(30, 40, 1f)
+    public static final BiomeType DESERT = new BiomeTypeBuilder(30, 100, 1f)
             .surfaceGenerator(SurfaceGenerator.DESERT)
             .terrainHeightGenerator(TerrainHeightGenerator.HILLS).build();
 

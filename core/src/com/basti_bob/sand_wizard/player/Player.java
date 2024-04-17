@@ -48,7 +48,7 @@ public class Player {
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
 
         Color c = Color.WHITE;
-        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 100f, 1f);
+        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 200f, 1f);
     }
 
     public void update(float deltaTime) {
@@ -162,7 +162,7 @@ public class Player {
                     this.ny = this.ny + stepHeight;
                 } else if (stepHeight < this.stepUpHeight) {
                     this.ny = this.ny + stepHeight;
-                    break;
+                    this.xVel *= 0.5;
                 } else {
                     this.xVel = 0;
                     break;
@@ -224,6 +224,8 @@ public class Player {
     }
 
     private void enteredNewChunk(Chunk previousChunk, Chunk newChunk) {
+        if(newChunk == null || previousChunk == null) return;
+
         light.moveIntoNewChunk(previousChunk, newChunk);
 
         int oldChunkX = previousChunk.posX;
@@ -243,8 +245,8 @@ public class Player {
                 int xOff = loadX * chunkXDiff;
 
                 for (int i = -loadY; i <= loadY; i++) {
+                    world.loadChunkAsync(newChunkX + xOff, newChunkY + i);
                     world.unloadChunkAsync(oldChunkX - xOff, oldChunkY + i);
-                    world.loadOrCreateChunkAsync(newChunkX + xOff, newChunkY + i);
                 }
             }
 
@@ -252,8 +254,8 @@ public class Player {
                 int yOff = loadY * chunkYDiff;
 
                 for (int i = -loadX; i <= loadX; i++) {
+                    world.loadChunkAsync(newChunkX + i, newChunkY + yOff);
                     world.unloadChunkAsync(oldChunkX + i, oldChunkY - yOff);
-                    world.loadOrCreateChunkAsync(newChunkX + i, newChunkY + yOff);
                 }
             }
         });
@@ -283,7 +285,7 @@ public class Player {
 
         for (int i = -loadX; i <= loadX; i++) {
             for (int j = -loadY; j <= loadY; j++) {
-                world.loadOrCreateChunk(chunkPosX + i, chunkPosY + j);
+                world.loadChunk(chunkPosX + i, chunkPosY + j);
             }
         }
     }
