@@ -3,11 +3,18 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
+import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkProvider;
+import com.basti_bob.sand_wizard.world.coordinates.CellPos;
+import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
+import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
+import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
+import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
 import com.basti_bob.sand_wizard.world_generation.structures.Structure;
+import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
 import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
 
 import java.util.*;
@@ -17,24 +24,25 @@ import java.util.function.Supplier;
 
 public class World {
 
-    public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(0L);
     private boolean updateDirection;
     public int activeChunks;
-    public int updateTimes = 0;
+    public int updateTimes;
 
     public final ChunkProvider chunkProvider;
+    public final ChunkGenerator chunkGenerator;
+    public final WorldGeneration worldGeneration;
 
-    private final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingRows = new TreeMap<>();
-
-    public final ConcurrentHashMap<Long, Supplier<Chunk>> chunksToAdd = new ConcurrentHashMap<>();
-    public final ConcurrentHashMap<Long, Chunk> chunksToRemove = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<ChunkPos, Supplier<Chunk>> chunksToAdd = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<ChunkPos, Chunk> chunksToRemove = new ConcurrentHashMap<>();
 
 
     public final Deque<Structure> unplacedStructures = new ArrayDeque<>();
-    public final HashMap<Long, HashMap<Long, Cell>> unloadedStructureCells = new HashMap<>();
+    public final HashMap<ChunkPos, HashMap<InChunkPos, Cell>> unloadedStructureCells = new HashMap<>();
 
     public World() {
         this.chunkProvider = new ChunkProvider(this);
+        this.worldGeneration = new WorldGeneration(this);
+        this.chunkGenerator = new ChunkGenerator(this);
     }
 
     public void addStructureToPlace(Structure structure) {
@@ -66,29 +74,29 @@ public class World {
     }
 
     private void chunkToAdd(Supplier<Chunk> supplier, int chunkX, int chunkY) {
-        chunksToAdd.put(getPositionLong(chunkX, chunkY), supplier);
+        chunksToAdd.put(new ChunkPos(chunkX, chunkY), supplier);
     }
 
     private void chunkToRemove(Chunk chunk) {
-        chunksToRemove.put(getPositionLong(chunk.posX, chunk.posY), chunk);
+        chunksToRemove.put(new ChunkPos(chunk.posX, chunk.posY), chunk);
     }
 
     private void addAndRemoveChunks() {
         if (!chunksToAdd.isEmpty()) {
 
-            Iterator<Map.Entry<Long, Supplier<Chunk>>> iterator = chunksToAdd.entrySet().iterator();
+            Iterator<Map.Entry<ChunkPos, Supplier<Chunk>>> iterator = chunksToAdd.entrySet().iterator();
 
             while (iterator.hasNext()) {
 
-                Map.Entry<Long, Supplier<Chunk>> entry = iterator.next();
-                long chunkKey = entry.getKey();
+                Map.Entry<ChunkPos, Supplier<Chunk>> entry = iterator.next();
+                ChunkPos chunkPos = entry.getKey();
                 Chunk chunk = entry.getValue().get();
                 addChunk(chunk);
 
-                HashMap<Long, Cell> toPlaceCells = unloadedStructureCells.get(chunkKey);
+                HashMap<InChunkPos, Cell> toPlaceCells = unloadedStructureCells.get(chunkPos);
                 if (toPlaceCells != null) {
                     placeStructureCellsInChunk(toPlaceCells, chunk);
-                    unloadedStructureCells.remove(chunkKey);
+                    unloadedStructureCells.remove(chunkPos);
                 }
 
                 iterator.remove();
@@ -97,11 +105,11 @@ public class World {
 
         if (!chunksToRemove.isEmpty()) {
 
-            Iterator<Map.Entry<Long, Chunk>> iterator = chunksToRemove.entrySet().iterator();
+            Iterator<Map.Entry<ChunkPos, Chunk>> iterator = chunksToRemove.entrySet().iterator();
 
             while (iterator.hasNext()) {
 
-                Map.Entry<Long, Chunk> entry = iterator.next();
+                Map.Entry<ChunkPos, Chunk> entry = iterator.next();
                 removeChunk(entry.getValue());
 
                 iterator.remove();
@@ -109,13 +117,11 @@ public class World {
         }
     }
 
-    public void placeStructureCellsInChunk(HashMap<Long, Cell> toPlaceCells, Chunk chunk) {
+    public void placeStructureCellsInChunk(HashMap<InChunkPos, Cell> toPlaceCells, Chunk chunk) {
 
-        for (Map.Entry<Long, Cell> cellEntry : toPlaceCells.entrySet()) {
-            long cellPosKey = cellEntry.getKey();
-            int cellX = World.getXFromPositionKey(cellPosKey);
-            int cellY = World.getYFromPositionKey(cellPosKey);
-            chunk.setCell(cellEntry.getValue(), cellX, cellY, CellPlaceFlag.NEW);
+        for (Map.Entry<InChunkPos, Cell> cellEntry : toPlaceCells.entrySet()) {
+            InChunkPos inChunkPos = cellEntry.getKey();
+            chunk.setCellWithInChunkPos(cellEntry.getValue(), inChunkPos.x, inChunkPos.y, CellPlaceFlag.NEW);
         }
     }
 
@@ -165,7 +171,7 @@ public class World {
         updateDirection = !updateDirection;
 
 
-        for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkUpdatingRows.values()) {
+        for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkProvider.chunkUpdatingRows.values()) {
 
             for (int i = 0; i < 3; i++) {
                 ArrayList<Chunk> separatedChunks = worldUpdatingChunkRow.separateChunksList[i];
@@ -187,29 +193,12 @@ public class World {
         }
     }
 
-
-    public float getTemperatureForChunkX(int chunkX) {
-        return (float) (openSimplexNoise.eval(chunkX * 0.01f, 0, 0) * 50);
-    }
-
     public static int getChunkPos(int cellPos) {
         return (int) Math.floor(cellPos / (float) WorldConstants.CHUNK_SIZE);
     }
 
     public static int getInChunkPos(int cellPos) {
         return Math.floorMod(cellPos, WorldConstants.CHUNK_SIZE);
-    }
-
-    public static long getPositionLong(int x, int y) {
-        return (((long) x) << 32) | (y & 0xFFFFFFFFL);
-    }
-
-    public static int getXFromPositionKey(long key) {
-        return (int) (key >> 32);
-    }
-
-    public static int getYFromPositionKey(long key) {
-        return (int) key;
     }
 
     public boolean hasChunkFromChunkPos(int chunkPosX, int chunkPosY) {
@@ -272,14 +261,6 @@ public class World {
             }
         }
 
-        WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.posY);
-
-        if (chunkRow == null) {
-            chunkRow = new WorldUpdatingChunkRow(chunk.posY);
-            chunkUpdatingRows.put(chunk.posY, chunkRow);
-        }
-        chunkRow.addChunk(chunk);
-
         chunkProvider.addChunk(chunk);
     }
 
@@ -297,12 +278,6 @@ public class World {
                 neighbourChunk.chunkAccessor.removeSurroundingChunk(chunk);
                 chunk.chunkAccessor.removeSurroundingChunk(neighbourChunk);
             }
-        }
-
-        WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.posY);
-        chunkRow.removeChunk(chunk);
-        if (chunkRow.isEmpty()) {
-            chunkUpdatingRows.remove(chunk.posY);
         }
 
         chunkProvider.removeChunk(chunk);

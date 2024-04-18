@@ -18,10 +18,7 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class SandWizard extends ApplicationAdapter {
@@ -52,26 +49,10 @@ public class SandWizard extends ApplicationAdapter {
 
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
-        player = new Player(world, 0, ChunkGenerator.getTerrainHeight(world, 0));
+        player = new Player(world, 0, world.worldGeneration.getTerrainHeight(0));
 
         this.debugScreen = new DebugScreen();
-
-
-//        int m = 5000;
-//        for(int i = 0; i < m; i++) {
-//            longMap.put((long) i, null);
-//            coordinateMap.put(new Coordinate(i, i), null);
-//        }
-//
-//
-//        In hashmap wird long zu Long also das ganze key system entfernen und zu CellPos, ChunkPos, InChunkPos umwandeln.
-//
-
-
-
-
     }
-
 
     @Override
     public void render() {
@@ -97,6 +78,9 @@ public class SandWizard extends ApplicationAdapter {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) camera.zoom = 1;
 
 
+        if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+            renderChunkBoarder = !renderChunkBoarder;
+        }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();
@@ -135,6 +119,8 @@ public class SandWizard extends ApplicationAdapter {
         updateTime = FunctionRunTime.timeFunction(() -> world.update());
 
         player.update(deltaTime);
+
+
         camera.position.lerp(new Vector3(player.getPosition().scl(WorldConstants.CELL_SIZE), 0), 0.2f);
 
         if (updateTimes % 5 == 0) {

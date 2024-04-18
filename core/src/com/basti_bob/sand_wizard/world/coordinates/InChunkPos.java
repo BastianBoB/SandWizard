@@ -1,23 +1,33 @@
 package com.basti_bob.sand_wizard.world.coordinates;
 
+import com.basti_bob.sand_wizard.world.WorldConstants;
+
 import java.util.Objects;
 
 public class InChunkPos {
 
-    private final int x;
-    private final int y;
+    public final int x;
+    public final int y;
 
-    public InChunkPos(int x, int y) {
+    private static final InChunkPos[][] positions;
+
+    static {
+        positions = new InChunkPos[WorldConstants.CHUNK_SIZE][WorldConstants.CHUNK_SIZE];
+
+        for(int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
+            for(int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
+                positions[i][j] = new InChunkPos(i, j);
+            }
+        }
+    }
+
+    private InChunkPos(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
+    public static InChunkPos get(int x, int y) {
+        return positions[x][y];
     }
 
     @Override

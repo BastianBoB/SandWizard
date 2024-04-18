@@ -29,7 +29,8 @@ public class Chunk {
     public Chunk() {
         mesh = new Mesh(true, WorldConstants.NUM_MESH_VERTICES, 0,
                 new VertexAttribute(VertexAttributes.Usage.Position, 2, "a_position"),
-                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_vertexColor"));
+                new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_vertexColor"),
+                new VertexAttribute(VertexAttributes.Usage.Generic, 1, "a_empty"));
 
         this.chunkAccessor = new ChunkAccessor(this);
         this.grid = new Array2D<>(Cell.class, WorldConstants.CHUNK_SIZE, WorldConstants.CHUNK_SIZE);
@@ -91,9 +92,13 @@ public class Chunk {
         grid.set(inChunkPosX, inChunkPosY, cell);
 
         this.cellActivatesChunk(inChunkPosX, inChunkPosY);
-        updateMeshColor(inChunkPosX, inChunkPosY, cell.getColorR(), cell.getColorG(), cell.getColorB());
+        updateMeshData(cell);
 
         this.hasBeenModified = true;
+    }
+
+    public void updateMeshColor(Cell cell) {
+        updateMeshColor(cell.inChunkX, cell.inChunkY, cell.getColorR(), cell.getColorG(), cell.getColorB());
     }
 
     public void updateMeshColor(int inChunkPosX, int inChunkPosY, float r, float g, float b) {
@@ -102,9 +107,16 @@ public class Chunk {
         mesh.updateVertices(index + 2, new float[]{r, g, b});
     }
 
-    public void updateMeshColor(Cell cell) {
-        updateMeshColor(cell.inChunkX, cell.inChunkY, cell.getColorR(), cell.getColorG(), cell.getColorB());
+    public void updateMeshData(Cell cell) {
+        updateMeshData(cell.inChunkX, cell.inChunkY, cell.getColorR(), cell.getColorG(), cell.getColorB(), cell instanceof Empty);
     }
+
+    public void updateMeshData(int inChunkPosX, int inChunkPosY, float r, float g, float b, boolean isEmpty) {
+        int index = (inChunkPosY * WorldConstants.CHUNK_SIZE + inChunkPosX) * WorldConstants.NUM_MESH_VERTEX_VALUES;
+
+        mesh.updateVertices(index + 2, new float[]{r, g, b, isEmpty ? 1f : 0f});
+    }
+
 
     public void setCell(Cell cell, int cellPosX, int cellPosY, CellPlaceFlag flag) {
         setCell(cell, cellPosX, cellPosY, World.getInChunkPos(cellPosX), World.getInChunkPos(cellPosY), flag);
@@ -116,6 +128,10 @@ public class Chunk {
 
     public void setCellWithInChunkPos(CellType cellType, int inChunkPosX, int inChunkPosY) {
         setCell(cellType, getCellPosX(inChunkPosX), getCellPosY(inChunkPosY), inChunkPosX, inChunkPosY);
+    }
+
+    public void setCellWithInChunkPos(Cell cell, int inChunkPosX, int inChunkPosY, CellPlaceFlag flag) {
+        setCell(cell, getCellPosX(inChunkPosX), getCellPosY(inChunkPosY), inChunkPosX, inChunkPosY, flag);
     }
 
     public int getCellPosX(int inChunkPosX) {

@@ -11,9 +11,7 @@ import java.util.Random;
 
 public class BiomeType {
 
-    private static final Random BIOME_RANDOM = new Random();
-
-    public static final List<BiomeType> biomeTypes = new ArrayList<>();
+    public static final List<BiomeType> allTypes = new ArrayList<>();
     public static final BiomeType ERROR = new BiomeTypeBuilder(0, 0, 0f).build();
 
 //    public static final BiomeType GRASS_FIELD = new BiomeTypeBuilder(10, 20, 0.8f).surfaceGenerator(SurfaceGenerator.GRASS_FIELD).build();
@@ -49,54 +47,15 @@ public class BiomeType {
         this.surfaceGenerator = builder.surfaceGenerator;
         this.terrainHeightGenerator = builder.terrainHeightGenerator;
 
-        biomeTypes.add(this);
+        allTypes.add(this);
     }
 
     public float getAverageTemperature() {
         return (minTemperature + maxTemperature)/2f;
     }
 
-    private boolean isInTemperatureRange(float temperature) {
+    public boolean isInTemperatureRange(float temperature) {
         return temperature >= this.minTemperature && temperature <= this.maxTemperature;
-    }
-
-
-    public static BiomeType getBiomeTypeWithChunkPos(World world, int chunkPosX) {
-        return getBiomeWithTemperature(world, world.getTemperatureForChunkX(chunkPosX));
-    }
-    public static BiomeType getBiomeWithTemperature(World world, float temperature) {
-
-        List<BiomeType> potentialBiomes = new ArrayList<>();
-        float totalWeight = 0;
-
-        for (BiomeType biomeType : biomeTypes) {
-            if (biomeType.isInTemperatureRange(temperature)) {
-                potentialBiomes.add(biomeType);
-                totalWeight += biomeType.weight;
-            }
-        }
-
-        if(potentialBiomes.size() == 0) {
-            return BiomeType.ERROR;
-        }
-
-        if(potentialBiomes.size() == 1) {
-            return potentialBiomes.get(0);
-        }
-
-        BIOME_RANDOM.setSeed((long) temperature);
-
-        float randomWeight = BIOME_RANDOM.nextFloat() * totalWeight;
-
-        float currentWeight = 0;
-        for (BiomeType biomeType : potentialBiomes) {
-            currentWeight += biomeType.weight;
-
-            if (randomWeight < currentWeight) return biomeType;
-        }
-
-        //shouldn't happen
-        return BiomeType.ERROR;
     }
 
     public static class BiomeTypeBuilder {

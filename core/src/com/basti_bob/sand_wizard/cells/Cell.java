@@ -85,7 +85,6 @@ public abstract class Cell {
             Color lightColor = cellProperty.lightColor;
 
             light = new Light(posX, posY, lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
-            //light.placedInChunk(world.getChunkFromCellPos(posX, posY));
         }
     }
 
@@ -395,7 +394,7 @@ public abstract class Cell {
         return neighbourCells;
     }
 
-    //Very fucking large but hopefully more efficient than the other approach (here for each chunkboardering state there have to be retrieved less chunks and not repeatedly)
+
     public Cell[][] getNeighbourCells(ChunkAccessor chunkAccessor, int posX, int posY) {
         Cell[][] neighbourCells = new Cell[3][3];
 

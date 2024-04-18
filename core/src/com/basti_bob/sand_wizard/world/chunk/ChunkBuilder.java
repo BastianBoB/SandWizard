@@ -1,12 +1,8 @@
 package com.basti_bob.sand_wizard.world.chunk;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.util.Array2D;
+import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
@@ -65,6 +61,7 @@ public class ChunkBuilder {
         this.vertices[index + 2] = cell.getColorR();
         this.vertices[index + 3] = cell.getColorG();
         this.vertices[index + 4] = cell.getColorB();
+        this.vertices[index + 5] = cell instanceof Empty ? 1f : 0f;
     }
 
     public Chunk buildChunk() {

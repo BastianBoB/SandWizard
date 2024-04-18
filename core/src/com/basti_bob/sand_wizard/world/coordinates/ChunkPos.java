@@ -4,20 +4,12 @@ import java.util.Objects;
 
 public class ChunkPos {
 
-    private final int x;
-    private final int y;
+    public final int x;
+    public final int y;
 
     public ChunkPos(int x, int y) {
         this.x = x;
         this.y = y;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
     }
 
     @Override

@@ -1,22 +1,20 @@
 package com.basti_bob.sand_wizard.world_generation.structures.trees;
 
 import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.FloatPredicate;
 import com.basti_bob.sand_wizard.world.World;
-import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
+import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 import com.basti_bob.sand_wizard.world_generation.structures.Structure;
-import com.basti_bob.sand_wizard.world_generation.structures.StructureGenerater;
+import com.basti_bob.sand_wizard.world_generation.structures.StructureGenerator;
 import com.basti_bob.sand_wizard.world_generation.util.Region;
 
-import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.*;
 import java.util.List;
 
 
-public class TreeGenerator implements StructureGenerater {
+public class TreeGenerator implements StructureGenerator {
 
     public static final TreeGenerator TREE_1 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[-F+F+F]").iterations(2)
             .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
@@ -90,8 +88,8 @@ public class TreeGenerator implements StructureGenerater {
 
         List<Branch> branches = generateBranches();
 
-        Set<Long> allBranchPositions = new HashSet<>();
-        Set<Long> allLeafPositions = new HashSet<>();
+        Set<CellPos> allBranchPositions = new HashSet<>();
+        Set<CellPos> allLeafPositions = new HashSet<>();
 
         for (Branch branch : branches) {
             allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
@@ -113,40 +111,31 @@ public class TreeGenerator implements StructureGenerater {
 
             if (!shouldAddLeaf.test(normalizedDist)) continue;
 
-            for (long leafPosition : generateLeaves(leafX, leafY, leafSize)) {
+            for (CellPos leafPosition : generateLeaves(leafX, leafY, leafSize)) {
                 boolean overLaps = allBranchPositions.contains(leafPosition);
 //
-//                if (!overLaps)
-//                    structureBuilder.addCell(leafCellType, x + startX, y + startY);
+                if (!overLaps)
+                    structureBuilder.addCell(leafCellType, leafPosition.x + startX, leafPosition.y + startY);
             }
         }
 
-        for (long point : allBranchPositions) {
-            int x = World.getXFromPositionKey(point);
-            int y = World.getYFromPositionKey(point);
+        for (CellPos point : allBranchPositions) {
 
-            structureBuilder.addCell(branchCellType, x + startX, y + startY);
-        }
-
-        for (long point : allLeafPositions) {
-            int x = World.getXFromPositionKey(point);
-            int y = World.getYFromPositionKey(point);
-
-            structureBuilder.addCell(leafCellType, x + startX, y + startY);
+            structureBuilder.addCell(branchCellType, point.x + startX, point.y + startY);
         }
 
         return structureBuilder.build();
     }
 
-    public List<Long> generateLeaves(float posX, float posY, int leafRadius) {
-        List<Long> leaves = new ArrayList<>();
+    public List<CellPos> generateLeaves(float posX, float posY, int leafRadius) {
+        List<CellPos> leaves = new ArrayList<>();
 
         for (int i = -leafRadius; i <= leafRadius; i++) {
             for (int j = -leafRadius; j <= leafRadius; j++) {
 
                 if (i * i + j * j > leafRadius * leafRadius) continue;
 
-                leaves.add(World.getPositionLong((int) (posX + i), (int) (posY + j)));
+                leaves.add(new CellPos((int) (posX + i), (int) (posY + j)));
             }
         }
 
@@ -197,8 +186,8 @@ public class TreeGenerator implements StructureGenerater {
         return branches;
     }
 
-    public List<Long> pathBetweenPoints(float x1, float y1, float x2, float y2, int thickness) {
-        List<Long> points = new ArrayList<>();
+    public List<CellPos> pathBetweenPoints(float x1, float y1, float x2, float y2, int thickness) {
+        List<CellPos> points = new ArrayList<>();
 
         int xDistance = (int) Math.abs(x2 - x1);
         int yDistance = (int) Math.abs(y2 - y1);
@@ -219,7 +208,7 @@ public class TreeGenerator implements StructureGenerater {
                 float y = positiveY ? i * slope : -i * slope;
 
                 for (int k = thickOffMin; k < thickOffMax; k++)
-                    points.add(World.getPositionLong((int) (x1 + x), (int) (y1 + y) + k));
+                    points.add(new CellPos((int) (x1 + x), (int) (y1 + y) + k));
 
             }
         } else {
@@ -230,25 +219,23 @@ public class TreeGenerator implements StructureGenerater {
                 float y = positiveY ? i : -i;
 
                 for (int k = thickOffMin; k < thickOffMax; k++)
-                    points.add(World.getPositionLong((int) (x1 + x) + k, (int) (y1 + y)));
+                    points.add(new CellPos((int) (x1 + x) + k, (int) (y1 + y)));
             }
         }
 
         return points;
     }
 
-    private Region getRegionsFromPoints(List<Long> points) {
-        Long first = points.get(0);
-        int firstX = World.getXFromPositionKey(first);
-        int firstY = World.getYFromPositionKey(first);
+    private Region getRegionsFromPoints(List<CellPos> points) {
+        CellPos first = points.get(0);
 
-        int minX = firstX, minY = firstY, maxX = firstX, maxY = firstY;
+        int minX = first.x, minY = first.y, maxX = first.x, maxY = first.y;
 
         for (int i = 1; i < points.size(); i++) {
-            Long point = points.get(i);
+            CellPos point = points.get(i);
 
-            int x = World.getXFromPositionKey(point);
-            int y = World.getYFromPositionKey(point);
+            int x = point.x;
+            int y = point.y;
 
             if (x < minX) minX = x;
             if (x > maxX) maxX = x;

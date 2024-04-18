@@ -10,6 +10,7 @@ import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.lighting.Light;
 
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +27,9 @@ public class Player {
     public boolean onGround;
     private int stepUpHeight = 6;
     private int fastStepUpHeight = 2;
+
+    public ChunkPos topLeftChunkPos;
+    public ChunkPos bottomRightChunkPos;
 
     private final Array2D<Chunk> renderingChunks = new Array2D<>(Chunk.class,
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1,
@@ -48,7 +52,7 @@ public class Player {
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
 
         Color c = Color.WHITE;
-        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 200f, 1f);
+        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 150f, 0.8f);
     }
 
     public void update(float deltaTime) {
@@ -158,7 +162,7 @@ public class Player {
 
                 int stepHeight = stepHeightAtTarget(checkX, (int) this.ny);
 
-                if(stepHeight < this.fastStepUpHeight) {
+                if (stepHeight < this.fastStepUpHeight) {
                     this.ny = this.ny + stepHeight;
                 } else if (stepHeight < this.stepUpHeight) {
                     this.ny = this.ny + stepHeight;
@@ -224,7 +228,7 @@ public class Player {
     }
 
     private void enteredNewChunk(Chunk previousChunk, Chunk newChunk) {
-        if(newChunk == null || previousChunk == null) return;
+        if (newChunk == null || previousChunk == null) return;
 
         light.moveIntoNewChunk(previousChunk, newChunk);
 
@@ -266,6 +270,9 @@ public class Player {
     public void setRenderingChunks(int chunkX, int chunkY) {
         int renderX = WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X;
         int renderY = WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_Y;
+
+        topLeftChunkPos = new ChunkPos(chunkX - renderX, chunkY + renderY);
+        bottomRightChunkPos = new ChunkPos(chunkX + renderX, chunkY - renderY);
 
         for (int i = -renderX; i <= renderX; i++) {
             for (int j = -renderY; j <= renderY; j++) {
