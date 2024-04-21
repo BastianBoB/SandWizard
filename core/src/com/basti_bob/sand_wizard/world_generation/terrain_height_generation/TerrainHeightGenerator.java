@@ -11,9 +11,13 @@ public abstract class TerrainHeightGenerator {
 
     public static final Random random = new Random(0);
 
-    public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(random.nextLong());
+    public static final TerrainHeightGenerator FLAT = FLAT(0);
 
-    public abstract float getTerrainHeight(World world, int cellPosX);
+    public static final TerrainHeightGenerator SPIKY_MOUNTAIN_PEAKS = ScaledShiftedTerrainHeightGenerator.normalToRange(
+            WeightedMultiTerrainHeightGenerator.builder()
+                    .addGeneratorAndWeight(NORMAL.SPIKY(0.01f, 32), 5f)
+                    .addGeneratorAndWeight(NORMAL.EROSION(0.002f), 0.1f).build(),
+            1500, 2000);
 
     public static final TerrainHeightGenerator MOUNTAINS = ScaledShiftedTerrainHeightGenerator.normalToRange(
             WeightedMultiTerrainHeightGenerator.builder()
@@ -21,14 +25,14 @@ public abstract class TerrainHeightGenerator {
                     .addGeneratorAndWeight(NORMAL.PLATEAU(0.001f), 1f)
                     .addGeneratorAndWeight(NORMAL.EROSION(0.002f), 3f)
                     .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.01f), 0.1f).build(),
-            500, 1000);
+            700, 1500);
 
     public static final TerrainHeightGenerator HILLS = ScaledShiftedTerrainHeightGenerator.normalToRange(
             WeightedMultiTerrainHeightGenerator.builder()
                     .addGeneratorAndWeight(NORMAL.PLATEAU(0.001f), 1f)
                     .addGeneratorAndWeight(NORMAL.EROSION(0.0005f), 1f)
                     .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.01f), 0.5f)
-                    .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.001f), 5f).build(),
+                    .addGeneratorAndWeight(NORMAL.PEAKS_AND_VALLEYS(0.002f), 5f).build(),
             100, 700);
 
     public static final TerrainHeightGenerator DESERT = ScaledShiftedTerrainHeightGenerator.normalToRange(
@@ -97,4 +101,7 @@ public abstract class TerrainHeightGenerator {
         }
     }
 
+    public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(random.nextLong());
+
+    public abstract float getTerrainHeight(World world, int cellPosX);
 }

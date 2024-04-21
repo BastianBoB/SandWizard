@@ -14,43 +14,7 @@ import java.util.*;
 import java.util.List;
 
 
-public class TreeGenerator implements StructureGenerator {
-
-    public static final TreeGenerator TREE_1 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[-F+F+F]").iterations(2)
-            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
-                if (isOuterBranch) return 3;
-                return 2;
-            }).branchThicknessFunction(i -> Math.max(1, 3 - i)).build();
-
-    public static final TreeGenerator TREE_2 = new TreeGeneratorBuilder().rule("FF+[+F-F-F]-[--F+F+F+F]").iterations(3).startLength(40f).angleIncrement((float) (Math.PI / 7f))
-            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
-                if (isOuterBranch) return 5;
-                return 2;
-            }).branchThicknessFunction(i -> switch (i) {
-                case 0 -> 7;
-                case 1, 2 -> 2;
-                default -> 1;
-            }).build();
-
-    public static final TreeGenerator TREE_3 = new TreeGeneratorBuilder().rule("FF[-FF][FFF][+FF]").iterations(2).startLength(30f)
-            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
-                if (isOuterBranch) return 3;
-                return 2;
-            }).build();
-
-    public static final TreeGenerator TREE_4 = new TreeGeneratorBuilder().rule("F[-F][FF[-F][+F]]").iterations(2).startLength(18f).angleIncrement((float) (Math.PI / 6f))
-            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> isOuterBranch ? 2 : 1)
-            .branchThicknessFunction(i -> 1).build();
-
-    public static final TreeGenerator TREE_5 = new TreeGeneratorBuilder().rule("F[-FF]F[+FF][F]").iterations(3).startLength(60f)
-            .leafSizeFunction((float normDistToCenter, boolean isOuterBranch) -> {
-                if (isOuterBranch) return 4;
-                return 2;
-            }).branchThicknessFunction(i -> switch (i) {
-                case 0 -> 5;
-                case 1, 2 -> 2;
-                default -> 1;
-            }).build();
+public class TreeGenerator extends StructureGenerator {
 
     private final CellType branchCellType, leafCellType;
     private final String rule;
@@ -309,7 +273,11 @@ public class TreeGenerator implements StructureGenerator {
         }
     }
 
-    private static class TreeGeneratorBuilder {
+    public static TreeGeneratorBuilder builder() {
+        return new TreeGeneratorBuilder();
+    }
+
+    public static class TreeGeneratorBuilder {
 
         private String rule = "FF+[+F-F-F]-[-F+F+F]";
         private CellType branchCellType = CellType.WOOD;
@@ -326,57 +294,57 @@ public class TreeGenerator implements StructureGenerator {
         private TreeGeneratorBuilder() {
         }
 
-        private TreeGeneratorBuilder rule(String rule) {
+        public TreeGeneratorBuilder rule(String rule) {
             this.rule = rule;
             return this;
         }
 
-        private TreeGeneratorBuilder branchCellType(CellType branchCellType) {
+        public TreeGeneratorBuilder branchCellType(CellType branchCellType) {
             this.branchCellType = branchCellType;
             return this;
         }
 
-        private TreeGeneratorBuilder leafCellType(CellType leafCellType) {
+        public TreeGeneratorBuilder leafCellType(CellType leafCellType) {
             this.leafCellType = leafCellType;
             return this;
         }
 
-        private TreeGeneratorBuilder iterations(int iterations) {
+        public TreeGeneratorBuilder iterations(int iterations) {
             this.iterations = iterations;
             return this;
         }
 
-        private TreeGeneratorBuilder startLength(float startLength) {
+        public TreeGeneratorBuilder startLength(float startLength) {
             this.startLength = startLength;
             return this;
         }
 
-        private TreeGeneratorBuilder lengthMultiplier(float lengthMultiplier) {
+        public TreeGeneratorBuilder lengthMultiplier(float lengthMultiplier) {
             this.lengthMultiplier = lengthMultiplier;
             return this;
         }
 
-        private TreeGeneratorBuilder angleIncrement(float angleIncrement) {
+        public TreeGeneratorBuilder angleIncrement(float angleIncrement) {
             this.angleIncrement = angleIncrement;
             return this;
         }
 
-        private TreeGeneratorBuilder branchThicknessFunction(BranchThicknessFunction branchThicknessFunction) {
+        public TreeGeneratorBuilder branchThicknessFunction(BranchThicknessFunction branchThicknessFunction) {
             this.branchThicknessFunction = branchThicknessFunction;
             return this;
         }
 
-        private TreeGeneratorBuilder leafSizeFunction(LeafSizeFunction leafSizeFunction) {
+        public TreeGeneratorBuilder leafSizeFunction(LeafSizeFunction leafSizeFunction) {
             this.leafSizeFunction = leafSizeFunction;
             return this;
         }
 
-        private TreeGeneratorBuilder shouldAddLeave(FloatPredicate shouldAddLeave) {
+        public TreeGeneratorBuilder shouldAddLeave(FloatPredicate shouldAddLeave) {
             this.shouldAddLeave = shouldAddLeave;
             return this;
         }
 
-        private TreeGenerator build() {
+        public TreeGenerator build() {
             return new TreeGenerator(branchCellType, leafCellType, rule, iterations, startLength, lengthMultiplier, angleIncrement, branchThicknessFunction, leafSizeFunction, shouldAddLeave);
         }
     }

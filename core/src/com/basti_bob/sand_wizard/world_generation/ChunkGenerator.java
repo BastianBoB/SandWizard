@@ -2,7 +2,6 @@ package com.basti_bob.sand_wizard.world_generation;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.world.WorldGeneration;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
@@ -10,14 +9,11 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
-import com.basti_bob.sand_wizard.world_generation.structures.trees.TreeGenerator;
+import com.basti_bob.sand_wizard.world_generation.structures.StructureGenerator;
+import com.basti_bob.sand_wizard.world_generation.surface_decoration.SurfaceDecorator;
 import com.basti_bob.sand_wizard.world_generation.surface_generation.SurfaceGenerator;
-import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
 
 public class ChunkGenerator {
 
@@ -39,6 +35,7 @@ public class ChunkGenerator {
 
         BiomeType biomeType = worldGeneration.getBiomeTypeWithChunkPos(chunkPosX);
 
+        SurfaceDecorator surfaceDecorator = biomeType.surfaceDecorator;
         SurfaceGenerator surfaceGenerator = biomeType.surfaceGenerator;
         SurfaceGenerator rightSurfaceGenerator = worldGeneration.getBiomeTypeWithChunkPos(chunkPosX + 1).surfaceGenerator;
 
@@ -65,8 +62,8 @@ public class ChunkGenerator {
                     chunkBuilder.setCell(cellType, cellPosX, cellPosY, i, j);
                 }
 
-                if (cellPosY == (int) terrainHeight && Math.random() < 0.01) {
-                    //world.addStructureToPlaceAsync(() -> TreeGenerator.TREE_2.generate(world, cellPosX, cellPosY));
+                if (cellPosY == (int) terrainHeight + 1) {
+                    surfaceDecorator.decorateSurface(world, cellPosX, cellPosY);
                 }
             }
         }

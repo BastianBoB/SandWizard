@@ -27,9 +27,16 @@ public abstract class SurfaceGenerator {
 
     public static final SurfaceGenerator SNOW_AND_ICE = BottomTerrainSurfaceGenerator.builder()
             .add(CellType.EMPTY)
-            .add(CellType.POWDER_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.02f, 32), 4, 8))
-            .add(CellType.COMPACT_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.05f, 32), 10, 30))
+            .add(CellType.POWDER_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.02f, 32), 2, 5))
+            .add(CellType.COMPACT_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.05f, 32), 5, 20))
             .add(CellType.ICE, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.1f, 16), 100, 200))
+            .add(CellType.STONE)
+            .build();
+
+    public static final SurfaceGenerator SNOW = BottomTerrainSurfaceGenerator.builder()
+            .add(CellType.EMPTY)
+            .add(CellType.POWDER_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.02f, 32), 5, 10))
+            .add(CellType.COMPACT_SNOW, ScaledShiftedTerrainHeightGenerator.normalToRange(TerrainHeightGenerator.NORMAL.SPIKY(0.05f, 32), 20, 40))
             .add(CellType.STONE)
             .build();
 

@@ -13,8 +13,11 @@ const int chunkSize = 32;
 const int viewHeight = 350;
 const int viewWidth = 650;
 
-const vec2 moonPos = vec2(200.0, 100.0);
+const vec2 celestialOffset = vec2(0, -175);
+const vec2 celestialSphere = vec2(325, 325);
+
 const float moonRadius = 20;
+const float sunRadius = 20;
 
 attribute vec2 a_position;
 attribute vec3 a_vertexColor;
@@ -27,8 +30,8 @@ uniform int u_cellSize;
 
 uniform vec2 u_playerPos;
 uniform vec2 u_cameraPos;
-uniform vec2 u_topLeftChunkPos;
-uniform vec2 u_bottomRightChunkPos;
+uniform int u_dayTimeMinutes;
+
 
 uniform float[chunkSize] terrain_heights;
 
@@ -37,16 +40,13 @@ const vec3 gammaCorrection = vec3(2.2);
 const vec3 skyColor1 = vec3(0.91, 0.94, 0.96);
 const vec3 skyColor2 = vec3(0.23, 0.58, 0.82);
 
-#define PI atan(1.0)*4.0
+#define PI 3.14159265359
 
-float rand(vec2 p) {
-    float r = dot(p, vec2(48.53, 72.96));
-    r += mod(r, PI/2.);
-    return (fract(sin(r)*45315.6327));
+float rand(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 float perlin(vec2 p) {
-    float re = 0.0;
 
     vec2 f = fract(p);
     f = f*f*(3.0-2.0*f);
@@ -57,8 +57,8 @@ float perlin(vec2 p) {
     botR = rand(id+vec2(0.5, -0.5));
     float top = mix(topL, topR, f.x);
     float bot = mix(botL, botR, f.x);
-    re += mix(bot, top, f.y);
-    return re;
+
+    return mix(bot, top, f.y);;
 }
 
 float fbm(vec2 p, int oct) {
@@ -90,15 +90,12 @@ float pattern(vec2 p, int oct) {
 
 
 vec3 moon(vec2 pos, vec2 moonPos, float size) {
-    pos = vec2(int(pos.x), int(pos.y));
 
     vec2 normOffset = (moonPos - pos) / size;
     float normDist = length(normOffset);
 
     float col;
-    float light = clamp(1.1/normDist, 0.0, 1.0);
-
-    //light = 0;
+    float light = clamp(1/normDist, 0.0, 1.0);
 
     if (length(normOffset) < 1) {
         float pattern = pattern(normOffset * 5, 10);
@@ -114,11 +111,24 @@ vec3 moon(vec2 pos, vec2 moonPos, float size) {
 }
 
 
+vec3 sun(vec2 pos, vec2 moonPos, float size) {
+
+    vec2 normOffset = (moonPos - pos) / size;
+    float normDist = length(normOffset);
+
+    float col = clamp(1/normDist, 0.0, 1.0);
+    col = smoothstep(0.0, 1.0, col);
+
+    return vec3(col, col-0.3, 0);
+
+}
+
+
 float lightFactor(float distanceSqr, float r) {
     float invRsqr = 1.0 / (r*r);
     float v = -distanceSqr * invRsqr;
 
-    return max(0, exp(5 * v) * (v + 1));
+    return max(0, exp(4 * v) * (v + 1));
 }
 
 vec3 gammaCorrect(vec3 color) {
@@ -149,15 +159,15 @@ vec3 calcLight(Light light) {
     return vec3(0);
 }
 
-vec3 calcLight2(Light light, float dist) {
-    float r = light.radius;
+vec3 calcLightAroundCircle(Light light, float dist) {
+    float r = light.radius + dist;
 
     float dx = light.x - a_position.x;
     float dy = light.y - a_position.y;
 
     float distanceSqr = dx*dx + dy*dy - dist*dist;
-    if(distanceSqr < 0) {
-        return vec3(1);
+    if (distanceSqr < 0) {
+        return vec3(light.r, light.g, light.b);
     }
 
     if (distanceSqr < r*r) {
@@ -173,16 +183,24 @@ vec3 calcLight2(Light light, float dist) {
 //
 //}
 
+const vec3 unlitBaseLight = vec3(0.1);
+
 void main() {
-
-    float sunLight = 0.5;
-
-    int inChunkX = int(mod(int(a_position.x), chunkSize));
-    float terrainHeight = terrain_heights[inChunkX];
-
     gl_Position = u_proj * vec4(a_position * u_cellSize + vec2(0, 2), 0.0, 1.0);
     gl_PointSize = u_pointSize;
 
+    float hour = u_dayTimeMinutes / 60.0;
+    float sunLight = sin(hour / 24.0 * PI * 2) * 0.5 + 0.5;
+
+    float moonAngle = map(hour, 0, 24, 0, PI * 2);
+    vec2 moonWorldPos = celestialOffset + u_cameraPos + vec2(cos(moonAngle) * celestialSphere.x, -sin(moonAngle) * celestialSphere.y);
+
+    float sunAngle = moonAngle + PI;
+    vec2 sunWorldPos = celestialOffset + u_cameraPos + vec2(cos(sunAngle) * celestialSphere.x, -sin(sunAngle) * celestialSphere.y);
+
+
+    int inChunkX = int(mod(int(a_position.x), chunkSize));
+    float terrainHeight = terrain_heights[inChunkX];
     float surfaceDist = a_position.y - terrainHeight;
 
     vec3 vertexColor = a_vertexColor;
@@ -191,35 +209,30 @@ void main() {
         vec2 cameraOff = a_position - u_cameraPos;
         float verticalT = map(cameraOff.y, -viewHeight/2.0, viewHeight/2.0, 0.0, 1.0);
 
-
         vec3 skyColor = mix(skyColor1 * sunLight, skyColor2 * sunLight, verticalT);
-        //if(length(cameraOff - moonPos) < moonRadius * 1.2) {
-            vertexColor = mix(moon(cameraOff, moonPos, moonRadius), skyColor, sunLight);
-//        } else {
-//            vertexColor = skyColor;
-//        }
+        vec3 moonColor = moon(a_position, moonWorldPos, moonRadius);
+        vec3 sunColor = sun(a_position, sunWorldPos, sunRadius);
 
-        //vertexColor = max(moon(cameraOff, moonPos, moonRadius), mix(skyColor1 * sunLight, skyColor2 * sunLight, verticalT));
+        vec3 maxSunMoon = max(moonColor, sunColor);
+
+        vertexColor = max(unlitBaseLight, mix(maxSunMoon, skyColor, sunLight));
     }
 
-    vec3 sumColor = mix(vec3(sunLight), vec3(0.05), clamp(-surfaceDist/32, 0, 1));
+    vec3 summedLightColor = unlitBaseLight + mix(vec3(sunLight / 2), vec3(0), clamp(-surfaceDist/32, 0, 1));
 
-    //light Calculation
-    for (int i = 0; i < lights.length(); i++) {
-        sumColor += calcLight(lights[i]);
-    }
-
-    Light moonLight;
-    moonLight.x = moonPos.x + u_cameraPos.x;
-    moonLight.y = moonPos.y + u_cameraPos.y;
     if (a_empty == 1) {
-        moonLight.radius = moonRadius*5;
-        moonLight.intensity = 1;
-        moonLight.r = 1;
-        moonLight.g = 1;
-        moonLight.b = 1;
-        sumColor += calcLight2(moonLight, moonRadius);
+        Light moonLight = Light(moonWorldPos.x, moonWorldPos.y, moonRadius*5, 1, 1, 1, 1);
+        summedLightColor += max(vec3(0), calcLightAroundCircle(moonLight, moonRadius));
+
+        Light sunLight = Light(sunWorldPos.x, sunWorldPos.y, sunRadius*5, 1, 1, 1, 0);
+        summedLightColor += max(vec3(0), calcLightAroundCircle(sunLight, sunRadius));
+
     }
 
-    v_color = gammaCorrect(vertexColor) * sumColor;
+    for (int i = 0; i < lights.length(); i++) {
+        summedLightColor += calcLight(lights[i]);
+    }
+
+    v_color = gammaCorrect(vertexColor) * summedLightColor;
+
 }

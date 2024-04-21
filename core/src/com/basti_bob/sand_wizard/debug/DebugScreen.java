@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
 
 public class DebugScreen {
 
@@ -41,6 +42,11 @@ public class DebugScreen {
         font.draw(spriteBatch, "world update time: " + String.format("%.1f", sandWizard.updateTime) + "ms", 50, hudCamera.viewportHeight - 230);
         font.draw(spriteBatch, "world render time: " + String.format("%.1f", sandWizard.renderTime) + "ms", 50, hudCamera.viewportHeight - 260);
 
+        float temperature = world.worldGeneration.getTemperatureForChunkX(World.getChunkPos((int) player.nx));
+        BiomeType biomeType = world.worldGeneration.getBiomeTypeWithChunkPos(World.getChunkPos((int) player.nx));
+
+        font.draw(spriteBatch, "chunk temperature: " + temperature, 50, hudCamera.viewportHeight - 290);
+        font.draw(spriteBatch, "current biome: " + biomeType.name, 50, hudCamera.viewportHeight - 320);
 
         spriteBatch.end();
     }

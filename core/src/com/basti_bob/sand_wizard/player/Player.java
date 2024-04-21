@@ -96,7 +96,11 @@ public class Player {
     }
 
     public Vector2 getPosition() {
-        return new Vector2(ox, oy);
+        return new Vector2(nx, ny);
+    }
+
+    public Vector2 getHeadPosition() {
+        return new Vector2(nx, ny + hitBox.getHeight());
     }
 
     public void moveTo(float x, float y) {
@@ -173,6 +177,7 @@ public class Player {
                 }
             }
 
+
             if (step == steps) {
                 this.nx = targetX;
             } else {
@@ -224,13 +229,13 @@ public class Player {
         this.ox = nx;
         this.oy = ny;
 
-        this.light.setNewPosition((int) nx, (int) ny);
+        //this.light.setNewPosition((int) nx, (int) ny);
     }
 
     private void enteredNewChunk(Chunk previousChunk, Chunk newChunk) {
         if (newChunk == null || previousChunk == null) return;
 
-        light.moveIntoNewChunk(previousChunk, newChunk);
+        //light.moveIntoNewChunk(previousChunk, newChunk);
 
         int oldChunkX = previousChunk.posX;
         int oldChunkY = previousChunk.posY;

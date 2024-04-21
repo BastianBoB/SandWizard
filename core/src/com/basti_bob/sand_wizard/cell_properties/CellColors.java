@@ -15,8 +15,8 @@ public class CellColors {
     public static final CellColors GRASS = new CellColors(c(19, 109, 21), c(38, 139, 7), c(65, 152, 10));
     public static final CellColors ICE = new CellColors(c(255, 255, 255), c(185, 232, 234), c(134, 214, 216), c(63, 208, 212), c(32, 195, 208));
     public static final CellColors SUMMER_LEAF = new CellColors(c(119, 163, 122), c(95, 146, 106), c(88, 126, 96));
-    public static final CellColors SPRING_LEAF = new CellColors(c(154,195,123), c(114,162,78), c(84,134,46));
-    public static final CellColors AUTUMN_LEAF = new CellColors(c(245,206,137), c(228,163,49), c(204,128,20), c(177,121,0), c(153,97,0));
+    public static final CellColors SPRING_LEAF = new CellColors(c(154, 195, 123), c(114, 162, 78), c(84, 134, 46));
+    public static final CellColors AUTUMN_LEAF = new CellColors(c(245, 206, 137), c(228, 163, 49), c(204, 128, 20), c(177, 121, 0), c(153, 97, 0));
     public static final CellColors COMPACT_SNOW = new CellColors(c(240, 240, 240), c(235, 235, 235), c(245, 245, 245), c(230, 230, 230), c(250, 250, 250));
     public static final CellColors WOOD = new CellColors(hC(0x6E470B), hC(0x785115), hC(0x643D10));
     public static final CellColors RED_WOOD = new CellColors(c(70, 31, 0), c(80, 41, 0), c(90, 51, 0));
@@ -33,6 +33,24 @@ public class CellColors {
     public static final CellColors FIRE = new CellColors(hC(0xFF8800), hC(0xFF2200), hC(0xFFFF00), hC(0xFFFF00), hC(0xFF2200), hC(0xFFFF00), hC(0xFF8800), hC(0xFFFF00), hC(0xFFFFFF));
     public static final CellColors STEAM = new CellColors(hC(0xC7D5E0), hC(0xC7D5E0), hC(0xFFFFFF));
     public static final CellColors METHANE = new CellColors(hC(0xFFFFFF), hC(0xDDDDFF), hC(0xEEEEFF));
+
+    public static final class FLOWER_PETAL {
+        public static final CellColors RED = new CellColors(c(255, 51, 51), c(204, 0, 0), c(255, 0, 0));
+        public static final CellColors PINK = new CellColors(c(255, 160, 200), c(255, 128, 192), c(255, 192, 203));
+        public static final CellColors YELLOW = new CellColors(c(255, 255, 102), c(204, 204, 0), c(255, 255, 0));
+        public static final CellColors ORANGE = new CellColors(c(255, 178, 102), c(255, 128, 0), c(255, 165, 0));
+        public static final CellColors PURPLE = new CellColors(c(153, 51, 204), c(102, 0, 102), c(128, 0, 128));
+        public static final CellColors WHITE = new CellColors(c(230, 230, 230), c(200, 200, 200), c(255, 255, 255));
+        public static final CellColors BLUE = new CellColors(c(51, 51, 255), c(0, 0, 204), c(0, 0, 255));
+        public static final CellColors LAVENDER = new CellColors(c(204, 204, 255), c(153, 153, 204), c(230, 230, 250));
+        public static final CellColors PEACH = new CellColors(c(255, 204, 170), c(255, 187, 153), c(255, 218, 185));
+        public static final CellColors LILAC = new CellColors(c(204, 153, 204), c(179, 102, 179), c(200, 162, 200));
+        public static final CellColors MAGENTA = new CellColors(c(255, 51, 255), c(204, 0, 204), c(255, 0, 255));
+        public static final CellColors CORAL = new CellColors(c(255, 153, 102), c(255, 102, 51), c(255, 127, 80));
+        public static final CellColors CYAN = new CellColors(c(102, 255, 255), c(0, 204, 204), c(0, 255, 255));
+        public static final CellColors GREEN = new CellColors(c(51, 153, 51), c(0, 102, 0), c(0, 128, 0));
+        public static final CellColors BROWN = new CellColors(c(139, 69, 19), c(160, 82, 45), c(205, 133, 63));
+    }
 
     private final List<Color> colors;
 

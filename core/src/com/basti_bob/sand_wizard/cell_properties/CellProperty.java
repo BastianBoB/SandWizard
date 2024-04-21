@@ -21,15 +21,15 @@ public class CellProperty {
     public static final MovableSolidProperty GRAVEL = MovableSolidProperty.builder().allMovableSolid(0.2f, 0.5f).build();
     public static final MovableSolidProperty POWDER_SNOW = MovableSolidProperty.builder().allMovableSolid(0.05f, 0.8f).burningTemperature(100).maxBurningTime(0).build();
 
-
     public static final LiquidProperty WATER = LiquidProperty.builder().allLiquid(6f, 1f).burningTemperature(100).maxBurningTime(0).build();
     public static final LiquidProperty ACID = LiquidProperty.builder().allLiquid(5f, 0.75f).allLight(5f, 1f, Color.LIME).allBurn(100, 120, 0.1f).build();
     public static final LiquidProperty OIL = LiquidProperty.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
 
     public static final GasProperty METHANE = GasProperty.builder().allGas(2f, 1f, 500).build();
     public static final GasProperty STEAM = GasProperty.builder().allGas(3f, 0.5f, 500).build();
-    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 60).allLight(16f, 0.6f, CellColors.c(255, 128, 0)).build();
+    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 60).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
 
+    public static final CellProperty FLOWER_PETAL = CellProperty.builder().allBurn(100, 10, 0.5f).build();
     public static final CellProperty GLOWBLOCK = CellProperty.builder().allLight(100f, 2f, Color.YELLOW).build();
 
     public final float friction;

@@ -51,6 +51,8 @@ public class SandWizard extends ApplicationAdapter {
         worldRenderer = new WorldRenderer(world, camera);
         player = new Player(world, 0, world.worldGeneration.getTerrainHeight(0));
 
+        world.test();
+
         this.debugScreen = new DebugScreen();
     }
 
@@ -102,6 +104,10 @@ public class SandWizard extends ApplicationAdapter {
             isUpdating = !isUpdating;
         }
 
+        if(Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+            world.setCell(CellType.GLOWBLOCK, (int) player.nx, (int) player.ny);
+        }
+
         accumulatedTime += deltaTime;
 
         while (accumulatedTime >= fixedDeltaTime) {
@@ -116,12 +122,16 @@ public class SandWizard extends ApplicationAdapter {
     public void fixedUpdate(float deltaTime) {
         updateTimes++;
 
+        if(updateTimes % 1800 == 0) {
+            world.test();
+        }
+
         updateTime = FunctionRunTime.timeFunction(() -> world.update());
 
         player.update(deltaTime);
 
 
-        camera.position.lerp(new Vector3(player.getPosition().scl(WorldConstants.CELL_SIZE), 0), 0.2f);
+        camera.position.lerp(new Vector3(player.getHeadPosition().scl(WorldConstants.CELL_SIZE), 0), 0.2f);
 
         if (updateTimes % 5 == 0) {
             Runtime runtime = Runtime.getRuntime();

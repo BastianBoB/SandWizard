@@ -3,18 +3,14 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
-import com.basti_bob.sand_wizard.util.MathUtil;
-import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkProvider;
-import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
-import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
 import com.basti_bob.sand_wizard.world_generation.structures.Structure;
-import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
+import com.basti_bob.sand_wizard.world_generation.structures.trees.TreeGenerator;
 import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
 
 import java.util.*;
@@ -45,6 +41,28 @@ public class World {
         this.chunkGenerator = new ChunkGenerator(this);
     }
 
+    public void test() {
+//        addStructureToPlaceAsync(() -> TreeGenerator.TREE_2.generate(this, 50, (int) worldGeneration.getTerrainHeight(50)));
+//        addStructureToPlaceAsync(() -> TreeGenerator.TREE_3.generate(this, 100, (int) worldGeneration.getTerrainHeight(100)));
+//        addStructureToPlaceAsync(() -> TreeGenerator.TREE_4.generate(this, 150, (int) worldGeneration.getTerrainHeight(150)));
+//        addStructureToPlaceAsync(() -> TreeGenerator.TREE_5.generate(this, 200, (int) worldGeneration.getTerrainHeight(200)));
+
+        int y = 400;
+        int x = 100;
+        for (CellType cellType : CellType.FLOWER_PETAL.ALL) {
+
+
+            for(int i = -10; i <= 10; i++) {
+                for(int j = -10; j<= 10; j++) {
+                    setCell(cellType, x + i, y + j);
+                }
+            }
+
+
+            x += 25;
+        }
+    }
+
     public void addStructureToPlace(Structure structure) {
         this.unplacedStructures.add(structure);
     }
@@ -55,6 +73,10 @@ public class World {
 
     public void update() {
         updateTimes++;
+
+//        for (int i = 50; i <= 200; i += 50)
+//            setCell(CellType.FIRE, i, (int) worldGeneration.getTerrainHeight(i));
+
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);

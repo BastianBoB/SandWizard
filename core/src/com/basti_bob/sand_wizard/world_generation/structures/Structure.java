@@ -60,6 +60,10 @@ public class Structure {
         }
 
         public void addCell(CellType cellType, int cellX, int cellY) {
+            addCell(cellType.createCell(), cellX, cellY);
+        }
+
+        public void addCell(Cell cell, int cellX, int cellY) {
             int chunkX = World.getChunkPos(cellX);
             int chunkY = World.getChunkPos(cellY);
 
@@ -68,8 +72,9 @@ public class Structure {
 
             HashMap<InChunkPos, Cell> chunkCells = chunksWithCells.computeIfAbsent(new ChunkPos(chunkX, chunkY), k -> new HashMap<>());
 
-            chunkCells.put(InChunkPos.get(inChunkX, inChunkY), cellType.createCell());
+            chunkCells.put(InChunkPos.get(inChunkX, inChunkY), cell);
         }
+
 
         public Structure build() {
             return new Structure(chunksWithCells);

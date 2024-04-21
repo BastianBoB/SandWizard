@@ -94,7 +94,7 @@ public class WorldGeneration {
             return potentialBiomes.get(0);
         }
 
-        biomeRandom.setSeed((long) temperature);
+        biomeRandom.setSeed((long) temperature * 10000000);
 
         float randomWeight = biomeRandom.nextFloat() * totalWeight;
 
@@ -111,6 +111,6 @@ public class WorldGeneration {
 
 
     public float getTemperatureForChunkX(int chunkX) {
-        return (float) (openSimplexNoise.eval(chunkX * 0.01f, 0, 0) * 50);
+        return (float) (openSimplexNoise.eval(chunkX * 0.05f, 0, 0) * 50);
     }
 }

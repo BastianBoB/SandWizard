@@ -11,7 +11,7 @@ public class DesktopLauncher {
 
 		Graphics.Monitor monitor = Lwjgl3ApplicationConfiguration.getMonitors()[2];
 
-		config.useVsync(true);
+		config.useVsync(false);
 		//config.setForegroundFPS(90);
 
 		float scale = 1f;
