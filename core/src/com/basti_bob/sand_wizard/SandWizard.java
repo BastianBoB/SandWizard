@@ -110,7 +110,7 @@ public class SandWizard extends ApplicationAdapter {
 
         accumulatedTime += deltaTime;
 
-        while (accumulatedTime >= fixedDeltaTime) {
+        if (accumulatedTime >= fixedDeltaTime) {
             if (isUpdating) {
                 fixedUpdate(fixedDeltaTime);
             }
@@ -122,7 +122,7 @@ public class SandWizard extends ApplicationAdapter {
     public void fixedUpdate(float deltaTime) {
         updateTimes++;
 
-        if(updateTimes % 1800 == 0) {
+        if(updateTimes % 500 == 0) {
             world.test();
         }
 

@@ -14,8 +14,9 @@ import com.basti_bob.sand_wizard.world.lighting.Light;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
-public class Chunk {
+public class Chunk implements Supplier<Chunk> {
 
     public World world;
     public Array2D<Cell> grid;
@@ -205,6 +206,11 @@ public class Chunk {
 
     public Array2D<Cell> getGrid() {
         return grid;
+    }
+
+    @Override
+    public Chunk get() {
+        return this;
     }
 
 

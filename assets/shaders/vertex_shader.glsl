@@ -39,6 +39,7 @@ const vec3 gammaCorrection = vec3(2.2);
 
 const vec3 skyColor1 = vec3(0.91, 0.94, 0.96);
 const vec3 skyColor2 = vec3(0.23, 0.58, 0.82);
+const vec3 unlitBaseLight = vec3(0.2);
 
 #define PI 3.14159265359
 
@@ -179,11 +180,6 @@ vec3 calcLightAroundCircle(Light light, float dist) {
     return vec3(0);
 }
 
-//vec3 calcLight(Light light, float minDist) {
-//
-//}
-
-const vec3 unlitBaseLight = vec3(0.1);
 
 void main() {
     gl_Position = u_proj * vec4(a_position * u_cellSize + vec2(0, 2), 0.0, 1.0);
@@ -220,7 +216,7 @@ void main() {
 
     vec3 summedLightColor = unlitBaseLight + mix(vec3(sunLight / 2), vec3(0), clamp(-surfaceDist/32, 0, 1));
 
-    if (a_empty == 1) {
+    if (a_empty == 1 && surfaceDist > 0) {
         Light moonLight = Light(moonWorldPos.x, moonWorldPos.y, moonRadius*5, 1, 1, 1, 1);
         summedLightColor += max(vec3(0), calcLightAroundCircle(moonLight, moonRadius));
 
@@ -234,5 +230,7 @@ void main() {
     }
 
     v_color = gammaCorrect(vertexColor) * summedLightColor;
+
+    //v_color = gammaCorrect(a_vertexColor);
 
 }

@@ -19,11 +19,11 @@ public abstract class MovingCell extends Cell {
         super.update(chunkAccessor, updateDirection);
     }
 
+    public abstract void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection);
     public abstract boolean moveWithVelocity(ChunkAccessor chunkAccessor, boolean updateDirection);
 
     public abstract boolean moveAlong(ChunkAccessor chunkAccessor, Cell targetCell, int lastValidX, int lastValidY, boolean updateDirection);
 
-    public abstract void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection);
 
     public boolean moveOrSwapDownLeftRight(ChunkAccessor chunkAccessor, boolean updateDirection) {
         if (updateDirection) {

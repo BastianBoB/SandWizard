@@ -52,7 +52,7 @@ public class Player {
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
 
         Color c = Color.WHITE;
-        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 150f, 0.8f);
+        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 256f, 1f);
     }
 
     public void update(float deltaTime) {
@@ -229,13 +229,13 @@ public class Player {
         this.ox = nx;
         this.oy = ny;
 
-        //this.light.setNewPosition((int) nx, (int) ny);
+        this.light.setNewPosition((int) nx, (int) ny);
     }
 
     private void enteredNewChunk(Chunk previousChunk, Chunk newChunk) {
         if (newChunk == null || previousChunk == null) return;
 
-        //light.moveIntoNewChunk(previousChunk, newChunk);
+        light.moveIntoNewChunk(previousChunk, newChunk);
 
         int oldChunkX = previousChunk.posX;
         int oldChunkY = previousChunk.posY;
@@ -243,11 +243,14 @@ public class Player {
         int newChunkX = newChunk.posX;
         int newChunkY = newChunk.posY;
 
+
         int chunkXDiff = newChunkX - oldChunkX;
         int chunkYDiff = newChunkY - oldChunkY;
 
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
         int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
+        int unloadX = WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_X;
+        int unloadY = WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_Y;
 
         CompletableFuture.runAsync(() -> {
             if (Math.abs(chunkXDiff) == 1) {
@@ -255,7 +258,7 @@ public class Player {
 
                 for (int i = -loadY; i <= loadY; i++) {
                     world.loadChunkAsync(newChunkX + xOff, newChunkY + i);
-                    world.unloadChunkAsync(oldChunkX - xOff, oldChunkY + i);
+                    //world.unloadChunkAsync(oldChunkX - xOff, oldChunkY + i);
                 }
             }
 
@@ -264,7 +267,15 @@ public class Player {
 
                 for (int i = -loadX; i <= loadX; i++) {
                     world.loadChunkAsync(newChunkX + i, newChunkY + yOff);
-                    world.unloadChunkAsync(oldChunkX + i, oldChunkY - yOff);
+                    //world.unloadChunkAsync(oldChunkX + i, oldChunkY - yOff);
+                }
+            }
+
+
+            for (Chunk chunk : world.chunkProvider.chunks) {
+
+                if (Math.abs(chunk.posX - newChunkX) > unloadX || Math.abs(chunk.posY - newChunkY) > unloadY) {
+                    world.unloadChunkAsync(chunk.posX, chunk.posY);
                 }
             }
         });

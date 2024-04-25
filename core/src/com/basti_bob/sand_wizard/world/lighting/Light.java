@@ -3,6 +3,8 @@ package com.basti_bob.sand_wizard.world.lighting;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 
+import java.util.concurrent.CompletableFuture;
+
 public class Light {
 
     public static final int NUM_FLOAT_DATA = 7;
@@ -29,42 +31,45 @@ public class Light {
     }
 
     public void placedInChunk(Chunk chunk) {
-        if(chunkRadius == 1) {
-            for(Chunk targetChunk : chunk.chunkAccessor.getSurroundingChunks()) {
-                if(targetChunk == null) continue;
+
+
+        if (chunkRadius == 1) {
+            for (Chunk targetChunk : chunk.chunkAccessor.getSurroundingChunks()) {
+                if (targetChunk == null) continue;
 
                 targetChunk.affectedLights.add(this);
             }
             return;
         }
 
-        for(int i = -chunkRadius; i <= chunkRadius; i++) {
-            for(int j = -chunkRadius; j <= chunkRadius; j++) {
+        for (int i = -chunkRadius; i <= chunkRadius; i++) {
+            for (int j = -chunkRadius; j <= chunkRadius; j++) {
                 Chunk targetChunk = chunk.world.getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
 
-                if(targetChunk != null) {
+                if (targetChunk != null) {
 
                     targetChunk.affectedLights.add(this);
                 }
             }
         }
     }
-//
+
+    //
     public void removedFromChunk(Chunk chunk) {
-        if(chunkRadius == 1) {
-            for(Chunk targetChunk : chunk.chunkAccessor.getSurroundingChunks()) {
-                if(targetChunk == null) continue;
+        if (chunkRadius == 1) {
+            for (Chunk targetChunk : chunk.chunkAccessor.getSurroundingChunks()) {
+                if (targetChunk == null) continue;
 
                 targetChunk.affectedLights.remove(this);
             }
             return;
         }
 
-        for(int i = -chunkRadius; i <= chunkRadius; i++) {
-            for(int j = -chunkRadius; j <= chunkRadius; j++) {
+        for (int i = -chunkRadius; i <= chunkRadius; i++) {
+            for (int j = -chunkRadius; j <= chunkRadius; j++) {
                 Chunk targetChunk = chunk.world.getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
 
-                if(targetChunk == null) continue;
+                if (targetChunk == null) continue;
 
                 targetChunk.affectedLights.remove(this);
             }
@@ -83,13 +88,36 @@ public class Light {
         removedFromChunk(previousChunk);
         placedInChunk(newChunk);
 
-//        int dx = newChunk.posX - previousChunk.posX;
-//        int dy = newChunk.posY - previousChunk.posY;
-
-
+//        int oldChunkX = previousChunk.posX;
+//        int oldChunkY = previousChunk.posY;
 //
-//        previousChunk.affectedLights.remove(this);
-//        newChunk.affectedLights.add(this);
+//        int newChunkX = newChunk.posX;
+//        int newChunkY = newChunk.posY;
+//
+//        int chunkXDiff = newChunkX - oldChunkX;
+//        int chunkYDiff = newChunkY - oldChunkY;
+//
+//
+//        if (Math.abs(chunkXDiff) == 1) {
+//            int xOff = chunkRadius * chunkXDiff;
+//
+//            for (int i = -chunkRadius; i <= chunkRadius; i++) {
+//                Chunk targetChunk = previousChunk.world.getChunkFromChunkPos(oldChunkX - xOff, oldChunkY + i);
+//                if (targetChunk == null) continue;
+//
+//                targetChunk.affectedLights.remove(this);
+//            }
+//        }
+//
+//        if (Math.abs(chunkYDiff) == 1) {
+//            int yOff = loadY * chunkYDiff;
+//
+//            for (int i = -loadX; i <= loadX; i++) {
+//                world.loadChunkAsync(newChunkX + i, newChunkY + yOff);
+//                //world.unloadChunkAsync(oldChunkX + i, oldChunkY - yOff);
+//            }
+//        }
+
     }
 
     public float[] getData() {

@@ -12,12 +12,10 @@ import com.basti_bob.sand_wizard.world.ChunkColumnData;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
-import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.lighting.Light;
 
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -60,18 +58,14 @@ public class WorldRenderer {
         Array2D<Chunk> chunks = player.getRenderingChunks();
 
         ChunkPos topLeftChunkPos = player.topLeftChunkPos;
-        ChunkPos bottomRightChunkPos = player.bottomRightChunkPos;
-
 
         shader.bind();
         shader.setUniformMatrix("u_proj", camera.combined);
         shader.setUniformf("u_pointSize", WorldConstants.CELL_SIZE / camera.zoom * 1.05f);
         shader.setUniformi("u_cellSize", WorldConstants.CELL_SIZE);
+
         shader.setUniformi("u_dayTimeMinutes", world.updateTimes);
-
-        //shader.setUniform2fv("u_playerPos", new float[]{player.nx, player.ny}, 0, 2);
         shader.setUniform2fv("u_cameraPos", new float[]{camera.position.x / WorldConstants.CELL_SIZE, camera.position.y / WorldConstants.CELL_SIZE}, 0, 2);
-
 
         int ssbo = Gdx.gl31.glGenBuffer();
         Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -84,6 +78,7 @@ public class WorldRenderer {
         for (int i = 0; i < chunks.rows; i++) {
             ChunkColumnData chunkColumnData = world.chunkProvider.chunkColumns.get(topLeftChunkPos.x + i);
             if (chunkColumnData == null) continue;
+
             shader.setUniform1fv("terrain_heights", chunkColumnData.terrainHeights, 0, WorldConstants.CHUNK_SIZE);
 
             for (int j = 0; j < chunks.cols; j++) {
@@ -117,6 +112,7 @@ public class WorldRenderer {
                     Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, numAffectedLights * Light.NUM_FLOAT_DATA * 4, buffer, GL31.GL_DYNAMIC_DRAW);
                     Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, 0, ssbo);
                 }
+
                 lastNumLights = numAffectedLights;
 
                 chunk.mesh.render(shader, GL20.GL_POINTS);

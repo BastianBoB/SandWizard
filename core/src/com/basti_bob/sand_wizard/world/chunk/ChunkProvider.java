@@ -26,7 +26,7 @@ public class ChunkProvider {
     public ChunkProvider(World world) {
         this.world = world;
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1500; i++) {
             unusedChunkPool.push(new Chunk());
         }
     }

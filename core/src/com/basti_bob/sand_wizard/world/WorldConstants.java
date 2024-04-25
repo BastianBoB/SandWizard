@@ -21,9 +21,15 @@ public class WorldConstants {
 
     public static final float M = 1f;
 
-    public static final int PLAYER_CHUNK_RENDER_RADIUS_X = (int) (13 * M);
-    public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = (int) (8 * M);
+    public static final int PLAYER_CHUNK_RENDER_RADIUS_X = (int) (12 * M);
+    public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = (int) (7 * M);
 
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = (int) (13 * M);
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = (int) (8 * M);
+//    public static final int PLAYER_CHUNK_UPDATE_RADIUS_X = 16;
+//    public static final int PLAYER_CHUNK_UPDATE_RADIUS_Y = 9;
+
+    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = 14;
+    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = 14;
+
+    public static final int PLAYER_CHUNK_UNLOAD_RADIUS_X = 18;
+    public static final int PLAYER_CHUNK_UNLOAD_RADIUS_Y = 18;
 }

@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.world_generation;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world.WorldGeneration;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
@@ -9,6 +10,7 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
+import com.basti_bob.sand_wizard.world_generation.cave_generation.CaveGenerator;
 import com.basti_bob.sand_wizard.world_generation.structures.StructureGenerator;
 import com.basti_bob.sand_wizard.world_generation.surface_decoration.SurfaceDecorator;
 import com.basti_bob.sand_wizard.world_generation.surface_generation.SurfaceGenerator;
@@ -17,9 +19,10 @@ import java.util.HashMap;
 
 public class ChunkGenerator {
 
-
     private final World world;
     private final WorldGeneration worldGeneration;
+    private final OpenSimplexNoise caveNoise = new OpenSimplexNoise();
+    private final OpenSimplexNoise caveNoise2 = new OpenSimplexNoise();
 
     public ChunkGenerator(World world) {
         this.world = world;
@@ -52,12 +55,11 @@ public class ChunkGenerator {
 
                 Cell cell = getCellFromMap(i, j, queuedCells);
 
-                if(cell != null) {
+                if (cell != null) {
                     chunkBuilder.setCell(cell, cellPosX, cellPosY, i, j);
                 } else {
 
-                    CellType cellType = Math.random() < surfaceInterpolationFactor ?
-                            rightSurfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight) : surfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight);
+                    CellType cellType = getNewCellType(cellPosX, cellPosY, terrainHeight, surfaceGenerator, rightSurfaceGenerator, surfaceInterpolationFactor);
 
                     chunkBuilder.setCell(cellType, cellPosX, cellPosY, i, j);
                 }
@@ -69,6 +71,17 @@ public class ChunkGenerator {
         }
 
         return chunkBuilder;
+    }
+
+    public CellType getNewCellType(int cellPosX, int cellPosY, float terrainHeight, SurfaceGenerator surfaceGenerator, SurfaceGenerator rightSurfaceGenerator, float surfaceInterpolationFactor) {
+        if(CaveGenerator.BASE.isCave(world, cellPosX, cellPosY, terrainHeight))
+            return CellType.EMPTY;
+
+        if (Math.random() < surfaceInterpolationFactor) {
+            return rightSurfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight);
+        } else {
+            return surfaceGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight);
+        }
     }
 
     public Cell getCellFromMap(int inChunkX, int inChunkY, HashMap<InChunkPos, Cell> queuedCells) {

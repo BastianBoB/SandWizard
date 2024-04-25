@@ -164,6 +164,8 @@ public class Liquid extends MovingCell {
             case SOLID -> {
                 if (Math.abs(velocityY) > Math.abs(velocityX)) {
                     velocityY = -1;
+                } else {
+                    velocityX = 0;
                 }
                 return false;
             }
