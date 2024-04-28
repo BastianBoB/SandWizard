@@ -4,6 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.basti_bob.sand_wizard.cell_properties.property_types.GasProperty;
 import com.basti_bob.sand_wizard.cell_properties.property_types.LiquidProperty;
 import com.basti_bob.sand_wizard.cell_properties.property_types.MovableSolidProperty;
+import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.world.lighting.Light;
+
+import java.util.function.Consumer;
 
 public class CellProperty {
 
@@ -12,8 +16,8 @@ public class CellProperty {
     public static final CellProperty GRASS = CellProperty.builder().build();
     public static final CellProperty ICE = CellProperty.builder().friction(0.98f).burningTemperature(100).maxBurningTime(0).build();
     public static final CellProperty COMPACT_SNOW = CellProperty.builder().burningTemperature(100).maxBurningTime(0).build();
-    public static final CellProperty WOOD = CellProperty.builder().allBurn(500, 400, 0.1f).build();
-    public static final CellProperty LEAF = CellProperty.builder().allBurn(100, 10, 0.5f).build();
+    public static final CellProperty WOOD = CellProperty.builder().allBurn(500, 400, 0.03f).build();
+    public static final CellProperty LEAF = CellProperty.builder().allBurn(100, 10, 0.3f).build();
 
     public static final MovableSolidProperty SAND = MovableSolidProperty.builder().allMovableSolid(0.1f, 0.6f).build();
     public static final MovableSolidProperty DIRT = MovableSolidProperty.builder().allMovableSolid(0.3f, 0.3f).build();
@@ -22,15 +26,29 @@ public class CellProperty {
     public static final MovableSolidProperty POWDER_SNOW = MovableSolidProperty.builder().allMovableSolid(0.05f, 0.8f).burningTemperature(100).maxBurningTime(0).build();
 
     public static final LiquidProperty WATER = LiquidProperty.builder().allLiquid(6f, 1f).burningTemperature(100).maxBurningTime(0).build();
-    public static final LiquidProperty ACID = LiquidProperty.builder().allLiquid(5f, 0.75f).allLight(5f, 1f, Color.LIME).allBurn(100, 120, 0.1f).build();
+    public static final LiquidProperty ACID = LiquidProperty.builder().allLiquid(5f, 0.75f).allLight(8f, 0.5f, Color.LIME).allBurn(100, 120, 0.1f).build();
     public static final LiquidProperty OIL = LiquidProperty.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
+    public static final LiquidProperty LAVA = LiquidProperty.builder().allLiquid(2f, 5f).allLight(8f, 0.5f, CellColors.c(255, 128, 0)).build();
 
-    public static final GasProperty METHANE = GasProperty.builder().allGas(2f, 1f, 500).build();
-    public static final GasProperty STEAM = GasProperty.builder().allGas(3f, 0.5f, 500).build();
-    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 60).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
+    public static final GasProperty METHANE = GasProperty.builder().allGas(2f, 1f, 300).build();
+    public static final GasProperty STEAM = GasProperty.builder().allGas(3f, 0.5f, 300).build();
+    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 40).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
 
     public static final CellProperty FLOWER_PETAL = CellProperty.builder().allBurn(100, 10, 0.5f).build();
     public static final CellProperty GLOWBLOCK = CellProperty.builder().allLight(100f, 2f, Color.YELLOW).build();
+
+    public static final CellProperty FLOWER_PETAL_GLOW = CellProperty.builder().allBurn(100, 10, 0.5f).glowsWithCellColor(16f, 0.5f).build();
+
+    public static final float r = 31f;
+    public static final float i = 0.4f;
+    public static final CellProperty FLOWER_PETAL_GLOW_RED = CellProperty.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 0.4f, 0.4f, 0)).build();
+    public static final CellProperty FLOWER_PETAL_GLOW_YELLOW = CellProperty.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 1f, 0.4f, 0)).build();
+    public static final CellProperty FLOWER_PETAL_GLOW_BLUE = CellProperty.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(0.4f, 0.4f, 1f, 0)).build();
+    public static final CellProperty FLOWER_PETAL_GLOW_PURPLE = CellProperty.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 0.4f, 1f, 0)).build();
+
+
+
+
 
     public final float friction;
     public final float speedFactor;
@@ -46,10 +64,13 @@ public class CellProperty {
     public final float maxCorrosionHealth;
     public final boolean canCorrode;
 
+    public final boolean glowsWithCellColor;
     public final boolean isLightSource;
     public final float lightRadius;
     public final float lightIntensity;
     public final Color lightColor;
+
+    public final Consumer<Cell> onCreate;
 
     public CellProperty(CellProperty.Builder builder) {
         this.friction = builder.friction;
@@ -66,8 +87,16 @@ public class CellProperty {
         this.isLightSource = builder.isLightSource;
         this.lightRadius = builder.lightRadius;
         this.lightIntensity = builder.lightIntensity;
-        ;
+
         this.lightColor = builder.lightColor;
+        this.glowsWithCellColor = builder.glowsWithCellColor;
+        this.onCreate = builder.onCreate;
+    }
+
+    public void createdCell(Cell cell) {
+        if(onCreate == null) return;
+
+        onCreate.accept(cell);
     }
 
     public static CellProperty.Builder builder() {
@@ -90,10 +119,12 @@ public class CellProperty {
         protected float maxCorrosionHealth = 100;
         protected boolean canCorrode = true;
 
+        protected boolean glowsWithCellColor = false;
         protected boolean isLightSource = false;
         protected float lightRadius = 32f;
         protected float lightIntensity = 1f;
         protected Color lightColor = Color.WHITE;
+        protected Consumer<Cell> onCreate = null;
 
         public T friction(float friction) {
             this.friction = friction;
@@ -169,6 +200,14 @@ public class CellProperty {
             return (T) this;
         }
 
+        public T glowsWithCellColor(float lightRadius, float lightIntensity) {
+            this.isLightSource = true;
+            this.glowsWithCellColor = true;
+            this.lightRadius = lightRadius;
+            this.lightIntensity = lightIntensity;
+            return (T) this;
+        }
+
         public T lightRadius(float lightRadius) {
             this.isLightSource = true;
             this.lightRadius = lightRadius;
@@ -184,6 +223,11 @@ public class CellProperty {
         public T lightColor(Color lightColor) {
             this.isLightSource = true;
             this.lightColor = lightColor;
+            return (T) this;
+        }
+
+        public T onCreate(Consumer<Cell> onCreate) {
+            this.onCreate = onCreate;
             return (T) this;
         }
 

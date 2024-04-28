@@ -40,7 +40,7 @@ public class SandWizard extends ApplicationAdapter {
 
 
     public float freeMemory, maxMemory, updateTime, renderTime;
-    public boolean isUpdating = true;
+    public static boolean isUpdating = true;
 
     @Override
     public void create() {
@@ -61,6 +61,9 @@ public class SandWizard extends ApplicationAdapter {
         float deltaTime = Gdx.graphics.getDeltaTime();
         Gdx.graphics.getDeltaTime();
 
+        if (updateTime > 8)
+            System.out.println(updateTime);
+
         float speed = WorldConstants.PLAYER_SPEED;
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) player.xVel = -speed;
@@ -80,7 +83,7 @@ public class SandWizard extends ApplicationAdapter {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) camera.zoom = 1;
 
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
             renderChunkBoarder = !renderChunkBoarder;
         }
 
@@ -104,16 +107,16 @@ public class SandWizard extends ApplicationAdapter {
             isUpdating = !isUpdating;
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
             world.setCell(CellType.GLOWBLOCK, (int) player.nx, (int) player.ny);
         }
 
         accumulatedTime += deltaTime;
 
         if (accumulatedTime >= fixedDeltaTime) {
-            if (isUpdating) {
-                fixedUpdate(fixedDeltaTime);
-            }
+            //if (isUpdating) {
+            fixedUpdate(fixedDeltaTime);
+            //}
             accumulatedTime -= fixedDeltaTime;
         }
         renderGame();
@@ -122,8 +125,8 @@ public class SandWizard extends ApplicationAdapter {
     public void fixedUpdate(float deltaTime) {
         updateTimes++;
 
-        if(updateTimes % 500 == 0) {
-            world.test();
+        if (updateTimes % 1500 == 0) {
+            //world.test();
         }
 
         updateTime = FunctionRunTime.timeFunction(() -> world.update());

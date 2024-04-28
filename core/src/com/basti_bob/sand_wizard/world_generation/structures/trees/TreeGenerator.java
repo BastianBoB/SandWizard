@@ -349,4 +349,12 @@ public class TreeGenerator extends StructureGenerator {
         }
     }
 
+    public interface LeafSizeFunction {
+        int getLeafSize(float normDistToCenter, boolean isOuterBranch);
+    }
+
+    public interface BranchThicknessFunction {
+        int getBranchThickness(int numBranchingBefore);
+    }
+
 }

@@ -23,9 +23,11 @@ public class Chunk implements Supplier<Chunk> {
     public ChunkAccessor chunkAccessor;
     public Mesh mesh;
     public int posX, posY;
-    private boolean active, activeNextFrame;
+    private int numActiveFrames;
     public boolean hasBeenModified;
+
     public final List<Light> affectedLights = new ArrayList<>();
+    public final List<Light> lightsInChunk = new ArrayList<>();
 
     public Chunk() {
         mesh = new Mesh(true, WorldConstants.NUM_MESH_VERTICES, 0,
@@ -39,12 +41,12 @@ public class Chunk implements Supplier<Chunk> {
 
     public void gotAddedToWorld() {
         this.hasBeenModified = false;
-        this.active = true;
-        this.activeNextFrame = true;
+        this.numActiveFrames = 5;
     }
 
     public void gotRemovedFromWorld() {
         affectedLights.clear();
+        lightsInChunk.clear();
 
         for (Cell cell : grid.getArray()) {
             cell.removedFromChunk(this);
@@ -52,6 +54,8 @@ public class Chunk implements Supplier<Chunk> {
     }
 
     public void update(boolean updateDirection) {
+
+        //setCell(updateDirection ? CellType.FLOWER_PETAL.BLUE_GLOW : CellType.FLOWER_PETAL.RED_GLOW, getCellPosX(16), getCellPosY(16), 16, 16);
 
         for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
             for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {
@@ -64,7 +68,7 @@ public class Chunk implements Supplier<Chunk> {
 
                 cell.update(chunkAccessor, updateDirection);
 
-                if (cell.shouldActiveChunk()) chunkAccessor.cellActivatesChunk(cell.posX, cell.posY);
+                if (cell.shouldActiveChunk()) chunkAccessor.cellActivatesChunk(cell.getPosX(), cell.getPosY());
             }
         }
     }
@@ -76,7 +80,8 @@ public class Chunk implements Supplier<Chunk> {
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY, CellPlaceFlag flag) {
-        cell.setPosition(cellPosX, cellPosY);
+        if (!(cell instanceof Empty))
+            cell.setPosition(cellPosX, cellPosY);
 
         setCellAndUpdate(cell, cellPosX, cellPosY, inChunkPosX, inChunkPosY, flag);
 
@@ -93,13 +98,14 @@ public class Chunk implements Supplier<Chunk> {
         grid.set(inChunkPosX, inChunkPosY, cell);
 
         this.cellActivatesChunk(inChunkPosX, inChunkPosY);
-        updateMeshData(cell);
+
+        updateMeshData(cell, inChunkPosX, inChunkPosY);
 
         this.hasBeenModified = true;
     }
 
     public void updateMeshColor(Cell cell) {
-        updateMeshColor(cell.inChunkX, cell.inChunkY, cell.getColorR(), cell.getColorG(), cell.getColorB());
+        updateMeshColor(cell.getInChunkX(), cell.getInChunkY(), cell.getColorR(), cell.getColorG(), cell.getColorB());
     }
 
     public void updateMeshColor(int inChunkPosX, int inChunkPosY, float r, float g, float b) {
@@ -108,8 +114,8 @@ public class Chunk implements Supplier<Chunk> {
         mesh.updateVertices(index + 2, new float[]{r, g, b});
     }
 
-    public void updateMeshData(Cell cell) {
-        updateMeshData(cell.inChunkX, cell.inChunkY, cell.getColorR(), cell.getColorG(), cell.getColorB(), cell instanceof Empty);
+    public void updateMeshData(Cell cell, int inChunkX, int inChunkY) {
+        updateMeshData(inChunkX, inChunkY, cell.getColorR(), cell.getColorG(), cell.getColorB(), cell instanceof Empty);
     }
 
     public void updateMeshData(int inChunkPosX, int inChunkPosY, float r, float g, float b, boolean isEmpty) {
@@ -148,7 +154,7 @@ public class Chunk implements Supplier<Chunk> {
     }
 
     public void activateChunk() {
-        this.activeNextFrame = true;
+        this.numActiveFrames = 3;
     }
 
     public void activateNeighbourChunk(int offsetX, int offsetY) {
@@ -195,12 +201,11 @@ public class Chunk implements Supplier<Chunk> {
     }
 
     public boolean isActive() {
-        return active;
+        return numActiveFrames > 0;
     }
 
     public void updateActive() {
-        this.active = activeNextFrame;
-        this.activeNextFrame = false;
+        numActiveFrames--;
     }
 
 

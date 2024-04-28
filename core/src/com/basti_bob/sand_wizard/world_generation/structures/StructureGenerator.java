@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.world_generation.structures;
 
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world_generation.structures.ponds.PondGenerator;
 import com.basti_bob.sand_wizard.world_generation.structures.static_structure.StaticStructureGenerator;
 import com.basti_bob.sand_wizard.world_generation.structures.trees.TreeGenerator;
 
@@ -11,6 +12,19 @@ import java.util.HashMap;
 import java.util.List;
 
 public abstract class StructureGenerator {
+
+
+    public static class PONDS {
+
+        public static final PondGenerator SMALL_ACID = PondGenerator.builder(CellType.ACID, 5, 20, 3, 10).build();
+        public static final PondGenerator SMALL_LAVA = PondGenerator.builder(CellType.LAVA, 5, 20, 3, 10).build();
+        public static final PondGenerator SMALL_WATER = PondGenerator.builder(CellType.WATER, 5, 20, 3, 10).build();
+
+
+        public static final PondGenerator WATER = PondGenerator.builder(CellType.WATER, 50, 200, 30, 50).build();
+
+    }
+
     public static class TREES {
 
         public static final TreeGenerator TREE_1 = TreeGenerator.builder().rule("FF+[+F-F-F]-[-F+F+F]").iterations(2)
@@ -87,6 +101,7 @@ public abstract class StructureGenerator {
 
             public static final List<StaticStructureGenerator> ALL = Arrays.asList(RED, PURPLE, PINK, YELLOW, ORANGE, WHITE);
         }
+
         public static class ROSES {
 
             private static final String[][] ROSE_PATTERN = new String[][]{
@@ -124,6 +139,49 @@ public abstract class StructureGenerator {
             public static final StaticStructureGenerator PURPLE = ROSE_FROM_TYPE(CellType.FLOWER_PETAL.PURPLE);
 
             public static final List<StaticStructureGenerator> ALL = Arrays.asList(WHITE, YELLOW, PINK, ORANGE, RED, LAVENDER, PURPLE);
+        }
+
+        public static class BERRY_BUSHES {
+            private static final String[][] BERRY_BUSH_PATTERN = new String[][]{
+                    {".", "g", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "."},
+                    {".", ".", "g", ".", ".", ".", ".", "g", ".", ".", ".", ".", ".", "."},
+                    {".", ".", "g", "f", "f", ".", "g", "g", ".", ".", ".", ".", ".", "."},
+                    {".", "f", "f", "f", "f", ".", "g", ".", ".", "f", "f", ".", ".", "."},
+                    {".", "f", "f", "y", "f", "f", ".", "f", "f", "f", "f", ".", ".", "."},
+                    {"g", "g", "f", "f", "f", "f", ".", "f", "f", "y", "f", "f", ".", "."},
+                    {".", ".", "f", "f", ".", ".", "g", ".", "f", "f", "f", "f", ".", "."},
+                    {".", ".", ".", ".", "f", "f", ".", "g", "f", "f", ".", ".", ".", "."},
+                    {".", ".", "g", "g", "f", "f", "f", "f", ".", "g", ".", ".", "g", "g"},
+                    {".", "g", ".", "f", "f", "y", "f", "f", ".", "g", ".", "g", "g", "."},
+                    {".", ".", ".", "f", "f", "f", "f", "g", ".", ".", "g", "g", ".", "."},
+                    {".", ".", ".", ".", ".", "f", "f", ".", "g", ".", "g", ".", ".", "."},
+                    {".", ".", ".", ".", ".", ".", ".", ".", ".", "g", ".", ".", ".", "."},
+                    {".", ".", ".", ".", ".", ".", ".", ".", ".", "g", ".", ".", ".", "."},
+            };
+
+            private static StaticStructureGenerator BERRY_BUSH_FROM_TYPE(CellType type1, CellType type2) {
+                return StaticStructureGenerator.builder().fromStringArray(BERRY_BUSH_PATTERN, 4, 0, new HashMap<>() {{
+                            put(".", null);
+                            put("g", CellType.FLOWER_PETAL.GREEN);
+                            put("y", type2);
+                            put("f", type1);
+                        }}
+                ).build();
+            }
+
+            public static final StaticStructureGenerator RED = BERRY_BUSH_FROM_TYPE(CellType.FLOWER_PETAL.RED, CellType.FLOWER_PETAL.YELLOW);
+            public static final StaticStructureGenerator YELLOW = BERRY_BUSH_FROM_TYPE(CellType.FLOWER_PETAL.YELLOW, CellType.FLOWER_PETAL.YELLOW);
+            public static final StaticStructureGenerator BLUE = BERRY_BUSH_FROM_TYPE(CellType.FLOWER_PETAL.BLUE, CellType.FLOWER_PETAL.YELLOW);
+            public static final StaticStructureGenerator PURPLE = BERRY_BUSH_FROM_TYPE(CellType.FLOWER_PETAL.PURPLE, CellType.FLOWER_PETAL.YELLOW);
+
+            public static final StaticStructureGenerator RED_GLOW = BERRY_BUSH_FROM_TYPE(CellType.FLOWER_PETAL.RED, CellType.FLOWER_PETAL.YELLOW_GLOW_RED);
+            public static final StaticStructureGenerator YELLOW_GLOW = BERRY_BUSH_FROM_TYPE(CellType.FLOWER_PETAL.YELLOW, CellType.FLOWER_PETAL.YELLOW_GLOW_YELLOW);
+            public static final StaticStructureGenerator BLUE_GLOW = BERRY_BUSH_FROM_TYPE(CellType.FLOWER_PETAL.BLUE, CellType.FLOWER_PETAL.YELLOW_GLOW_BLUE);
+            public static final StaticStructureGenerator PURPLE_GLOW = BERRY_BUSH_FROM_TYPE(CellType.FLOWER_PETAL.PURPLE, CellType.FLOWER_PETAL.YELLOW_GLOW_PURPLE);
+
+            public static final List<StructureGenerator> ALL_NORMAL = Arrays.asList(RED, YELLOW, BLUE, PURPLE);
+            public static final List<StructureGenerator> ALL_GLOW = Arrays.asList(RED_GLOW, YELLOW_GLOW, BLUE_GLOW, PURPLE_GLOW);
+
         }
 
         public static final StaticStructureGenerator LAVENDER = StaticStructureGenerator.builder().fromStringArray(
@@ -179,12 +237,14 @@ public abstract class StructureGenerator {
         public static final List<StructureGenerator> ALL = new ArrayList<>();
 
         static {
-            ALL.addAll(FLOWERS.TULIPS.ALL);
-            ALL.addAll(FLOWERS.ROSES.ALL);
+            ALL.addAll(TULIPS.ALL);
+            ALL.addAll(ROSES.ALL);
+            ALL.addAll(BERRY_BUSHES.ALL_NORMAL);
             ALL.add(LAVENDER);
             ALL.add(SUNFLOWER);
 
         }
     }
+
     public abstract Structure generate(World world, int startX, int startY);
 }

@@ -1,6 +1,8 @@
 package com.basti_bob.sand_wizard.world;
 
+import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.cells.CellParticle;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
@@ -21,6 +23,8 @@ import java.util.function.Supplier;
 
 public class World {
 
+    public final Random random = new Random(0);
+
     private boolean updateDirection;
     public int activeChunks;
     public int updateTimes;
@@ -34,34 +38,24 @@ public class World {
     public final Deque<Structure> unplacedStructures = new ArrayDeque<>();
     public final HashMap<ChunkPos, HashMap<InChunkPos, Cell>> unloadedStructureCells = new HashMap<>();
 
+    private final ExecutorService executor;
+
     public World() {
         this.chunkProvider = new ChunkProvider(this);
         this.worldGeneration = new WorldGeneration(this);
         this.chunkGenerator = new ChunkGenerator(this);
+
+        int numThreads = Runtime.getRuntime().availableProcessors();
+        System.out.println(numThreads);
+        executor = Executors.newFixedThreadPool(numThreads);
     }
 
     public void test() {
-        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_2.generate(this, 50, (int) worldGeneration.getTerrainHeight(50)));
-        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_3.generate(this, 100, (int) worldGeneration.getTerrainHeight(100)));
-        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_4.generate(this, 150, (int) worldGeneration.getTerrainHeight(150)));
-        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_5.generate(this, 200, (int) worldGeneration.getTerrainHeight(200)));
-        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_2.generate(this, 250, (int) worldGeneration.getTerrainHeight(250)));
-
-
-        int y = 400;
-        int x = 100;
-        for (CellType cellType : CellType.FLOWER_PETAL.ALL) {
-
-
-            for (int i = -10; i <= 10; i++) {
-                for (int j = -10; j <= 10; j++) {
-                    setCell(cellType, x + i, y + j);
-                }
-            }
-
-
-            x += 25;
-        }
+//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_2.generate(this, 50, (int) worldGeneration.getTerrainHeight(50)));
+//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_3.generate(this, 100, (int) worldGeneration.getTerrainHeight(100)));
+//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_4.generate(this, 150, (int) worldGeneration.getTerrainHeight(150)));
+//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_5.generate(this, 200, (int) worldGeneration.getTerrainHeight(200)));
+//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_2.generate(this, 250, (int) worldGeneration.getTerrainHeight(250)));
     }
 
     public void addStructureToPlace(Structure structure) {
@@ -75,25 +69,15 @@ public class World {
     public void update() {
         updateTimes++;
 
-        for (int i = 50; i <= 250; i += 50)
-            setCell(CellType.FIRE, i, (int) worldGeneration.getTerrainHeight(i));
-
-
-        int numThreads = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        setCell(CellType.FIRE, 100, 400);
 
         addAndRemoveChunks();
         placeStructures();
 
         updateChunkActiveAndSetCellsNotUpdated(executor);
-        updateAllCells(executor);
 
-        executor.shutdown();
-        try {
-            executor.awaitTermination(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        if (SandWizard.isUpdating)
+            updateAllCells(executor);
     }
 
     private void chunkToAdd(Supplier<Chunk> supplier, int chunkX, int chunkY) {
@@ -168,7 +152,7 @@ public class World {
 
             final Array2D<Cell> grid = chunk.getGrid();
 
-            executor.submit(() -> {
+            tasks.add(Executors.callable(() -> {
                 for (int inChunkY = 0; inChunkY < WorldConstants.CHUNK_SIZE; inChunkY++) {
                     for (int inChunkX = 0; inChunkX < WorldConstants.CHUNK_SIZE; inChunkX++) {
                         Cell cell = grid.get(inChunkX, inChunkY);
@@ -176,8 +160,9 @@ public class World {
                         cell.gotUpdated = false;
                     }
                 }
-            });
+            }));
         }
+
 
         try {
             executor.invokeAll(tasks);
@@ -185,31 +170,42 @@ public class World {
             throw new RuntimeException(e);
         }
 
-        updateDirection = !updateDirection;
     }
 
     private void updateAllCells(ExecutorService executor) {
         updateDirection = !updateDirection;
 
-
         for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkProvider.chunkUpdatingRows.values()) {
 
             for (int i = 0; i < 3; i++) {
-                ArrayList<Chunk> separatedChunks = worldUpdatingChunkRow.separateChunksList[i];
+                int index = updateDirection ? i : 2 - i;
+
+                ArrayList<Chunk> separatedChunks = new ArrayList<>(worldUpdatingChunkRow.separateChunksList[index]);
 
                 List<Callable<Object>> tasks = new ArrayList<>();
 
                 for (Chunk chunk : separatedChunks) {
 
                     if (!chunk.isActive()) continue;
+
                     tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
                 }
 
-                try {
-                    executor.invokeAll(tasks);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                //run tasks
+                if (tasks.size() == 1) {
+                    try {
+                        tasks.get(0).call();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        executor.invokeAll(tasks);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
+
             }
         }
     }
@@ -280,10 +276,13 @@ public class World {
                 neighbourChunk.activateChunk();
                 neighbourChunk.chunkAccessor.setSurroundingChunk(chunk);
                 chunk.chunkAccessor.setSurroundingChunk(neighbourChunk);
+
+                chunk.affectedLights.addAll(neighbourChunk.lightsInChunk);
             }
         }
 
         chunkProvider.addChunk(chunk);
+        chunk.activateChunk();
     }
 
     private void removeChunk(Chunk chunk) {

@@ -31,7 +31,7 @@ public class Light {
     }
 
     public void placedInChunk(Chunk chunk) {
-
+        chunk.lightsInChunk.add(this);
 
         if (chunkRadius == 1) {
             for (Chunk targetChunk : chunk.chunkAccessor.getSurroundingChunks()) {
@@ -56,6 +56,8 @@ public class Light {
 
     //
     public void removedFromChunk(Chunk chunk) {
+        chunk.lightsInChunk.remove(this);
+
         if (chunkRadius == 1) {
             for (Chunk targetChunk : chunk.chunkAccessor.getSurroundingChunks()) {
                 if (targetChunk == null) continue;

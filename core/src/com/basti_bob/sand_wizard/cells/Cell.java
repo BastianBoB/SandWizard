@@ -18,10 +18,12 @@ import com.basti_bob.sand_wizard.world.lighting.Light;
 public abstract class Cell {
 
     public World world;
-    private final CellType cellType;
+    protected final CellType cellType;
 
-    public int posX, posY;
-    public int inChunkX, inChunkY;
+    private int posX;
+    private int posY;
+    private int inChunkX;
+    private int inChunkY;
 
     private float colorR, colorG, colorB;
     private final float originalColorR, originalColorG, originalColorB;
@@ -46,14 +48,16 @@ public abstract class Cell {
     private float corrosionHealth;
     private boolean canCorrode;
 
-    private boolean isLightSource;
-    private Light light;
+    public boolean glowsWithCellColor;
+    public boolean isLightSource;
+
+    public Light light;
 
 
     public Cell(CellType cellType) {
         this.cellType = cellType;
 
-        Color color = cellType.getCellColors().getColor(world, posX, posY);
+        Color color = cellType.getCellColors().getColor(world);
         this.colorR = color.r;
         this.colorG = color.g;
         this.colorB = color.b;
@@ -80,40 +84,40 @@ public abstract class Cell {
         this.corrosionHealth = cellProperty.maxCorrosionHealth;
 
         this.isLightSource = cellProperty.isLightSource;
+        this.glowsWithCellColor = cellProperty.glowsWithCellColor;
 
         if (isLightSource) {
-            Color lightColor = cellProperty.lightColor;
 
-            light = new Light(posX, posY, lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
+            Color lightColor = glowsWithCellColor ? color : cellProperty.lightColor;
+
+            light = new Light(getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
         }
-    }
 
-    public int getX() {
-        return posX;
-    }
-
-    public int getY() {
-        return posY;
+        cellProperty.createdCell(this);
     }
 
     public void removedFromChunk(Chunk chunk) {
-        if(isLightSource) {
+        if (isLightSource) {
             light.removedFromChunk(chunk);
         }
     }
 
     public void addedToWorld(World world, Chunk chunk, int posX, int posY) {
         this.world = world;
-        this.setPosition(posX, posY);
 
-        if(isLightSource) {
+        if (!(this instanceof Empty))
+            this.setPosition(posX, posY);
+
+        if (isLightSource) {
             light.placedInChunk(chunk);
         }
     }
 
     public void addedToWorld(World world, int posX, int posY) {
         this.world = world;
-        this.setPosition(posX, posY);
+
+        if (!(this instanceof Empty))
+            this.setPosition(posX, posY);
     }
 
     public void movedInNewChunk(Chunk previousChunk, Chunk newChunk) {
@@ -123,15 +127,21 @@ public abstract class Cell {
     }
 
     public void setPosition(int posX, int posY) {
-        this.posX = posX;
-        this.posY = posY;
+        this.setPosX(posX);
+        this.setPosY(posY);
 
-        this.inChunkX = World.getInChunkPos(posX);
-        this.inChunkY = World.getInChunkPos(posY);
+        this.setInChunkX(World.getInChunkPos(posX));
+        this.setInChunkY(World.getInChunkPos(posY));
 
         if (isLightSource) {
             light.setNewPosition(posX, posY);
         }
+    }
+
+    public void setColor(float r, float g, float b) {
+        this.colorR = r;
+        this.colorG = g;
+        this.colorB = b;
     }
 
     public void update(ChunkAccessor chunkAccessor, boolean updateDirection) {
@@ -188,15 +198,15 @@ public abstract class Cell {
     }
 
     public void updateBurning(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        if (Math.random() > this.getFireSpreadChance()) return;
+        if (world.random.nextFloat() > this.getFireSpreadChance()) return;
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if (i == 0 && j == 0) continue;
 
-                if (Math.random() > this.getFireSpreadChance()) continue;
+                if (world.random.nextFloat() > this.getFireSpreadChance()) continue;
 
-                chunkAccessor.setCellIfEmpty(CellType.FIRE, this.getX() + i, this.getY() + j);
+                chunkAccessor.setCellIfEmpty(CellType.FIRE, this.getPosX() + i, this.getPosY() + j);
             }
         }
     }
@@ -210,15 +220,15 @@ public abstract class Cell {
     }
 
     public boolean die(ChunkAccessor chunkAccessor) {
-        if(isLightSource) {
-            light.removedFromChunk(chunkAccessor.getNeighbourChunk(this.getX(), this.getY()));
-        }
-
         return replace(CellType.EMPTY, chunkAccessor);
     }
 
     public boolean replace(CellType cellType, ChunkAccessor chunkAccessor) {
-        chunkAccessor.setCell(cellType, this.getX(), this.getY());
+        if (isLightSource) {
+            light.removedFromChunk(chunkAccessor.getNeighbourChunk(getPosX(), getPosY()));
+        }
+        chunkAccessor.setCell(cellType, getPosX(), getPosY());
+
         return true;
     }
 
@@ -573,7 +583,7 @@ public abstract class Cell {
 
     public void trySetNeighboursMoving(ChunkAccessor chunkAccessor, int posX, int posY) {
 
-        Cell[] directNeighbourCells = this.getDirectNeighbourCells(chunkAccessor, this.getX(), this.getY());
+        Cell[] directNeighbourCells = this.getDirectNeighbourCells(chunkAccessor, posX, posY);
         for (Cell cell : directNeighbourCells) {
             trySetMoving(cell);
         }
@@ -689,5 +699,37 @@ public abstract class Cell {
 
     public Light getLight() {
         return light;
+    }
+
+    public int getPosX() {
+        return posX;
+    }
+
+    public void setPosX(int posX) {
+        this.posX = posX;
+    }
+
+    public int getPosY() {
+        return posY;
+    }
+
+    public void setPosY(int posY) {
+        this.posY = posY;
+    }
+
+    public int getInChunkX() {
+        return inChunkX;
+    }
+
+    public void setInChunkX(int inChunkX) {
+        this.inChunkX = inChunkX;
+    }
+
+    public int getInChunkY() {
+        return inChunkY;
+    }
+
+    public void setInChunkY(int inChunkY) {
+        this.inChunkY = inChunkY;
     }
 }

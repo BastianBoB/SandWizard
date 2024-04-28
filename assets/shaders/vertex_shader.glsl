@@ -39,7 +39,7 @@ const vec3 gammaCorrection = vec3(2.2);
 
 const vec3 skyColor1 = vec3(0.91, 0.94, 0.96);
 const vec3 skyColor2 = vec3(0.23, 0.58, 0.82);
-const vec3 unlitBaseLight = vec3(0.2);
+const vec3 unlitBaseLight = vec3(0.025);
 
 #define PI 3.14159265359
 
@@ -211,7 +211,7 @@ void main() {
 
         vec3 maxSunMoon = max(moonColor, sunColor);
 
-        vertexColor = max(unlitBaseLight, mix(maxSunMoon, skyColor, sunLight));
+        vertexColor += max(unlitBaseLight, mix(maxSunMoon, skyColor, sunLight));
     }
 
     vec3 summedLightColor = unlitBaseLight + mix(vec3(sunLight / 2), vec3(0), clamp(-surfaceDist/32, 0, 1));

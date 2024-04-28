@@ -1,19 +1,18 @@
 package com.basti_bob.sand_wizard.world_generation.surface_decoration;
 
 import com.basti_bob.sand_wizard.world.World;
-import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
 import com.basti_bob.sand_wizard.world_generation.structures.StructureGenerator;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StructureSurfaceDecorator extends SurfaceDecorator {
+public class StructureWorldDecorator extends WorldDecorator {
 
     private final HashMap<StructureGenerator, Float> structuresAndWeights;
 
     private final float totalWeight;
-    public StructureSurfaceDecorator(HashMap<StructureGenerator, Float> structuresAndWeights) {
+    public StructureWorldDecorator(HashMap<StructureGenerator, Float> structuresAndWeights) {
         this.structuresAndWeights = structuresAndWeights;
 
         float totalWeight = 0;
@@ -25,7 +24,7 @@ public class StructureSurfaceDecorator extends SurfaceDecorator {
 
     @Override
     public void decorateSurface(World world, int cellX, int cellY) {
-        float randomWeight = (float) (Math.random());
+        float randomWeight = world.random.nextFloat();
 
         if(randomWeight > totalWeight) return;
 
@@ -68,8 +67,8 @@ public class StructureSurfaceDecorator extends SurfaceDecorator {
             return this;
         }
 
-        public StructureSurfaceDecorator build() {
-            return new StructureSurfaceDecorator(structuresAndWeights);
+        public StructureWorldDecorator build() {
+            return new StructureWorldDecorator(structuresAndWeights);
         }
     }
 }

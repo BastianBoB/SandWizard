@@ -52,7 +52,7 @@ public class Player {
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
 
         Color c = Color.WHITE;
-        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 256f, 1f);
+        this.light = new Light((int) ox, (int) oy, c.r, c.g, c.b, 128f, 0f);
     }
 
     public void update(float deltaTime) {
@@ -303,6 +303,7 @@ public class Player {
 
     private void loadChunksAround(int chunkPosX, int chunkPosY) {
 
+
         int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
         int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
 
@@ -312,6 +313,5 @@ public class Player {
             }
         }
     }
-
 
 }

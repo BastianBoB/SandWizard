@@ -6,45 +6,62 @@ import com.basti_bob.sand_wizard.world.World;
 
 public class Empty extends Cell {
 
-    //public static Empty INSTANCE;
+    private static Empty INSTANCE;
 
-    public Empty(CellType cellType) {
+    private Empty(CellType cellType) {
         super(cellType);
     }
 
+    public static Empty getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new Empty(CellType.EMPTY);
+        }
 
-    //    public Empty getInstance(){
-//        if(INSTANCE == null) {
-//            INSTANCE = new Empty(CellType.EMPTY, null, po)
-//        }
-//
-//        return INSTANCE;
-//    }
+        return INSTANCE;
+    }
 
-//    @Override
-//    public int getX() {
-//        try {
-//            throw new Exception("CANT GET POSITION OF EMPTY CELL");
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    @Override
-//    public int getY() {
-//        try {
-//            throw new Exception("CANT GET POSITION OF EMPTY CELL");
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    @Override
-//    public void setPosition(int posX, int posY) {
-//        try {
-//            throw new Exception("CANT SET POSITION OF EMPTY CELL");
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    @Override
+    public int getPosX() {
+        try {
+            throw new Exception("CANT getPosX OF EMPTY CELL");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public int getPosY() {
+        try {
+            throw new Exception("CANT getPosY OF EMPTY CELL");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public int getInChunkX() {
+        try {
+            throw new Exception("CANT getInChunkX OF EMPTY CELL");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public int getInChunkY() {
+        try {
+            throw new Exception("CANT getInChunkY OF EMPTY CELL");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void setPosition(int posX, int posY) {
+        try {
+            throw new Exception("CANT SET POSITION OF EMPTY CELL");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

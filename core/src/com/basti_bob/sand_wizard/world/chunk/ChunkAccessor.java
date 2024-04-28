@@ -5,7 +5,6 @@ import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.World;
-import com.basti_bob.sand_wizard.world.chunk.Chunk;
 
 public class ChunkAccessor {
 
@@ -93,10 +92,11 @@ public class ChunkAccessor {
         int targetInChunkY = World.getInChunkPos(targetY);
 
         Cell targetCell = targetChunk.getCellFromInChunkPos(targetInChunkX, targetInChunkY);
-        Chunk cellChunk = getNeighbourChunk(cell.posX, cell.posY);
+        Chunk cellChunk = getNeighbourChunk(cell.getPosX(), cell.getPosY());
 
-        if (cell.canMoveToOrSwap(targetCell)) {
-            finalMovedCell(targetChunk, cellChunk, targetCell, cell.posX, cell.posY, cell.inChunkX, cell.inChunkY);
+
+         if (cell.canMoveToOrSwap(targetCell)) {
+            finalMovedCell(targetChunk, cellChunk, targetCell, cell.getPosX(), cell.getPosY(), cell.getInChunkX(), cell.getInChunkY());
             finalMovedCell(cellChunk, targetChunk, cell, targetX, targetY, targetInChunkX, targetInChunkY);
             return true;
         }
@@ -104,19 +104,19 @@ public class ChunkAccessor {
     }
 
     public void swapCells(Cell cell, Cell other) {
-        int targetX = other.posX;
-        int targetY = other.posY;
+        int targetX = other.getPosX();
+        int targetY = other.getPosY();
 
-        int targetInChunkX = other.inChunkX;
-        int targetInChunkY = other.inChunkY;
+        int targetInChunkX = other.getInChunkX();
+        int targetInChunkY = other.getInChunkY();
 
         Chunk targetChunk = getNeighbourChunk(targetX, targetY);
 
         if (targetChunk == null) return;
 
-        Chunk cellChunk = getNeighbourChunk(cell.posX, cell.posY);
+        Chunk cellChunk = getNeighbourChunk(cell.getPosX(), cell.getPosY());
 
-        finalMovedCell(targetChunk, cellChunk, other, cell.posX, cell.posY, cell.inChunkX, cell.inChunkY);
+        finalMovedCell(targetChunk, cellChunk, other, cell.getPosX(), cell.getPosY(), cell.getInChunkX(), cell.getInChunkY());
         finalMovedCell(cellChunk, targetChunk, cell, targetX, targetY, targetInChunkX, targetInChunkY);
     }
 
@@ -128,9 +128,9 @@ public class ChunkAccessor {
         int targetInChunkX = World.getInChunkPos(targetX);
         int targetInChunkY = World.getInChunkPos(targetY);
 
-        Chunk cellChunk = getNeighbourChunk(cell.posX, cell.posY);
+        Chunk cellChunk = getNeighbourChunk(cell.getPosX(), cell.getPosY());
 
-        cellChunk.setCell(CellType.EMPTY, cell.posX, cell.posY, cell.inChunkX, cell.inChunkY);
+        cellChunk.setCell(Empty.getInstance(), cell.getPosX(), cell.getPosY(), cell.getInChunkX(), cell.getInChunkY(), CellPlaceFlag.MOVED);
         finalMovedCell(cellChunk, targetChunk, cell, targetX, targetY, targetInChunkX, targetInChunkY);
     }
 
@@ -158,8 +158,16 @@ public class ChunkAccessor {
         targetChunk.setCell(cellType, posX, posY, targetInChunkX, targetInChunkY);
     }
 
+    public void setCell(Cell cell, int posX, int posY, int inChunkX, int inChunkY) {
+        Chunk targetChunk = getNeighbourChunk(posX, posY);
+
+        if (targetChunk == null) return;
+
+        targetChunk.setCell(cell, posX, posY, inChunkX, inChunkY, CellPlaceFlag.NEW);
+    }
+
     public void updateMeshColor(Cell cell) {
-        Chunk targetChunk = getNeighbourChunk(cell.posX, cell.posY);
+        Chunk targetChunk = getNeighbourChunk(cell.getPosX(), cell.getPosY());
 
         if (targetChunk == null) return;
 

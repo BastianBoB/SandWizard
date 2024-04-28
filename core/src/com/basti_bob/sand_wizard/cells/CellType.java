@@ -1,12 +1,15 @@
 package com.basti_bob.sand_wizard.cells;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.basti_bob.sand_wizard.cell_properties.CellColors;
 import com.basti_bob.sand_wizard.cell_properties.CellProperty;
 import com.basti_bob.sand_wizard.cell_properties.PhysicalState;
 import com.basti_bob.sand_wizard.cells.gases.Fire;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
+import com.basti_bob.sand_wizard.cells.gases.Steam;
 import com.basti_bob.sand_wizard.cells.liquids.Acid;
+import com.basti_bob.sand_wizard.cells.liquids.Lava;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
 import com.basti_bob.sand_wizard.cells.liquids.Water;
 import com.basti_bob.sand_wizard.cells.solids.immovable_solids.CompactSnow;
@@ -25,13 +28,24 @@ public class CellType implements Supplier<Cell> {
 
     private static final Map<String, CellType> ID_NAME_MAP = new HashMap<>();
 
-    public static final CellType EMPTY = new CellType("empty", PhysicalState.OTHER, CellProperty.EMPTY, Empty::new, CellColors.EMPTY); //(x, y, world) -> Empty.getInstance()
+    public static final CellType EMPTY = new CellType("empty", PhysicalState.OTHER, CellProperty.EMPTY, (cellType -> Empty.getInstance()), CellColors.EMPTY); //(x, y, world) -> Empty.getInstance()
+
+    public static final CellType PARTICLE = new CellType("particle", PhysicalState.OTHER, CellProperty.EMPTY, null, CellColors.EMPTY);
 
     public static final CellType STONE = new CellType("stone", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.STONE);
     public static final CellType GRASS = new CellType("grass", PhysicalState.SOLID, CellProperty.GRASS, ImmovableSolid::new, CellColors.GRASS);
     public static final CellType ICE = new CellType("ice", PhysicalState.SOLID, CellProperty.ICE, Ice::new, CellColors.ICE);
     public static final CellType SUMMER_LEAF = new CellType("summer_leaf", PhysicalState.SOLID, CellProperty.LEAF, ImmovableSolid::new, CellColors.SUMMER_LEAF);
     public static final CellType SPRING_LEAF = new CellType("spring_leaf", PhysicalState.SOLID, CellProperty.LEAF, ImmovableSolid::new, CellColors.SPRING_LEAF);
+    public static final CellType IRON_ORE = new CellType("iron_ore", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.IRON_ORE);
+    public static final CellType DIORITE = new CellType("diorite", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.DIORITE);
+    public static final CellType ANDESITE = new CellType("andesite", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.ANDESITE);
+    public static final CellType GRANITE = new CellType("granite", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.GRANITE);
+    public static final CellType BASALT = new CellType("basalt", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.BASALT);
+    public static final CellType MARBLE = new CellType("marble", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.MARBLE);
+    public static final CellType LIMESTONE = new CellType("limestone", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.LIMESTONE);
+    public static final CellType SHALE = new CellType("shale", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.SHALE);
+
 
     public static final CellType COMPACT_SNOW = new CellType("compact_snow", PhysicalState.SOLID, CellProperty.COMPACT_SNOW, CompactSnow::new, CellColors.COMPACT_SNOW);
     public static final CellType WOOD = new CellType("wood", PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.WOOD);
@@ -48,9 +62,11 @@ public class CellType implements Supplier<Cell> {
     public static final CellType WATER = new CellType("water", PhysicalState.LIQUID, CellProperty.WATER, Water::new, CellColors.WATER);
     public static final CellType OIL = new CellType("oil", PhysicalState.LIQUID, CellProperty.OIL, Liquid::new, CellColors.OIL);
     public static final CellType ACID = new CellType("acid", PhysicalState.LIQUID, CellProperty.ACID, Acid::new, CellColors.ACID);
+    public static final CellType LAVA = new CellType("lava", PhysicalState.LIQUID, CellProperty.LAVA, Lava::new, CellColors.LAVA);
+
 
     public static final CellType FIRE = new CellType("fire", PhysicalState.GAS, CellProperty.FIRE, Fire::new, CellColors.FIRE);
-    public static final CellType STEAM = new CellType("Steam", PhysicalState.GAS, CellProperty.STEAM, Gas::new, CellColors.STEAM);
+    public static final CellType STEAM = new CellType("Steam", PhysicalState.GAS, CellProperty.STEAM, Steam::new, CellColors.STEAM);
     public static final CellType METHANE = new CellType("methane", PhysicalState.GAS, CellProperty.METHANE, Gas::new, CellColors.METHANE);
 
     public static final class FLOWER_PETAL {
@@ -70,7 +86,26 @@ public class CellType implements Supplier<Cell> {
         public static final CellType GREEN = new CellType("flower_petal_green", PhysicalState.SOLID, CellProperty.FLOWER_PETAL, ImmovableSolid::new, CellColors.FLOWER_PETAL.GREEN);
         public static final CellType BROWN = new CellType("flower_petal_brown", PhysicalState.SOLID, CellProperty.FLOWER_PETAL, ImmovableSolid::new, CellColors.FLOWER_PETAL.BROWN);
 
-        public static final CellType[] ALL = new CellType[]{RED, PINK, YELLOW, ORANGE, PURPLE, WHITE, BLUE, LAVENDER, PEACH, LILAC, MAGENTA, CORAL, CYAN, GREEN};
+        public static final CellType RED_GLOW = new CellType("flower_petal_red_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.RED);
+        public static final CellType PINK_GLOW = new CellType("flower_petal_pink_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.PINK);
+        public static final CellType YELLOW_GLOW = new CellType("flower_petal_yellow_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.YELLOW);
+        public static final CellType ORANGE_GLOW = new CellType("flower_petal_orange_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.ORANGE);
+        public static final CellType PURPLE_GLOW = new CellType("flower_petal_purple_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.PURPLE);
+        public static final CellType WHITE_GLOW = new CellType("flower_petal_white_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.WHITE);
+        public static final CellType BLUE_GLOW = new CellType("flower_petal_blue_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.BLUE);
+        public static final CellType LAVENDER_GLOW = new CellType("flower_petal_lavender_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.LAVENDER);
+        public static final CellType PEACH_GLOW = new CellType("flower_petal_peach_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.PEACH);
+        public static final CellType LILAC_GLOW = new CellType("flower_petal_lilac_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.LILAC);
+        public static final CellType MAGENTA_GLOW = new CellType("flower_petal_magenta_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.MAGENTA);
+        public static final CellType CORAL_GLOW = new CellType("flower_petal_coral_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.CORAL);
+        public static final CellType CYAN_GLOW = new CellType("flower_petal_cyan_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.CYAN);
+        public static final CellType GREEN_GLOW = new CellType("flower_petal_green_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.GREEN);
+        public static final CellType BROWN_GLOW = new CellType("flower_petal_brown_glow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.BROWN);
+
+        public static final CellType YELLOW_GLOW_RED = new CellType("flower_petal_yellow_glow_red", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW_RED, ImmovableSolid::new, CellColors.FLOWER_PETAL.YELLOW);
+        public static final CellType YELLOW_GLOW_YELLOW = new CellType("flower_petal_yellow_glow_yellow", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW_YELLOW, ImmovableSolid::new, CellColors.FLOWER_PETAL.YELLOW);
+        public static final CellType YELLOW_GLOW_BLUE = new CellType("flower_petal_yellow_glow_blue", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW_BLUE, ImmovableSolid::new, CellColors.FLOWER_PETAL.YELLOW);
+        public static final CellType YELLOW_GLOW_PURPLE = new CellType("flower_petal_yellow_glow_purple", PhysicalState.SOLID, CellProperty.FLOWER_PETAL_GLOW_PURPLE, ImmovableSolid::new, CellColors.FLOWER_PETAL.YELLOW);
 
     }
 

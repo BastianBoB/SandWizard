@@ -29,7 +29,7 @@ public class WorldRenderer {
     private final ShaderProgram shader;
     private final ShapeRenderer shapeRenderer;
 
-    private final HashMap<Integer, FloatBuffer> lightBuffers = new HashMap<>();
+    private FloatBuffer lightBuffer = BufferUtils.newFloatBuffer(1000);
 
     public WorldRenderer(World world, OrthographicCamera camera) {
         this.shapeRenderer = new ShapeRenderer();
@@ -67,11 +67,11 @@ public class WorldRenderer {
         shader.setUniformi("u_dayTimeMinutes", world.updateTimes);
         shader.setUniform2fv("u_cameraPos", new float[]{camera.position.x / WorldConstants.CELL_SIZE, camera.position.y / WorldConstants.CELL_SIZE}, 0, 2);
 
-        int ssbo = Gdx.gl31.glGenBuffer();
-        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, ssbo);
+        int lightSSBO = Gdx.gl31.glGenBuffer();
+        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, lightSSBO);
 
-        int lightsIndex = Gdx.gl31.glGetUniformBlockIndex(shader.getHandle(), "lights_data");
-        Gdx.gl31.glUniformBlockBinding(shader.getHandle(), lightsIndex, 1);
+        int lightsDataIndex = Gdx.gl31.glGetUniformBlockIndex(shader.getHandle(), "lights_data");
+        Gdx.gl31.glUniformBlockBinding(shader.getHandle(), lightsDataIndex, 1);
 
         int lastNumLights = -1;
 
@@ -87,30 +87,27 @@ public class WorldRenderer {
 
                 List<Light> affectedLights = chunk.affectedLights;
                 int numAffectedLights = affectedLights.size();
+                int numLightFloats = numAffectedLights * Light.NUM_FLOAT_DATA;
 
                 if (!(lastNumLights == 0 && numAffectedLights == 0)) { //dont have to modify the buffer with 2 empty light chunks
-                    FloatBuffer buffer = lightBuffers.get(numAffectedLights);
-
-                    if (buffer == null) {
-                        buffer = BufferUtils.newFloatBuffer(numAffectedLights * Light.NUM_FLOAT_DATA);
-                        lightBuffers.put(numAffectedLights, buffer);
+                    if(numLightFloats > lightBuffer.capacity()) {
+                        lightBuffer = BufferUtils.newFloatBuffer(numLightFloats + 50);
                     }
 
-                    buffer.clear();
+                    lightBuffer.clear();
 
                     for (int k = 0; k < numAffectedLights; k++) {
-                        if (k == affectedLights.size()) break;
 
-                        Light light = (affectedLights.get(k));
+                        Light light = affectedLights.get(k);
                         if (light == null) continue;
 
-                        buffer.put(light.getData());
+                        lightBuffer.put(light.getData());
                     }
 
-                    buffer.flip();
+                    lightBuffer.flip();
 
-                    Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, numAffectedLights * Light.NUM_FLOAT_DATA * 4, buffer, GL31.GL_DYNAMIC_DRAW);
-                    Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+                    Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, numLightFloats * 4, lightBuffer, GL31.GL_DYNAMIC_DRAW);
+                    Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
                 }
 
                 lastNumLights = numAffectedLights;
@@ -118,7 +115,7 @@ public class WorldRenderer {
                 chunk.mesh.render(shader, GL20.GL_POINTS);
             }
         }
-        Gdx.gl31.glDeleteBuffer(ssbo);
+        Gdx.gl31.glDeleteBuffer(lightSSBO);
 
 
         if (SandWizard.renderChunkBoarder)

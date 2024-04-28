@@ -20,6 +20,15 @@ public class CellColors {
     public static final CellColors COMPACT_SNOW = new CellColors(c(240, 240, 240), c(235, 235, 235), c(245, 245, 245), c(230, 230, 230), c(250, 250, 250));
     public static final CellColors WOOD = new CellColors(hC(0x6E470B), hC(0x785115), hC(0x643D10));
     public static final CellColors RED_WOOD = new CellColors(c(70, 31, 0), c(80, 41, 0), c(90, 51, 0));
+    public static final CellColors IRON_ORE = new CellColors(c(105, 105, 105), c(128, 128, 128), c(169, 169, 169));
+    public static final CellColors GRANITE = new CellColors(c(180, 120, 80), c(60, 40, 30), c(120, 80, 60));
+    public static final CellColors ANDESITE = new CellColors(c(135, 135, 135), c(105, 105, 105), c(169, 169, 169));
+    public static final CellColors BASALT = new CellColors(c(34, 34, 34), c(85, 85, 85), c(136, 136, 136));
+    public static final CellColors MARBLE = new CellColors(c(255, 255, 255), c(245, 245, 245), c(230, 230, 230));
+    public static final CellColors LIMESTONE = new CellColors(c(250, 250, 210), c(238, 232, 170), c(222, 184, 135));
+    public static final CellColors DIORITE = new CellColors(c(220, 220, 220), c(192, 192, 192), c(169, 169, 169));
+    public static final CellColors SHALE = new CellColors(c(105, 105, 105), c(128, 128, 128), c(169, 169, 169));
+
     public static final CellColors SAND = new CellColors(c(223, 190, 147), c(204, 168, 121), c(187, 156, 104));
     public static final CellColors FINE_SAND = new CellColors(c(255, 240, 180), c(255, 220, 140), c(255, 200, 100));
     public static final CellColors SAND_STONE = new CellColors(c(194, 158, 110), c(166, 134, 95), c(138, 111, 75));
@@ -27,9 +36,12 @@ public class CellColors {
     public static final CellColors COAL = new CellColors(hC(0x363232), hC(0x292929), hC(0x393939));
     public static final CellColors GRAVEL = new CellColors(hC(0x4c4c4c), hC(0x666666), hC(0x7f7f7f));
     public static final CellColors POWDER_SNOW = new CellColors(c(255, 255, 255), c(245, 245, 245), c(250, 250, 250), c(240, 240, 240), c(255, 250, 250));
+
     public static final CellColors WATER = new CellColors(c(30, 125, 200), c(35, 137, 218), c(25, 115, 185));
     public static final CellColors OIL = new CellColors(hC(0x0E0F0E), hC(0x0B0C0B), hC(0x121312));
     public static final CellColors ACID = new CellColors(hC(0x9BE60F), hC(0xBFFF28), hC(0xAffA19));
+    public static final CellColors LAVA = new CellColors(c(255, 60, 0), c(255, 80, 0), c(255, 100, 0));
+
     public static final CellColors FIRE = new CellColors(hC(0xFF8800), hC(0xFF2200), hC(0xFFFF00), hC(0xFFFF00), hC(0xFF2200), hC(0xFFFF00), hC(0xFF8800), hC(0xFFFF00), hC(0xFFFFFF));
     public static final CellColors STEAM = new CellColors(hC(0xC7D5E0), hC(0xC7D5E0), hC(0xFFFFFF));
     public static final CellColors METHANE = new CellColors(hC(0xFFFFFF), hC(0xDDDDFF), hC(0xEEEEFF));
@@ -62,7 +74,7 @@ public class CellColors {
 //        }
     }
 
-    public Color getColor(World world, int cellX, int cellY) {
+    public Color getColor(World world) {
         int i = (int) (MathUtils.random() * colors.size());
         return colors.get(i);
     }

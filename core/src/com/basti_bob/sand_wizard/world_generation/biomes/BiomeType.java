@@ -1,14 +1,11 @@
 package com.basti_bob.sand_wizard.world_generation.biomes;
 
-import com.basti_bob.sand_wizard.world.World;
-import com.basti_bob.sand_wizard.world_generation.surface_decoration.SurfaceDecorator;
+import com.basti_bob.sand_wizard.world_generation.surface_decoration.WorldDecorator;
 import com.basti_bob.sand_wizard.world_generation.surface_generation.SurfaceGenerator;
-import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.ScaledShiftedTerrainHeightGenerator;
 import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class BiomeType {
 
@@ -30,12 +27,12 @@ public class BiomeType {
     public static final BiomeType HILLS = new BiomeTypeBuilder("hills", 0, 30, 1f)
             .surfaceGenerator(SurfaceGenerator.GRASS_FIELD)
             .terrainHeightGenerator(TerrainHeightGenerator.HILLS)
-            .surfaceDecorator(SurfaceDecorator.HILLS).build();
+            .surfaceDecorator(WorldDecorator.HILLS).build();
 
     public static final BiomeType FLOWER_FIELD = new BiomeTypeBuilder("flower_field", 0, 30, 0.1f)
             .surfaceGenerator(SurfaceGenerator.GRASS_FIELD)
             .terrainHeightGenerator(TerrainHeightGenerator.HILLS)
-            .surfaceDecorator(SurfaceDecorator.FLOWER_FIELD).build();
+            .surfaceDecorator(WorldDecorator.FLOWER_FIELD).build();
 
     public static final BiomeType DESERT = new BiomeTypeBuilder("desert", 30, 100, 1f)
             .surfaceGenerator(SurfaceGenerator.DESERT)
@@ -48,7 +45,7 @@ public class BiomeType {
     public final float weight;
     public final SurfaceGenerator surfaceGenerator;
     public final TerrainHeightGenerator terrainHeightGenerator;
-    public final SurfaceDecorator surfaceDecorator;
+    public final WorldDecorator worldDecorator;
 
     public BiomeType(BiomeTypeBuilder builder) {
         this.name = builder.name;
@@ -57,7 +54,7 @@ public class BiomeType {
         this.weight = builder.weight;
         this.surfaceGenerator = builder.surfaceGenerator;
         this.terrainHeightGenerator = builder.terrainHeightGenerator;
-        this.surfaceDecorator = builder.surfaceDecorator;
+        this.worldDecorator = builder.worldDecorator;
 
         allTypes.add(this);
     }
@@ -78,7 +75,7 @@ public class BiomeType {
         public final float weight;
         public SurfaceGenerator surfaceGenerator = SurfaceGenerator.STONE_ONLY;
         public TerrainHeightGenerator terrainHeightGenerator = TerrainHeightGenerator.FLAT;
-        public SurfaceDecorator surfaceDecorator = SurfaceDecorator.NOTHING;
+        public WorldDecorator worldDecorator = WorldDecorator.NOTHING;
 
         public BiomeTypeBuilder(String name, int minTemperature, int maxTemperature, float weight) {
             this.name = name;
@@ -97,8 +94,8 @@ public class BiomeType {
             return this;
         }
 
-        public BiomeTypeBuilder surfaceDecorator(SurfaceDecorator surfaceDecorator) {
-            this.surfaceDecorator = surfaceDecorator;
+        public BiomeTypeBuilder surfaceDecorator(WorldDecorator worldDecorator) {
+            this.worldDecorator = worldDecorator;
             return this;
         }
 
