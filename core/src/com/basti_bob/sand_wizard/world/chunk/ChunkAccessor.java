@@ -6,69 +6,14 @@ import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.World;
 
-public class ChunkAccessor {
+public interface ChunkAccessor {
 
-    private final Array2D<Chunk> surroundingChunks;
-    public final Chunk centerChunk;
+    Chunk getChunkFromCellPos(int targetX, int targetY);
 
-    public ChunkAccessor(Chunk centerChunk) {
-        this.surroundingChunks = new Array2D<>(Chunk.class, 3, 3);
-        this.surroundingChunks.set(1, 1, centerChunk);
-        this.centerChunk = centerChunk;
-    }
+    Chunk getChunkFromChunkPos(int targetChunkX, int targetChunkY);
 
-//    public void resetSurroundingChunks() {
-//        for (int i = 0; i < 3; i++) {
-//            for (int j = 0; j < 3; j++) {
-//                if (i == 1 && j == 1) continue;
-//
-//                surroundingChunks.set(i, j, null);
-//            }
-//        }
-//    }
-
-    public Chunk[] getSurroundingChunks() {
-        return surroundingChunks.getArray();
-    }
-
-    public Chunk getNeighbourChunkWithOffset(int offsetX, int offsetY) {
-        return surroundingChunks.get(offsetX + 1, offsetY + 1);
-    }
-
-    public void setSurroundingChunk(Chunk chunk) {
-        int gridX = chunk.posX - centerChunk.posX + 1;
-        int gridY = chunk.posY - centerChunk.posY + 1;
-
-        surroundingChunks.set(gridX, gridY, chunk);
-    }
-
-    public void removeSurroundingChunk(Chunk chunk) {
-        int gridX = chunk.posX - centerChunk.posX + 1;
-        int gridY = chunk.posY - centerChunk.posY + 1;
-
-        surroundingChunks.set(gridX, gridY, null);
-    }
-
-    public Chunk getNeighbourChunk(int targetX, int targetY) {
-        int targetChunkX = World.getChunkPos(targetX);
-        int targetChunkY = World.getChunkPos(targetY);
-
-        int gridX = targetChunkX - centerChunk.posX + 1;
-        int gridY = targetChunkY - centerChunk.posY + 1;
-
-        return surroundingChunks.get(gridX, gridY);
-    }
-
-    public void cellActivatesChunk(int cellX, int cellY) {
-        int inChunkX = World.getInChunkPos(cellX);
-        int inChunkY = World.getInChunkPos(cellY);
-        Chunk cellChunk = getNeighbourChunk(cellX, cellY);
-
-        cellChunk.cellActivatesChunk(inChunkX, inChunkY);
-    }
-
-    public Cell getCell(int targetX, int targetY) {
-        Chunk targetChunk = getNeighbourChunk(targetX, targetY);
+    default Cell getCell(int targetX, int targetY) {
+        Chunk targetChunk = getChunkFromCellPos(targetX, targetY);
         if (targetChunk == null) return null;
 
         int targetInChunkX = World.getInChunkPos(targetX);
@@ -77,25 +22,24 @@ public class ChunkAccessor {
         return targetChunk.getCellFromInChunkPos(targetInChunkX, targetInChunkY);
     }
 
-    private void finalMovedCell(Chunk previousChunk, Chunk targetChunk, Cell cell, int posX, int posY, int inChunkX, int inChunkY) {
+    default void finalMovedCell(Chunk previousChunk, Chunk targetChunk, Cell cell, int posX, int posY, int inChunkX, int inChunkY) {
         targetChunk.setCell(cell, posX, posY, inChunkX, inChunkY, CellPlaceFlag.MOVED);
 
         if (previousChunk != targetChunk)
             cell.movedInNewChunk(previousChunk, targetChunk);
     }
 
-    public boolean moveToOrSwap(Cell cell, int targetX, int targetY) {
-        Chunk targetChunk = getNeighbourChunk(targetX, targetY);
+    default boolean moveToOrSwap(Cell cell, int targetX, int targetY) {
+        Chunk targetChunk = getChunkFromCellPos(targetX, targetY);
         if (targetChunk == null) return false;
 
         int targetInChunkX = World.getInChunkPos(targetX);
         int targetInChunkY = World.getInChunkPos(targetY);
 
         Cell targetCell = targetChunk.getCellFromInChunkPos(targetInChunkX, targetInChunkY);
-        Chunk cellChunk = getNeighbourChunk(cell.getPosX(), cell.getPosY());
+        Chunk cellChunk = getChunkFromCellPos(cell.getPosX(), cell.getPosY());
 
-
-         if (cell.canMoveToOrSwap(targetCell)) {
+        if (cell.canMoveToOrSwap(targetCell)) {
             finalMovedCell(targetChunk, cellChunk, targetCell, cell.getPosX(), cell.getPosY(), cell.getInChunkX(), cell.getInChunkY());
             finalMovedCell(cellChunk, targetChunk, cell, targetX, targetY, targetInChunkX, targetInChunkY);
             return true;
@@ -103,39 +47,39 @@ public class ChunkAccessor {
         return false;
     }
 
-    public void swapCells(Cell cell, Cell other) {
+    default void swapCells(Cell cell, Cell other) {
         int targetX = other.getPosX();
         int targetY = other.getPosY();
 
         int targetInChunkX = other.getInChunkX();
         int targetInChunkY = other.getInChunkY();
 
-        Chunk targetChunk = getNeighbourChunk(targetX, targetY);
+        Chunk targetChunk = getChunkFromCellPos(targetX, targetY);
 
         if (targetChunk == null) return;
 
-        Chunk cellChunk = getNeighbourChunk(cell.getPosX(), cell.getPosY());
+        Chunk cellChunk = getChunkFromCellPos(cell.getPosX(), cell.getPosY());
 
         finalMovedCell(targetChunk, cellChunk, other, cell.getPosX(), cell.getPosY(), cell.getInChunkX(), cell.getInChunkY());
         finalMovedCell(cellChunk, targetChunk, cell, targetX, targetY, targetInChunkX, targetInChunkY);
     }
 
-    public void moveTo(Cell cell, int targetX, int targetY) {
+    default void moveTo(Cell cell, int targetX, int targetY) {
 
-        Chunk targetChunk = getNeighbourChunk(targetX, targetY);
+        Chunk targetChunk = getChunkFromCellPos(targetX, targetY);
         if (targetChunk == null) return;
 
         int targetInChunkX = World.getInChunkPos(targetX);
         int targetInChunkY = World.getInChunkPos(targetY);
 
-        Chunk cellChunk = getNeighbourChunk(cell.getPosX(), cell.getPosY());
+        Chunk cellChunk = getChunkFromCellPos(cell.getPosX(), cell.getPosY());
 
         cellChunk.setCell(Empty.getInstance(), cell.getPosX(), cell.getPosY(), cell.getInChunkX(), cell.getInChunkY(), CellPlaceFlag.MOVED);
         finalMovedCell(cellChunk, targetChunk, cell, targetX, targetY, targetInChunkX, targetInChunkY);
     }
 
-    public void setCellIfEmpty(CellType cellType, int posX, int posY) {
-        Chunk targetChunk = getNeighbourChunk(posX, posY);
+    default void setCellIfEmpty(CellType cellType, int posX, int posY) {
+        Chunk targetChunk = getChunkFromCellPos(posX, posY);
 
         if (targetChunk == null) return;
 
@@ -147,8 +91,16 @@ public class ChunkAccessor {
         targetChunk.setCell(cellType, posX, posY, targetInChunkX, targetInChunkY);
     }
 
-    public void setCell(CellType cellType, int posX, int posY) {
-        Chunk targetChunk = getNeighbourChunk(posX, posY);
+     default void cellActivatesChunk(int cellX, int cellY) {
+        int inChunkX = World.getInChunkPos(cellX);
+        int inChunkY = World.getInChunkPos(cellY);
+        Chunk cellChunk = getChunkFromCellPos(cellX, cellY);
+
+        cellChunk.cellActivatesChunk(inChunkX, inChunkY);
+    }
+
+    default void setCell(CellType cellType, int posX, int posY) {
+        Chunk targetChunk = getChunkFromCellPos(posX, posY);
 
         if (targetChunk == null) return;
 
@@ -158,61 +110,21 @@ public class ChunkAccessor {
         targetChunk.setCell(cellType, posX, posY, targetInChunkX, targetInChunkY);
     }
 
-    public void setCell(Cell cell, int posX, int posY, int inChunkX, int inChunkY) {
-        Chunk targetChunk = getNeighbourChunk(posX, posY);
+    default void setCell(Cell cell, int posX, int posY, int inChunkX, int inChunkY) {
+        Chunk targetChunk = getChunkFromCellPos(posX, posY);
 
         if (targetChunk == null) return;
 
         targetChunk.setCell(cell, posX, posY, inChunkX, inChunkY, CellPlaceFlag.NEW);
     }
 
-    public void updateMeshColor(Cell cell) {
-        Chunk targetChunk = getNeighbourChunk(cell.getPosX(), cell.getPosY());
+    default void updateMeshColor(Cell cell) {
+        Chunk targetChunk = getChunkFromCellPos(cell.getPosX(), cell.getPosY());
 
         if (targetChunk == null) return;
 
         targetChunk.updateMeshColor(cell);
     }
 
-
-    public boolean isEmpty(int targetX, int targetY) {
-        return getCell(targetX, targetY) instanceof Empty;
-    }
-
-    //    public Chunk getNeighbourChunk(ChunkBoarderState chunkBoarderState) {
-//
-//        return switch (chunkBoarderState) {
-//            case CENTER -> surroundingChunks[1][1];
-//
-//            case TOP_LEFT -> surroundingChunks[0][0];
-//            case TOP -> surroundingChunks[1][0];
-//            case TOP_RIGHT -> surroundingChunks[2][0];
-//
-//            case BOTTOM_LEFT -> surroundingChunks[0][2];
-//            case BOTTOM -> surroundingChunks[1][2];
-//            case BOTTOM_RIGHT -> surroundingChunks[2][2];
-//
-//            case LEFT -> surroundingChunks[0][1];
-//            case RIGHT -> surroundingChunks[2][1];
-//        };
-//    }
-
-//    public boolean moveToIfEmpty(Cell cell, int targetX, int targetY) {
-//
-//        Chunk targetChunk = getNeighbourChunk(targetX, targetY);
-//        if (targetChunk == null) return false;
-//
-//        int targetInChunkX = World.getInChunkPos(targetX);
-//        int targetInChunkY = World.getInChunkPos(targetY);
-//
-//        if (!(targetChunk.getCellFromInChunkPos(targetInChunkX, targetInChunkY) instanceof Empty)) return false;
-//
-//        Chunk cellChunk = getNeighbourChunk(cell.posX, cell.posY);
-//
-//        cellChunk.setCell(CellType.EMPTY, cell.posX, cell.posY, cell.inChunkX, cell.inChunkY);
-//        targetChunk.setCell(cell, targetX, targetY, targetInChunkX, targetInChunkY);
-//
-//        return true;
-//    }
 }
 

@@ -20,6 +20,10 @@ public abstract class StructureGenerator {
         public static final PondGenerator SMALL_LAVA = PondGenerator.builder(CellType.LAVA, 5, 20, 3, 10).build();
         public static final PondGenerator SMALL_WATER = PondGenerator.builder(CellType.WATER, 5, 20, 3, 10).build();
 
+        public static final PondGenerator MEDIUM_ACID = PondGenerator.builder(CellType.ACID, 15, 60, 9, 30).build();
+        public static final PondGenerator MEDIUM_LAVA = PondGenerator.builder(CellType.LAVA, 15, 60, 9, 30).build();
+        public static final PondGenerator MEDIUM_WATER = PondGenerator.builder(CellType.WATER, 15, 60, 9, 30).build();
+
 
         public static final PondGenerator WATER = PondGenerator.builder(CellType.WATER, 50, 200, 30, 50).build();
 

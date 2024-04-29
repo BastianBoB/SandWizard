@@ -10,7 +10,7 @@ import java.util.List;
 public class CellColors {
 
 
-    public static final CellColors EMPTY = new CellColors(c(30, 30, 30)); //c(255, 255, 255)); //hC(0x080808));
+    public static final CellColors EMPTY = new CellColors(c(40, 40, 40)); //c(255, 255, 255)); //hC(0x080808));
     public static final CellColors STONE = new CellColors(c(85, 85, 85), c(75, 71, 68), c(70, 70, 70), c(61, 55, 51), c(51, 44, 40));
     public static final CellColors GRASS = new CellColors(c(19, 109, 21), c(38, 139, 7), c(65, 152, 10));
     public static final CellColors ICE = new CellColors(c(255, 255, 255), c(185, 232, 234), c(134, 214, 216), c(63, 208, 212), c(32, 195, 208));

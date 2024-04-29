@@ -15,6 +15,7 @@ import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 
@@ -109,6 +110,10 @@ public class SandWizard extends ApplicationAdapter {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
             world.setCell(CellType.GLOWBLOCK, (int) player.nx, (int) player.ny);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 200, 20));
         }
 
         accumulatedTime += deltaTime;

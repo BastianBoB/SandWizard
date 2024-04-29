@@ -7,9 +7,11 @@ import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.chunk.ChunkProvider;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
+import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
 import com.basti_bob.sand_wizard.world_generation.structures.Structure;
 import com.basti_bob.sand_wizard.world_generation.structures.StructureGenerator;
@@ -21,7 +23,7 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 
-public class World {
+public class World implements ChunkAccessor {
 
     public final Random random = new Random(0);
 
@@ -39,6 +41,8 @@ public class World {
     public final HashMap<ChunkPos, HashMap<InChunkPos, Cell>> unloadedStructureCells = new HashMap<>();
 
     private final ExecutorService executor;
+
+    private final Stack<Explosion> explosions = new Stack<>();
 
     public World() {
         this.chunkProvider = new ChunkProvider(this);
@@ -74,10 +78,12 @@ public class World {
         addAndRemoveChunks();
         placeStructures();
 
-        updateChunkActiveAndSetCellsNotUpdated(executor);
+        updateChunkActiveAndSetCellsNotUpdated();
 
-        if (SandWizard.isUpdating)
-            updateAllCells(executor);
+        if (SandWizard.isUpdating) {
+            updateExplosions();
+            updateAllCells();
+        }
     }
 
     private void chunkToAdd(Supplier<Chunk> supplier, int chunkX, int chunkY) {
@@ -138,7 +144,7 @@ public class World {
         }
     }
 
-    private void updateChunkActiveAndSetCellsNotUpdated(ExecutorService executor) {
+    private void updateChunkActiveAndSetCellsNotUpdated() {
         activeChunks = 0;
 
         List<Callable<Object>> tasks = new ArrayList<>();
@@ -172,7 +178,7 @@ public class World {
 
     }
 
-    private void updateAllCells(ExecutorService executor) {
+    private void updateAllCells() {
         updateDirection = !updateDirection;
 
         for (WorldUpdatingChunkRow worldUpdatingChunkRow : chunkProvider.chunkUpdatingRows.values()) {
@@ -210,6 +216,20 @@ public class World {
         }
     }
 
+    public void updateExplosions() {
+
+        while (!explosions.isEmpty()) {
+            Explosion explosion = explosions.pop();
+
+            explosion.explode();
+        }
+
+    }
+
+    public void addExplosion(Explosion explosion) {
+        this.explosions.push(explosion);
+    }
+
     public static int getChunkPos(int cellPos) {
         return (int) Math.floor(cellPos / (float) WorldConstants.CHUNK_SIZE);
     }
@@ -222,10 +242,12 @@ public class World {
         return getChunkFromChunkPos(chunkPosX, chunkPosY) != null;
     }
 
+    @Override
     public Chunk getChunkFromCellPos(int cellPosX, int cellPosY) {
         return getChunkFromChunkPos(getChunkPos(cellPosX), getChunkPos(cellPosY));
     }
 
+    @Override
     public Chunk getChunkFromChunkPos(int chunkPosX, int chunkPosY) {
         return chunkProvider.getChunk(chunkPosX, chunkPosY);
     }
@@ -303,34 +325,4 @@ public class World {
 
         chunkProvider.removeChunk(chunk);
     }
-
-
-    public Cell getCell(int cellPosX, int cellPosY) {
-        return getCell(cellPosX, cellPosY, getChunkPos(cellPosX), getChunkPos(cellPosY));
-    }
-
-
-    public Cell getCell(int cellPosX, int cellPosY, int chunkPosX, int chunkPosY) {
-        Chunk chunk = getChunkFromChunkPos(chunkPosX, chunkPosY);
-        if (chunk == null) return null;
-
-        return chunk.getCellFromInChunkPos(getInChunkPos(cellPosX), getInChunkPos(cellPosY));
-    }
-
-
-    public void setCell(CellType cellType, int cellPosX, int cellPosY) {
-        Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
-        if (chunk == null) return;
-
-        chunk.setCell(cellType, cellPosX, cellPosY);
-    }
-
-
-    public void setCell(Cell cell, int cellPosX, int cellPosY, CellPlaceFlag flag) {
-        Chunk chunk = getChunkFromCellPos(cellPosX, cellPosY);
-        if (chunk == null) return;
-
-        chunk.setCell(cell, cellPosX, cellPosY, flag);
-    }
-
 }

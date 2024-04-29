@@ -39,7 +39,7 @@ public class ChunkGenerator {
         SurfaceGenerator surfaceGenerator = biomeType.surfaceGenerator;
         SurfaceGenerator rightSurfaceGenerator = worldGeneration.getBiomeTypeWithChunkPos(chunkPosX + 1).surfaceGenerator;
         CaveGenerator caveGenerator = CaveGenerator.BASE;
-        WorldDecorator caveBottomDecorator = WorldDecorator.CAVES;
+        WorldDecorator caveBottomDecorator = WorldDecorator.CAVES_BOTTOM;
         WorldDecorator caveTopDecorator = null;
 
         boolean generatedNewCell = false;

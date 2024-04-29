@@ -20,7 +20,7 @@ public class Chunk implements Supplier<Chunk> {
 
     public World world;
     public Array2D<Cell> grid;
-    public ChunkAccessor chunkAccessor;
+    public NeighbourChunkAccessor chunkAccessor;
     public Mesh mesh;
     public int posX, posY;
     private int numActiveFrames;
@@ -35,7 +35,7 @@ public class Chunk implements Supplier<Chunk> {
                 new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 3, "a_vertexColor"),
                 new VertexAttribute(VertexAttributes.Usage.Generic, 1, "a_empty"));
 
-        this.chunkAccessor = new ChunkAccessor(this);
+        this.chunkAccessor = new NeighbourChunkAccessor(this);
         this.grid = new Array2D<>(Cell.class, WorldConstants.CHUNK_SIZE, WorldConstants.CHUNK_SIZE);
     }
 

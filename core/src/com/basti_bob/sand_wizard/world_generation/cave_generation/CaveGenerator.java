@@ -11,26 +11,33 @@ public class CaveGenerator {
 
     public static final CaveGenerator BASE = new CaveGenerator();
 
-    private final Noise cheeseNoise = new LayeredNoise(8, 1f, 0.002f, 0.6f, 1.8f);
-    private final Noise spaghettiNoise = new LayeredNoise(10, 1f, 0.003f, 0.5f, 2f);
+    private final Noise cheeseNoise = new LayeredNoise(8, 1f, 0.001f, 0.6f, 1.8f);
+    private final Noise spaghettiNoise = new LayeredNoise(10, 1f, 0.004f, 0.5f, 2f);
+    private final float cheeseNoiseThreshold = 0.35f;
+    private final float spaghettiNoiseThreshold = 0.3f;
 
-    private final float verticalSquishFactor = 2f;
+    private final float verticalSquishFactor = 1.8f;
     private final float maxTerrainHeightOffset = 500;
 
     public CaveGenerator() {
     }
 
     public boolean isCave(World world, int cellX, int cellY, float terrainHeight) {
-        if(cellY > terrainHeight) return false;
+        float terrainHeightOffset = terrainHeight - cellY;
+
+        if (terrainHeightOffset < 0) return false;
 
         float evalY = cellY * verticalSquishFactor;
-        float factor = MathUtil.clampedMap(terrainHeight - cellY, 0, maxTerrainHeightOffset, 0.05f, 0.2f);
 
-        if(Math.abs(spaghettiNoise.eval(cellX, evalY)) < factor)
+
+        float factor = terrainHeightOffset > maxTerrainHeightOffset ? spaghettiNoiseThreshold
+                : MathUtil.clampedMap(terrainHeightOffset, 0, maxTerrainHeightOffset, 0.05f, spaghettiNoiseThreshold);
+
+        if (Math.abs(spaghettiNoise.eval(cellX, evalY)) < factor)
             return true;
 
         if (terrainHeight - cellY < maxTerrainHeightOffset) return false;
 
-        return cheeseNoise.eval(cellX, evalY) > 0.3;
+        return cheeseNoise.eval(cellX, evalY) > cheeseNoiseThreshold;
     }
 }

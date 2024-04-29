@@ -48,6 +48,10 @@ public abstract class Cell {
     private float corrosionHealth;
     private boolean canCorrode;
 
+    private float explosionHealth;
+    private float explosionResistance;
+    private boolean canExplode;
+
     public boolean glowsWithCellColor;
     public boolean isLightSource;
 
@@ -156,6 +160,29 @@ public abstract class Cell {
         }
     }
 
+    public boolean explode(ChunkAccessor chunkAccessor, int originX, int originY, float strength) {
+        if (!canExplode()) return false;
+
+        if (explosionResistance < strength) {
+            float r = (float) Math.random();
+//            if (r < 0 && canBeTurnedToParticle()) {
+//                PVector vel = new PVector(this.x - originX, this.y - originY).normalize().mult((float) (Math.random() * (strength / 20f)));
+//                replaceWithParticle(vel);
+//                return true;
+//            }
+            if (r < 0.3) {
+                replace(CellType.FIRE, chunkAccessor);
+                return true;
+            }
+            die(chunkAccessor);
+
+            return true;
+        } else {
+            //this.stainWithColor(chunkAccessor, );
+            return false;
+        }
+    }
+
     public boolean applyCorrosion(ChunkAccessor chunkAccessor, float amount) {
         if (!this.canCorrode()) return false;
 
@@ -173,7 +200,7 @@ public abstract class Cell {
     }
 
     public void cleanColor(ChunkAccessor chunkAccessor, float factor) {
-        taintWithColor(chunkAccessor, originalColorR, originalColorG, originalColorB, factor);
+        stainWithColor(chunkAccessor, originalColorR, originalColorG, originalColorB, factor);
 
         float newR = MathUtil.lerp(colorR, originalColorR, factor);
         float newG = MathUtil.lerp(colorG, originalColorG, factor);
@@ -182,7 +209,7 @@ public abstract class Cell {
         updateColor(chunkAccessor, newR, newG, newB);
     }
 
-    public void taintWithColor(ChunkAccessor chunkAccessor, float r, float g, float b, float factor) {
+    public void stainWithColor(ChunkAccessor chunkAccessor, float r, float g, float b, float factor) {
         float newR = MathUtil.lerp(colorR, r, factor);
         float newG = MathUtil.lerp(colorG, g, factor);
         float newB = MathUtil.lerp(colorB, b, factor);
@@ -225,7 +252,7 @@ public abstract class Cell {
 
     public boolean replace(CellType cellType, ChunkAccessor chunkAccessor) {
         if (isLightSource) {
-            light.removedFromChunk(chunkAccessor.getNeighbourChunk(getPosX(), getPosY()));
+            light.removedFromChunk(chunkAccessor.getChunkFromCellPos(getPosX(), getPosY()));
         }
         chunkAccessor.setCell(cellType, getPosX(), getPosY());
 
@@ -281,13 +308,10 @@ public abstract class Cell {
 
         ChunkBoarderState chunkBoarderState = ChunkBoarderState.getStateWithInChunkPos(inChunkX, inChunkY);
 
-        int targetChunkX = World.getChunkPos(posX);
-        int targetChunkY = World.getChunkPos(posY);
+        int cellChunkX = World.getChunkPos(posX);
+        int cellChunkY = World.getChunkPos(posY);
 
-        int chunkOffsetX = targetChunkX - chunkAccessor.centerChunk.posX;
-        int chunkOffsetY = targetChunkY - chunkAccessor.centerChunk.posY;
-
-        Chunk cellChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY);
+        Chunk cellChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY);
 
         switch (chunkBoarderState) {
 
@@ -298,7 +322,7 @@ public abstract class Cell {
                 neighbourCells[3] = cellChunk.getCellFromInChunkPos(inChunkX - 1, inChunkY);
             }
             case TOP_LEFT -> {
-                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                Chunk topChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY + 1);
                 if (topChunk != null) {
                     neighbourCells[0] = topChunk.getCellFromInChunkPos(0, 0);
                 }
@@ -306,18 +330,18 @@ public abstract class Cell {
                 neighbourCells[1] = cellChunk.getCellFromInChunkPos(1, boarderPos);
                 neighbourCells[2] = cellChunk.getCellFromInChunkPos(0, boarderPos - 1);
 
-                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                Chunk leftChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX - 1, cellChunkY);
                 if (leftChunk != null) {
                     neighbourCells[3] = leftChunk.getCellFromInChunkPos(boarderPos, boarderPos);
                 }
             }
             case TOP_RIGHT -> {
 
-                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                Chunk topChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY + 1);
                 if (topChunk != null) {
                     neighbourCells[0] = topChunk.getCellFromInChunkPos(boarderPos, 0);
                 }
-                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                Chunk rightChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX + 1, cellChunkY);
                 if (rightChunk != null) {
                     neighbourCells[1] = rightChunk.getCellFromInChunkPos(0, boarderPos);
                 }
@@ -330,11 +354,11 @@ public abstract class Cell {
                 neighbourCells[0] = cellChunk.getCellFromInChunkPos(0, 1);
                 neighbourCells[1] = cellChunk.getCellFromInChunkPos(1, 0);
 
-                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                Chunk bottomChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY - 1);
                 if (bottomChunk != null) {
                     neighbourCells[2] = (bottomChunk.getCellFromInChunkPos(0, boarderPos));
                 }
-                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                Chunk leftChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX - 1, cellChunkY);
                 if (leftChunk != null) {
                     neighbourCells[3] = (leftChunk.getCellFromInChunkPos(boarderPos, 0));
                 }
@@ -343,12 +367,12 @@ public abstract class Cell {
             case BOTTOM_RIGHT -> {
                 neighbourCells[0] = (cellChunk.getCellFromInChunkPos(boarderPos, 1));
 
-                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                Chunk rightChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX + 1, cellChunkY);
                 if (rightChunk != null) {
                     neighbourCells[1] = (rightChunk.getCellFromInChunkPos(0, 0));
                 }
 
-                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                Chunk bottomChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY - 1);
                 if (bottomChunk != null) {
                     neighbourCells[2] = (bottomChunk.getCellFromInChunkPos(boarderPos, boarderPos));
                 }
@@ -360,14 +384,14 @@ public abstract class Cell {
                 neighbourCells[1] = (cellChunk.getCellFromInChunkPos(inChunkX + 1, inChunkY));
                 neighbourCells[2] = (cellChunk.getCellFromInChunkPos(inChunkX, inChunkY - 1));
 
-                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                Chunk leftChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX - 1, cellChunkY);
                 if (leftChunk != null) {
                     neighbourCells[3] = (leftChunk.getCellFromInChunkPos(boarderPos, inChunkY));
                 }
             }
             case TOP -> {
 
-                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                Chunk topChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY + 1);
                 if (topChunk != null) {
                     neighbourCells[0] = (topChunk.getCellFromInChunkPos(inChunkX, 0));
                 }
@@ -381,7 +405,7 @@ public abstract class Cell {
                 neighbourCells[0] = (cellChunk.getCellFromInChunkPos(inChunkX, inChunkY + 1));
                 neighbourCells[1] = (cellChunk.getCellFromInChunkPos(inChunkX + 1, inChunkY));
 
-                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                Chunk bottomChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY - 1);
                 if (bottomChunk != null) {
                     neighbourCells[2] = (bottomChunk.getCellFromInChunkPos(inChunkX, boarderPos));
                 }
@@ -391,7 +415,7 @@ public abstract class Cell {
             case RIGHT -> {
                 neighbourCells[0] = (cellChunk.getCellFromInChunkPos(inChunkX, inChunkY + 1));
 
-                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                Chunk rightChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX + 1, cellChunkY);
                 if (rightChunk != null) {
                     neighbourCells[1] = (rightChunk.getCellFromInChunkPos(0, inChunkY));
                 }
@@ -415,13 +439,10 @@ public abstract class Cell {
 
         ChunkBoarderState chunkBoarderState = ChunkBoarderState.getStateWithInChunkPos(inChunkX, inChunkY);
 
-        int targetChunkX = World.getChunkPos(posX);
-        int targetChunkY = World.getChunkPos(posY);
+        int cellChunkX = World.getChunkPos(posX);
+        int cellChunkY = World.getChunkPos(posY);
 
-        int chunkOffsetX = targetChunkX - chunkAccessor.centerChunk.posX;
-        int chunkOffsetY = targetChunkY - chunkAccessor.centerChunk.posY;
-
-        Chunk cellChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY);
+        Chunk cellChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY);
 
         switch (chunkBoarderState) {
 
@@ -438,16 +459,16 @@ public abstract class Cell {
                 neighbourCells[2][0] = cellChunk.getCellFromInChunkPos(1, boarderPos - 1);
                 neighbourCells[2][1] = cellChunk.getCellFromInChunkPos(1, boarderPos);
 
-                Chunk topLeftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY + 1);
+                Chunk topLeftChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX - 1, cellChunkY + 1);
                 if (topLeftChunk != null) {
                     neighbourCells[0][2] = topLeftChunk.getCellFromInChunkPos(boarderPos, 0);
                 }
-                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                Chunk topChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY + 1);
                 if (topChunk != null) {
                     neighbourCells[1][2] = topChunk.getCellFromInChunkPos(0, 0);
                     neighbourCells[2][2] = topChunk.getCellFromInChunkPos(1, 0);
                 }
-                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                Chunk leftChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX - 1, cellChunkY);
                 if (leftChunk != null) {
                     neighbourCells[0][1] = leftChunk.getCellFromInChunkPos(boarderPos, boarderPos);
                     neighbourCells[0][0] = leftChunk.getCellFromInChunkPos(boarderPos, boarderPos - 1);
@@ -458,16 +479,16 @@ public abstract class Cell {
                 neighbourCells[0][0] = cellChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos - 1);
                 neighbourCells[0][1] = cellChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos);
 
-                Chunk topRightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY + 1);
+                Chunk topRightChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX + 1, cellChunkY + 1);
                 if (topRightChunk != null) {
                     neighbourCells[2][2] = topRightChunk.getCellFromInChunkPos(0, 0);
                 }
-                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                Chunk topChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY + 1);
                 if (topChunk != null) {
                     neighbourCells[1][2] = topChunk.getCellFromInChunkPos(boarderPos, 0);
                     neighbourCells[0][2] = topChunk.getCellFromInChunkPos(boarderPos - 1, 0);
                 }
-                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                Chunk rightChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX + 1, cellChunkY);
                 if (rightChunk != null) {
                     neighbourCells[2][1] = rightChunk.getCellFromInChunkPos(0, boarderPos);
                     neighbourCells[2][0] = rightChunk.getCellFromInChunkPos(0, boarderPos - 1);
@@ -479,16 +500,16 @@ public abstract class Cell {
                 neighbourCells[2][2] = (cellChunk.getCellFromInChunkPos(1, 1));
                 neighbourCells[2][1] = (cellChunk.getCellFromInChunkPos(1, 0));
 
-                Chunk bottomLeftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY - 1);
+                Chunk bottomLeftChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX - 1, cellChunkY - 1);
                 if (bottomLeftChunk != null) {
                     neighbourCells[0][0] = (bottomLeftChunk.getCellFromInChunkPos(boarderPos, boarderPos));
                 }
-                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                Chunk bottomChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY - 1);
                 if (bottomChunk != null) {
                     neighbourCells[1][0] = (bottomChunk.getCellFromInChunkPos(0, boarderPos));
                     neighbourCells[2][0] = (bottomChunk.getCellFromInChunkPos(1, boarderPos));
                 }
-                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                Chunk leftChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX - 1, cellChunkY);
                 if (leftChunk != null) {
                     neighbourCells[0][1] = (leftChunk.getCellFromInChunkPos(boarderPos, 0));
                     neighbourCells[0][2] = (leftChunk.getCellFromInChunkPos(boarderPos, 1));
@@ -500,16 +521,16 @@ public abstract class Cell {
                 neighbourCells[0][2] = (cellChunk.getCellFromInChunkPos(boarderPos - 1, 1));
                 neighbourCells[0][1] = (cellChunk.getCellFromInChunkPos(boarderPos - 1, 0));
 
-                Chunk bottomRightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY - 1);
+                Chunk bottomRightChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX + 1, cellChunkY - 1);
                 if (bottomRightChunk != null) {
                     neighbourCells[2][0] = (bottomRightChunk.getCellFromInChunkPos(0, boarderPos));
                 }
-                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                Chunk bottomChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY - 1);
                 if (bottomChunk != null) {
                     neighbourCells[1][0] = (bottomChunk.getCellFromInChunkPos(boarderPos, boarderPos));
                     neighbourCells[0][0] = (bottomChunk.getCellFromInChunkPos(boarderPos - 1, boarderPos));
                 }
-                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                Chunk rightChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX + 1, cellChunkY);
                 if (rightChunk != null) {
                     neighbourCells[2][1] = (rightChunk.getCellFromInChunkPos(0, 0));
                     neighbourCells[2][2] = (rightChunk.getCellFromInChunkPos(0, 1));
@@ -522,7 +543,7 @@ public abstract class Cell {
                         neighbourCells[i + 1][j + 1] = (cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
                     }
                 }
-                Chunk leftChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX - 1, chunkOffsetY);
+                Chunk leftChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX - 1, cellChunkY);
                 if (leftChunk == null) return neighbourCells;
 
                 for (int j = -1; j <= 1; j++)
@@ -535,7 +556,7 @@ public abstract class Cell {
                         neighbourCells[i + 1][j + 1] = (cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
                     }
                 }
-                Chunk topChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY + 1);
+                Chunk topChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY + 1);
                 if (topChunk == null) return neighbourCells;
 
                 for (int i = -1; i <= 1; i++)
@@ -550,7 +571,7 @@ public abstract class Cell {
                     }
                 }
 
-                Chunk bottomChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX, chunkOffsetY - 1);
+                Chunk bottomChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY - 1);
                 if (bottomChunk == null) return neighbourCells;
 
                 for (int i = -1; i <= 1; i++)
@@ -563,7 +584,7 @@ public abstract class Cell {
                         neighbourCells[i + 1][j + 1] = (cellChunk.getCellFromInChunkPos(inChunkX + i, inChunkY + j));
                     }
                 }
-                Chunk rightChunk = chunkAccessor.getNeighbourChunkWithOffset(chunkOffsetX + 1, chunkOffsetY);
+                Chunk rightChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX + 1, cellChunkY);
                 if (rightChunk == null) return neighbourCells;
 
                 for (int j = -1; j <= 1; j++)
@@ -693,6 +714,18 @@ public abstract class Cell {
         return canCorrode;
     }
 
+    public float getExplosionHealth() {
+        return explosionHealth;
+    }
+
+    public float getExplosionResistance() {
+        return explosionResistance;
+    }
+
+    public boolean canExplode() {
+        return canExplode;
+    }
+
     public boolean isLightSource() {
         return isLightSource;
     }
@@ -732,4 +765,6 @@ public abstract class Cell {
     public void setInChunkY(int inChunkY) {
         this.inChunkY = inChunkY;
     }
+
+
 }
