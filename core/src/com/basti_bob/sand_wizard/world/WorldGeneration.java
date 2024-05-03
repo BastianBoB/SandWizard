@@ -1,8 +1,9 @@
 package com.basti_bob.sand_wizard.world;
 
 import com.basti_bob.sand_wizard.util.MathUtil;
-import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
+import com.basti_bob.sand_wizard.util.noise.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
+import com.basti_bob.sand_wizard.world_generation.biomes.SurfaceBiomeType;
 import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
 import java.util.ArrayList;
@@ -12,15 +13,15 @@ import java.util.Random;
 public class WorldGeneration {
 
     private final Random biomeRandom = new Random();
-    public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(0L);
+    public final OpenSimplexNoise surfaceBiomeNoise = new OpenSimplexNoise(0L);
 
     private final World world;
-    private final List<BiomeType> biomeTypes;
+    private final List<SurfaceBiomeType> surfaceBiomeTypes;
     public final int blendingRadius = 5;
 
     public WorldGeneration(World world) {
         this.world = world;
-        this.biomeTypes = BiomeType.allTypes;
+        this.surfaceBiomeTypes = SurfaceBiomeType.ALL_TYPES;
     }
 
     public float getTerrainHeight(int cellPosX) {
@@ -31,9 +32,9 @@ public class WorldGeneration {
         return chunkColumnData.terrainHeights[inChunkX];
     }
 
-    public BiomeType getBiomeTypeWithChunkPos(int chunkPosX) {
+    public SurfaceBiomeType getBiomeTypeWithChunkPos(int chunkPosX) {
         ChunkColumnData chunkColumnData = world.chunkProvider.getOrCreateChunkColumn(chunkPosX);
-        return chunkColumnData.biomeType;
+        return chunkColumnData.surfaceBiomeType;
     }
 
 
@@ -70,47 +71,13 @@ public class WorldGeneration {
     }
 
 
-    public BiomeType calculateBiomeTypeWithChunkPos(int chunkPosX) {
-        return calculateBiomeWithTemperature(getTemperatureForChunkX(chunkPosX));
-    }
-
-    public BiomeType calculateBiomeWithTemperature(float temperature) {
-
-        List<BiomeType> potentialBiomes = new ArrayList<>();
-        float totalWeight = 0;
-
-        for (BiomeType biomeType : biomeTypes) {
-            if (biomeType.isInTemperatureRange(temperature)) {
-                potentialBiomes.add(biomeType);
-                totalWeight += biomeType.weight;
-            }
-        }
-
-        if (potentialBiomes.size() == 0) {
-            return BiomeType.ERROR;
-        }
-
-        if (potentialBiomes.size() == 1) {
-            return potentialBiomes.get(0);
-        }
-
-        biomeRandom.setSeed((long) temperature * 10000000);
-
-        float randomWeight = biomeRandom.nextFloat() * totalWeight;
-
-        float currentWeight = 0;
-        for (BiomeType biomeType : potentialBiomes) {
-            currentWeight += biomeType.weight;
-
-            if (randomWeight < currentWeight) return biomeType;
-        }
-
-        //shouldn't happen
-        return BiomeType.ERROR;
+    public SurfaceBiomeType calculateBiomeTypeWithChunkPos(int chunkPosX) {
+        return BiomeType.calculateBiomeWithNoiseValue(surfaceBiomeTypes, biomeRandom, getSurfaceBiomeNoise(chunkPosX));
     }
 
 
-    public float getTemperatureForChunkX(int chunkX) {
-        return (float) (openSimplexNoise.eval(chunkX * 0.05f, 0, 0) * 50);
+
+    public float getSurfaceBiomeNoise(int chunkX) {
+        return surfaceBiomeNoise.eval(chunkX * 0.05f, 0, 0);
     }
 }

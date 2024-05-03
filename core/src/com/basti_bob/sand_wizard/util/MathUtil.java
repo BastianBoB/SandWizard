@@ -2,6 +2,9 @@ package com.basti_bob.sand_wizard.util;
 
 public class MathUtil {
 
+    public static final float PI = (float) Math.PI;
+    public static final float TWO_PI = 2 * PI;
+
     public static float lerp(float v0, float v1, float t) {
         return v0 + t * (v1 - v0);
     }

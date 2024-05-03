@@ -1,16 +1,16 @@
 package com.basti_bob.sand_wizard.world;
 
-import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
+import com.basti_bob.sand_wizard.world_generation.biomes.SurfaceBiomeType;
 
 public class ChunkColumnData {
 
     public final World world;
-    public final BiomeType biomeType;
+    public final SurfaceBiomeType surfaceBiomeType;
     public final float[] terrainHeights;
 
     public ChunkColumnData(World world, int chunkX) {
         this.world = world;
-        this.biomeType = world.worldGeneration.calculateBiomeTypeWithChunkPos(chunkX);
+        this.surfaceBiomeType = world.worldGeneration.calculateBiomeTypeWithChunkPos(chunkX);
 
         terrainHeights = new float[WorldConstants.CHUNK_SIZE];
         for(int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {

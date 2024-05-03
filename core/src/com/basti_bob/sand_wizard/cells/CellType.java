@@ -1,7 +1,6 @@
 package com.basti_bob.sand_wizard.cells;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.basti_bob.sand_wizard.cell_properties.CellColors;
 import com.basti_bob.sand_wizard.cell_properties.CellProperty;
 import com.basti_bob.sand_wizard.cell_properties.PhysicalState;
@@ -12,13 +11,13 @@ import com.basti_bob.sand_wizard.cells.liquids.Acid;
 import com.basti_bob.sand_wizard.cells.liquids.Lava;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
 import com.basti_bob.sand_wizard.cells.liquids.Water;
-import com.basti_bob.sand_wizard.cells.solids.immovable_solids.CompactSnow;
-import com.basti_bob.sand_wizard.cells.solids.immovable_solids.Ice;
-import com.basti_bob.sand_wizard.cells.solids.immovable_solids.ImmovableSolid;
+import com.basti_bob.sand_wizard.cells.solids.immovable_solids.*;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.PowderSnow;
-import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.util.MathUtil;
+import com.basti_bob.sand_wizard.util.range.FloatRange;
+import com.basti_bob.sand_wizard.util.range.IntRange;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +44,8 @@ public class CellType implements Supplier<Cell> {
     public static final CellType MARBLE = new CellType("marble", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.MARBLE);
     public static final CellType LIMESTONE = new CellType("limestone", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.LIMESTONE);
     public static final CellType SHALE = new CellType("shale", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.SHALE);
+    public static final CellType STALACTITE_LIGHT = new CellType("stalactite_light", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.STALACTITE_LIGHT);
+    public static final CellType STALACTITE_DARK = new CellType("stalactite_dark", PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.STALACTITE_DARK);
 
 
     public static final CellType COMPACT_SNOW = new CellType("compact_snow", PhysicalState.SOLID, CellProperty.COMPACT_SNOW, CompactSnow::new, CellColors.COMPACT_SNOW);
@@ -68,6 +69,35 @@ public class CellType implements Supplier<Cell> {
     public static final CellType FIRE = new CellType("fire", PhysicalState.GAS, CellProperty.FIRE, Fire::new, CellColors.FIRE);
     public static final CellType STEAM = new CellType("Steam", PhysicalState.GAS, CellProperty.STEAM, Steam::new, CellColors.STEAM);
     public static final CellType METHANE = new CellType("methane", PhysicalState.GAS, CellProperty.METHANE, Gas::new, CellColors.METHANE);
+    public static final CellType EXPLOSION_SPARK = new CellType("explosion_spark", PhysicalState.GAS, CellProperty.EXPLOSION_SPARK, Gas::new, CellColors.FIRE);
+
+    public static final class FIRE_BREATHING_STONES {
+        public static final float aOff = MathUtil.PI / 6f;
+
+        public static final CellType UP = get("fire_breathing_stone_up", CellType.FIRE, MathUtil.PI / 2f - aOff, MathUtil.PI / 2f + aOff);
+        public static final CellType DOWN = get("fire_breathing_stone_up", CellType.FIRE, -MathUtil.PI / 2f - aOff, -MathUtil.PI / 2f + aOff);
+        public static final CellType RIGHT = get("fire_breathing_stone_up", CellType.FIRE, -aOff, +aOff);
+        public static final CellType LEFT = get("fire_breathing_stone_up", CellType.FIRE, MathUtil.PI - aOff, MathUtil.PI + aOff);
+
+
+        public static CellType get(String id, CellType gasType, float minAngle, float maxAngle) {
+
+            return new CellType(id, PhysicalState.SOLID, CellProperty.STONE, cellType -> new GasBreathingStone(cellType, gasType,
+                    new IntRange(180, 240), new IntRange(30, 60), 3, new FloatRange(minAngle, maxAngle), new FloatRange(3f, 5f), new IntRange(10, 25)), CellColors.STONE);
+        }
+    }
+
+    public static final class DRIPPING_STONES {
+
+        public static final CellType WATER = get("water_dripping_stone", CellType.WATER);
+        public static final CellType LAVA = get("water_dripping_stone", CellType.LAVA);
+        public static final CellType ACID = get("water_dripping_stone", CellType.ACID);
+
+        public static CellType get(String id, CellType toCreateCellType) {
+            return new CellType(id, PhysicalState.SOLID, CellProperty.STONE, cellType -> new DrippingStone(cellType, toCreateCellType, new IntRange(10, 600)), CellColors.STONE);
+        }
+
+    }
 
     public static final class FLOWER_PETAL {
         public static final CellType RED = new CellType("flower_petal_red", PhysicalState.SOLID, CellProperty.FLOWER_PETAL, ImmovableSolid::new, CellColors.FLOWER_PETAL.RED);

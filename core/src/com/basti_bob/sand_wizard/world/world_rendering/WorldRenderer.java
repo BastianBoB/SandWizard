@@ -144,12 +144,12 @@ public class WorldRenderer {
         shapeRenderer.end();
     }
 
-    private final Color activeColor = new Color(1f, 1f, 1f, 1);
-    private final Color inActiveColor = new Color(0.1f, 0.1f, 0.1f, 1);
-
+    private final Color activeColor = new Color(0f, 1f, 0f, 1f);
+    private final Color inActiveColor = new Color(1f, 0f, 0f, 1f);
+    private final Color unloadedColor = new Color(0f, 0f, 0f, 1f);
     public void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
 
-        shapeRenderer.setColor(chunk.isActive() ? activeColor : inActiveColor);
+        shapeRenderer.setColor(chunk.isLoaded() ? (chunk.isActive() ? activeColor : inActiveColor) : unloadedColor);
 
         float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 2;
         shapeRenderer.rect(chunkRenderX, chunkRenderY, rectSize, rectSize);

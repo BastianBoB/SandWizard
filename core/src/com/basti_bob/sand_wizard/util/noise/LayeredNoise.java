@@ -1,4 +1,4 @@
-package com.basti_bob.sand_wizard.util;
+package com.basti_bob.sand_wizard.util.noise;
 
 public class LayeredNoise implements Noise {
 

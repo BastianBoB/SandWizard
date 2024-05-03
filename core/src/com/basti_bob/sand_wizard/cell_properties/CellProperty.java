@@ -5,7 +5,6 @@ import com.basti_bob.sand_wizard.cell_properties.property_types.GasProperty;
 import com.basti_bob.sand_wizard.cell_properties.property_types.LiquidProperty;
 import com.basti_bob.sand_wizard.cell_properties.property_types.MovableSolidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
-import com.basti_bob.sand_wizard.world.lighting.Light;
 
 import java.util.function.Consumer;
 
@@ -30,9 +29,10 @@ public class CellProperty {
     public static final LiquidProperty OIL = LiquidProperty.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
     public static final LiquidProperty LAVA = LiquidProperty.builder().allLiquid(2f, 5f).allLight(8f, 0.5f, CellColors.c(255, 128, 0)).build();
 
-    public static final GasProperty METHANE = GasProperty.builder().allGas(2f, 1f, 300).build();
-    public static final GasProperty STEAM = GasProperty.builder().allGas(3f, 0.5f, 300).build();
-    public static final GasProperty FIRE = GasProperty.builder().allGas(2f, 1f, 40).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
+    public static final GasProperty METHANE = GasProperty.builder().allGas(1f, 1f, 300).build();
+    public static final GasProperty STEAM = GasProperty.builder().allGas(1.5f, 0.5f, 300).build();
+    public static final GasProperty FIRE = GasProperty.builder().allGas(1f, 1f, 40).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
+    public static final GasProperty EXPLOSION_SPARK = GasProperty.builder().allGas(1f, 1f, 10).build();
 
     public static final CellProperty FLOWER_PETAL = CellProperty.builder().allBurn(100, 10, 0.5f).build();
     public static final CellProperty GLOWBLOCK = CellProperty.builder().allLight(100f, 2f, Color.YELLOW).build();
@@ -48,8 +48,6 @@ public class CellProperty {
 
 
 
-
-
     public final float friction;
     public final float speedFactor;
     public final float jumpFactor;
@@ -61,9 +59,14 @@ public class CellProperty {
     public final int maxBurningTime;
     public final float fireSpreadChance;
 
-    public final float maxCorrosionHealth;
+    public final float corrosionHealth;
     public final boolean canCorrode;
+    public final float corrosionResistance;
 
+    public final float explosionHealth;
+    public final float explosionResistance;
+    public final boolean canExplode;
+    
     public final boolean glowsWithCellColor;
     public final boolean isLightSource;
     public final float lightRadius;
@@ -82,14 +85,23 @@ public class CellProperty {
         this.burningTemperature = builder.burningTemperature;
         this.maxBurningTime = builder.maxBurningTime;
         this.fireSpreadChance = builder.fireSpreadChance;
-        this.maxCorrosionHealth = builder.maxCorrosionHealth;
+
+
+        this.corrosionHealth = builder.corrosionHealth;
+        this.corrosionResistance = builder.corrosionResistance;
         this.canCorrode = builder.canCorrode;
+
         this.isLightSource = builder.isLightSource;
         this.lightRadius = builder.lightRadius;
         this.lightIntensity = builder.lightIntensity;
 
         this.lightColor = builder.lightColor;
         this.glowsWithCellColor = builder.glowsWithCellColor;
+
+        this.explosionHealth = builder.explosionHealth;
+        this.explosionResistance = builder.explosionResistance;
+        this.canExplode = builder.canExplode;
+
         this.onCreate = builder.onCreate;
     }
 
@@ -116,8 +128,13 @@ public class CellProperty {
         protected int maxBurningTime = 100;
         protected float fireSpreadChance = 0.2f;
 
-        protected float maxCorrosionHealth = 100;
+        protected float corrosionResistance = 0f;
+        protected float corrosionHealth = 100;
         protected boolean canCorrode = true;
+
+        protected float explosionHealth = 100;
+        protected float explosionResistance = 0f;
+        protected boolean canExplode = true;
 
         protected boolean glowsWithCellColor = false;
         protected boolean isLightSource = false;
@@ -183,7 +200,7 @@ public class CellProperty {
         }
 
         public T maxCorrosionHealth(float maxCorrosionHealth) {
-            this.maxCorrosionHealth = maxCorrosionHealth;
+            this.corrosionHealth = maxCorrosionHealth;
             return (T) this;
         }
 
@@ -228,6 +245,21 @@ public class CellProperty {
 
         public T onCreate(Consumer<Cell> onCreate) {
             this.onCreate = onCreate;
+            return (T) this;
+        }
+
+        public T canExplode(boolean canExplode) {
+            this.canExplode = canExplode;
+            return (T) this;
+        }
+
+        public T explosionHealt(float explosionHealth) {
+            this.explosionHealth = explosionHealth;
+            return (T) this;
+        }
+
+        public T explosionResistance(float explosionResistance) {
+            this.explosionResistance = explosionResistance;
             return (T) this;
         }
 

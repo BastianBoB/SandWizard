@@ -8,7 +8,7 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
-import com.basti_bob.sand_wizard.world_generation.biomes.BiomeType;
+import com.basti_bob.sand_wizard.world_generation.biomes.SurfaceBiomeType;
 import com.basti_bob.sand_wizard.world_generation.cave_generation.CaveGenerator;
 import com.basti_bob.sand_wizard.world_generation.ore_generation.OreGenerator;
 import com.basti_bob.sand_wizard.world_generation.surface_decoration.WorldDecorator;
@@ -31,12 +31,13 @@ public class ChunkGenerator {
     }
 
     public ChunkBuilder generateWithCells(Chunk oldChunk, int chunkPosX, int chunkPosY, HashMap<InChunkPos, Cell> queuedCells) {
+
         ChunkBuilder chunkBuilder = new ChunkBuilder(world, oldChunk, chunkPosX, chunkPosY);
 
-        BiomeType biomeType = worldGeneration.getBiomeTypeWithChunkPos(chunkPosX);
+        SurfaceBiomeType surfaceBiomeType = worldGeneration.getBiomeTypeWithChunkPos(chunkPosX);
 
-        WorldDecorator worldDecorator = biomeType.worldDecorator;
-        SurfaceGenerator surfaceGenerator = biomeType.surfaceGenerator;
+        WorldDecorator worldDecorator = surfaceBiomeType.worldDecorator;
+        SurfaceGenerator surfaceGenerator = surfaceBiomeType.surfaceGenerator;
         SurfaceGenerator rightSurfaceGenerator = worldGeneration.getBiomeTypeWithChunkPos(chunkPosX + 1).surfaceGenerator;
         CaveGenerator caveGenerator = CaveGenerator.BASE;
         WorldDecorator caveBottomDecorator = WorldDecorator.CAVES_BOTTOM;

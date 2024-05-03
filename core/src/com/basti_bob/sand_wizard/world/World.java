@@ -4,7 +4,11 @@ import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellParticle;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.gases.Fire;
+import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.Array2D;
+import com.basti_bob.sand_wizard.util.FunctionRunTime;
+import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
@@ -59,7 +63,63 @@ public class World implements ChunkAccessor {
 //        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_3.generate(this, 100, (int) worldGeneration.getTerrainHeight(100)));
 //        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_4.generate(this, 150, (int) worldGeneration.getTerrainHeight(150)));
 //        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_5.generate(this, 200, (int) worldGeneration.getTerrainHeight(200)));
-//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_2.generate(this, 250, (int) worldGeneration.getTerrainHeight(250)));
+//        addStructureToPlaceAsync(() -> StructureGeneratdeor.TREES.TREE_2.generate(this, 250, (int) worldGeneration.getTerrainHeight(250)));
+
+//        setCell(CellType.FIRE_BREATHING_STONES.UP, 100, 601);
+//        setCell(CellType.FIRE_BREATHING_STONES.DOWN, 100, 599);
+//        setCell(CellType.FIRE_BREATHING_STONES.RIGHT, 101, 600);
+//        setCell(CellType.FIRE_BREATHING_STONES.LEFT, 99, 600);
+//
+//        setCell(CellType.DRIPPING_STONES.WATER, 200, 600);
+//        setCell(CellType.DRIPPING_STONES.LAVA, 250, 600);
+//        setCell(CellType.DRIPPING_STONES.ACID, 300, 600);
+
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_1_LARGE.generate(this, 100, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_1_MEDIUM.generate(this, 100, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_1_SMALL.generate(this, 100, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_1_TINY.generate(this, 100, 825));
+//
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_2_LARGE.generate(this, 200, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_2_MEDIUM.generate(this, 200, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_2_SMALL.generate(this, 200, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_2_TINY.generate(this, 200, 825));
+//
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_3_LARGE.generate(this, 300, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_3_MEDIUM.generate(this, 300, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_3_SMALL.generate(this, 300, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_3_TINY.generate(this, 300, 825));
+//
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_4_LARGE.generate(this, 400, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_4_MEDIUM.generate(this, 400, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_4_SMALL.generate(this, 400, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_4_TINY.generate(this, 400, 825));
+
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_1_LARGE.generate(this, 100, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_1_MEDIUM.generate(this, 100, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_1_SMALL.generate(this, 100, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_1_TINY.generate(this, 100, 825));
+//
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_2_LARGE.generate(this, 200, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_2_MEDIUM.generate(this, 200, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_2_SMALL.generate(this, 200, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_2_TINY.generate(this, 200, 825));
+//
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_3_LARGE.generate(this, 300, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_3_MEDIUM.generate(this, 300, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_3_SMALL.generate(this, 300, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_3_TINY.generate(this, 300, 825));
+//
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_4_LARGE.generate(this, 400, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_4_MEDIUM.generate(this, 400, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_4_SMALL.generate(this, 400, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_4_TINY.generate(this, 400, 825));
+//
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_5_LARGE.generate(this, 500, 500));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_5_MEDIUM.generate(this, 500, 650));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_5_SMALL.generate(this, 500, 750));
+//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_5_TINY.generate(this, 500, 825));
+
+
     }
 
     public void addStructureToPlace(Structure structure) {
@@ -73,16 +133,15 @@ public class World implements ChunkAccessor {
     public void update() {
         updateTimes++;
 
-        setCell(CellType.FIRE, 100, 400);
-
         addAndRemoveChunks();
         placeStructures();
 
         updateChunkActiveAndSetCellsNotUpdated();
 
         if (SandWizard.isUpdating) {
-            updateExplosions();
             updateAllCells();
+            float time = FunctionRunTime.timeFunction(() -> updateExplosions());
+            if (time > 0.1) System.out.println("UPDATE EXPLOSION: " + time);
         }
     }
 
@@ -192,9 +251,10 @@ public class World implements ChunkAccessor {
 
                 for (Chunk chunk : separatedChunks) {
 
-                    if (!chunk.isActive()) continue;
+                    if (!chunk.isActive() || !chunk.isLoaded()) continue;
 
-                    tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
+                    chunk.update(updateDirection);
+                    //tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
                 }
 
                 //run tasks
@@ -202,13 +262,13 @@ public class World implements ChunkAccessor {
                     try {
                         tasks.get(0).call();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 } else {
                     try {
                         executor.invokeAll(tasks);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 }
 
@@ -272,8 +332,12 @@ public class World implements ChunkAccessor {
         chunkToRemove(chunk);
     }
 
-    public void loadChunk(int chunkPosX, int chunkPosY) {
-        addChunk(chunkProvider.createChunk(chunkPosX, chunkPosY).get());
+    public Chunk loadChunk(int chunkPosX, int chunkPosY) {
+        Chunk chunk = chunkProvider.createChunk(chunkPosX, chunkPosY).get();
+
+        addChunk(chunk);
+
+        return chunk;
     }
 
     public void loadChunkAsync(int chunkPosX, int chunkPosY) {

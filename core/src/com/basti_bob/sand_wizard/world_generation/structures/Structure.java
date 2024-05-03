@@ -7,10 +7,7 @@ import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class Structure {
@@ -23,7 +20,7 @@ public class Structure {
 
     public void placeInWorld(World world) {
 
-        List<ChunkPos> toLoadChunks = new ArrayList<>();
+        Set<ChunkPos> toLoadChunks = new HashSet<>();
 
         for (Map.Entry<ChunkPos, HashMap<InChunkPos, Cell>> entry : chunksWithCells.entrySet()) {
 

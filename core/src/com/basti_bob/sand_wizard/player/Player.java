@@ -130,6 +130,7 @@ public class Player {
     }
 
     private void moveWithVelocity(float deltaTime) {
+        clampVelocity();
 
         float targetX = ox + xVel;
         float targetY = oy + yVel;
@@ -189,6 +190,14 @@ public class Player {
 
     }
 
+    public void clampVelocity() {
+        if (xVel > WorldConstants.CHUNK_SIZE) xVel = WorldConstants.CHUNK_SIZE;
+        else if (xVel < -WorldConstants.CHUNK_SIZE) xVel = -WorldConstants.CHUNK_SIZE;
+
+        if (yVel > WorldConstants.CHUNK_SIZE) yVel = WorldConstants.CHUNK_SIZE;
+        else if (yVel < -WorldConstants.CHUNK_SIZE) yVel = -WorldConstants.CHUNK_SIZE;
+    }
+
     public int stepHeightAtTarget(int x, int y) {
 
         int stepHeight = 0;
@@ -235,6 +244,10 @@ public class Player {
     private void enteredNewChunk(Chunk previousChunk, Chunk newChunk) {
         if (newChunk == null || previousChunk == null) return;
 
+        if (!(Math.abs(previousChunk.posX - newChunk.posX) == 1 || Math.abs(previousChunk.posY - newChunk.posY) == 1)) {
+            System.out.println("Player moved more than 1 chunk");
+        }
+
         light.moveIntoNewChunk(previousChunk, newChunk);
 
         int oldChunkX = previousChunk.posX;
@@ -243,44 +256,61 @@ public class Player {
         int newChunkX = newChunk.posX;
         int newChunkY = newChunk.posY;
 
+        generateAndRemoveChunks(oldChunkX, oldChunkY, newChunkX, newChunkY);
+        loadAndUnloadChunks(oldChunkX, oldChunkY, newChunkX, newChunkY);
 
+        setRenderingChunks(newChunkX, newChunkY);
+    }
+
+    private void generateAndRemoveChunks(int oldChunkX, int oldChunkY, int newChunkX, int newChunkY) {
         int chunkXDiff = newChunkX - oldChunkX;
         int chunkYDiff = newChunkY - oldChunkY;
 
-        int loadX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
-        int loadY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
-        int unloadX = WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_X;
-        int unloadY = WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_Y;
+        int generateX = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_X;
+        int generateY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
 
         CompletableFuture.runAsync(() -> {
-            if (Math.abs(chunkXDiff) == 1) {
-                int xOff = loadX * chunkXDiff;
 
-                for (int i = -loadY; i <= loadY; i++) {
-                    world.loadChunkAsync(newChunkX + xOff, newChunkY + i);
-                    //world.unloadChunkAsync(oldChunkX - xOff, oldChunkY + i);
+            if (Math.abs(chunkXDiff) == 1) {
+                for (int i = -generateY; i <= generateY; i++) {
+                    world.loadChunkAsync(newChunkX + generateX * chunkXDiff, newChunkY + i);
                 }
             }
 
             if (Math.abs(chunkYDiff) == 1) {
-                int yOff = loadY * chunkYDiff;
-
-                for (int i = -loadX; i <= loadX; i++) {
-                    world.loadChunkAsync(newChunkX + i, newChunkY + yOff);
-                    //world.unloadChunkAsync(oldChunkX + i, oldChunkY - yOff);
+                for (int i = -generateX; i <= generateX; i++) {
+                    world.loadChunkAsync(newChunkX + i, newChunkY + generateY * chunkYDiff);
                 }
             }
 
-
             for (Chunk chunk : world.chunkProvider.chunks) {
-
-                if (Math.abs(chunk.posX - newChunkX) > unloadX || Math.abs(chunk.posY - newChunkY) > unloadY) {
+                if (Math.abs(chunk.posX - newChunkX) > WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_X || Math.abs(chunk.posY - newChunkY) > WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_Y) {
                     world.unloadChunkAsync(chunk.posX, chunk.posY);
                 }
             }
         });
+    }
 
-        setRenderingChunks(newChunkX, newChunkY);
+    private void loadAndUnloadChunks(int oldChunkX, int oldChunkY, int newChunkX, int newChunkY) {
+        int chunkXDiff = newChunkX - oldChunkX;
+        int chunkYDiff = newChunkY - oldChunkY;
+
+        int loadX = WorldConstants.PLAYER_CHUNK_UPDATE_RADIUS_X;
+        int loadY = WorldConstants.PLAYER_CHUNK_UPDATE_RADIUS_Y;
+
+        if (Math.abs(chunkXDiff) == 1) {
+            for (int i = -loadY; i <= loadY; i++) {
+                world.getChunkFromChunkPos(newChunkX + loadX * chunkXDiff, newChunkY + i).setLoaded(true);
+                world.getChunkFromChunkPos(oldChunkX - loadX * chunkXDiff, oldChunkY + i).setLoaded(false);
+            }
+        }
+
+        if (Math.abs(chunkYDiff) == 1) {
+            for (int i = -loadX; i <= loadX; i++) {
+                world.getChunkFromChunkPos(newChunkX + i, newChunkY + loadY * chunkYDiff).setLoaded(true);
+                world.getChunkFromChunkPos(oldChunkX + i, oldChunkY - loadY * chunkYDiff).setLoaded(false);
+            }
+        }
     }
 
     public void setRenderingChunks(int chunkX, int chunkY) {
@@ -309,7 +339,8 @@ public class Player {
 
         for (int i = -loadX; i <= loadX; i++) {
             for (int j = -loadY; j <= loadY; j++) {
-                world.loadChunk(chunkPosX + i, chunkPosY + j);
+                Chunk chunk = world.loadChunk(chunkPosX + i, chunkPosY + j);
+                chunk.setLoaded(true);
             }
         }
     }

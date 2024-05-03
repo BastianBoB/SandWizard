@@ -11,12 +11,12 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 
 public class Gas extends MovingCell {
 
-    private static final Vector2 GAS_GRAVITY = new Vector2(WorldConstants.GRAVITY.x, WorldConstants.GRAVITY.y * -0.1f);
+    private static final Vector2 GAS_GRAVITY = new Vector2(WorldConstants.GRAVITY.x, WorldConstants.GRAVITY.y * -0.3f);
+    private static final float MAX_SIDEWARDS_ACC = 2;
 
     private float dispersionRate;
     private float density;
-    protected int lifeTime;
-    private boolean moving;
+    public int lifeTime;
 
     public Gas(CellType cellType) {
         super(cellType);
@@ -59,51 +59,57 @@ public class Gas extends MovingCell {
 
     @Override
     public void updateMoving(ChunkAccessor chunkAccessor, boolean updateDirection) {
-        Cell cellAbove = chunkAccessor.getCell(this.getPosX(), this.getPosY() + 1);
 
-        boolean spaceAbove = canMoveToOrSwap(cellAbove);
-
-        if (spaceAbove) {
-            this.velocityX += this.getGravity().x;
-            this.velocityY += this.getGravity().y;
-            this.moving = true;
-        } else {
-            this.velocityY = 1;
-        }
+        int yDir = velocityY > 0 ? 1 : -1;
+        boolean spaceVertical = canMoveToOrSwap(chunkAccessor.getCell(this.getPosX(), this.getPosY() + yDir));
 
         boolean spaceLeft = canMoveToOrSwap(chunkAccessor.getCell(this.getPosX() - 1, this.getPosY()));
         boolean spaceRight = canMoveToOrSwap(chunkAccessor.getCell(this.getPosX() + 1, this.getPosY()));
 
-        if (!spaceLeft && !spaceRight && !spaceAbove) {
-            this.moving = false;
-        } else {
-            this.moving = true;
-            this.velocityX += getXVelocityWhenBelowIsBlocked(updateDirection, spaceLeft, spaceRight);
-            this.velocityX *= 0.7f;
+        if (spaceVertical) {
+            this.velocityY += this.getGravity().y;
+            this.velocityY *= 0.98f;
         }
 
-        if (!moving) return;
+        if (spaceLeft || spaceRight) {
+            this.velocityX += this.getGravity().x;
+            this.velocityX += getSidewardsVelocity(updateDirection, spaceLeft, spaceRight);
+            this.velocityX *= 0.98f;
+        }
+
+        if (!(spaceLeft || spaceRight || spaceVertical)) return;
 
         if (Math.abs(velocityX) >= 1 || Math.abs(velocityY) >= 1) {
             if (moveWithVelocity(chunkAccessor, updateDirection)) return;
         }
     }
 
-    private float getXVelocityWhenBelowIsBlocked(boolean updateDirection, boolean spaceLeft, boolean spaceRight) {
-        int velocityModifier = 1;
+    private float getSidewardsVelocity(boolean updateDirection, boolean spaceLeft, boolean spaceRight) {
 
-        if (spaceLeft && spaceRight) {
-            velocityModifier = (world.random.nextFloat() > 0.5 ? 1 : -1);
-        } else if (spaceLeft) {
-            velocityModifier = -1;
-        }
+        float velocityModifier = getSidewardsVelocityModifier(updateDirection, spaceLeft, spaceRight);
 
         return velocityModifier * this.getDispersionRate() * world.random.nextFloat();
     }
 
+    private float getSidewardsVelocityModifier(boolean updateDirection, boolean spaceLeft, boolean spaceRight) {
+
+        if (velocityX > MAX_SIDEWARDS_ACC) return world.random.nextBoolean() ? 0 : -0.3f;
+        if (velocityX < -MAX_SIDEWARDS_ACC) return world.random.nextBoolean() ? 0 : 0.3f;
+
+        if (spaceLeft && spaceRight) {
+            return world.random.nextBoolean() ? 1 : -1;
+        }
+
+        if (spaceLeft) {
+            return -1;
+        }
+
+        return 1;
+    }
+
     @Override
     public MoveAlongState moveAlong(ChunkAccessor chunkAccessor, Cell targetCell, int targetX, int targetY, int lastValidX, int lastValidY, boolean updateDirection) {
-        if(targetCell == null) return MoveAlongState.STOP;
+        if (targetCell == null) return MoveAlongState.STOP;
 
         switch (targetCell.getPhysicalState()) {
 
@@ -113,7 +119,9 @@ public class Gas extends MovingCell {
 
             case SOLID, LIQUID -> {
                 if (Math.abs(velocityY) > Math.abs(velocityX)) {
-                    velocityY = 1;
+                    velocityY = 0;
+                } else {
+                    velocityX = 0;
                 }
                 return MoveAlongState.STOP;
             }

@@ -44,16 +44,15 @@ public class NeighbourChunkAccessor implements ChunkAccessor {
         int targetChunkX = World.getChunkPos(targetX);
         int targetChunkY = World.getChunkPos(targetY);
 
-        int gridX = targetChunkX - centerChunk.posX + 1;
-        int gridY = targetChunkY - centerChunk.posY + 1;
-
-        return surroundingChunks.get(gridX, gridY);
+        return getChunkFromChunkPos(targetChunkX, targetChunkY);
     }
 
     @Override
     public Chunk getChunkFromChunkPos(int targetChunkX, int targetChunkY) {
         int gridX = targetChunkX - centerChunk.posX + 1;
         int gridY = targetChunkY - centerChunk.posY + 1;
+
+        if(gridX < 0 || gridX > 2 || gridY < 0 || gridY > 2) return null;
 
         return surroundingChunks.get(gridX, gridY);
     }

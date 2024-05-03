@@ -2,7 +2,6 @@ package com.basti_bob.sand_wizard.world_generation.structures.trees;
 
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.util.FloatPredicate;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 import com.basti_bob.sand_wizard.world_generation.structures.Structure;
@@ -26,11 +25,11 @@ public class TreeGenerator extends StructureGenerator {
     private final float angleIncrement;
     private final BranchThicknessFunction branchThicknessFunction;
 
-    private final FloatPredicate shouldAddLeaf;
+    private final ShouldAddLeaf shouldAddLeaf;
     private final LeafSizeFunction leafSizeFunction;
 
     public TreeGenerator(CellType branchCellType, CellType leafCellType, String rule, int iterations, float startLength, float lengthMultiplier, float angleIncrement, BranchThicknessFunction branchThicknessFunction,
-                         LeafSizeFunction leafSize, FloatPredicate shouldAddLeaf) {
+                         LeafSizeFunction leafSize, ShouldAddLeaf shouldAddLeaf) {
         this.branchCellType = branchCellType;
         this.leafCellType = leafCellType;
         this.rule = rule;
@@ -73,7 +72,7 @@ public class TreeGenerator extends StructureGenerator {
 
             int leafSize = leafSizeFunction.getLeafSize(normalizedDist, isOuterBranch);
 
-            if (!shouldAddLeaf.test(normalizedDist)) continue;
+            if (!shouldAddLeaf.shouldAffLeaf(normalizedDist)) continue;
 
             for (CellPos leafPosition : generateLeaves(leafX, leafY, leafSize)) {
                 boolean overLaps = allBranchPositions.contains(leafPosition);
@@ -289,7 +288,7 @@ public class TreeGenerator extends StructureGenerator {
         private BranchThicknessFunction branchThicknessFunction = i -> 3 - i;
 
         private LeafSizeFunction leafSizeFunction = (v, b) -> 3;
-        private FloatPredicate shouldAddLeave = v -> true;
+        private ShouldAddLeaf shouldAddLeave = v -> true;
 
         private TreeGeneratorBuilder() {
         }
@@ -339,7 +338,7 @@ public class TreeGenerator extends StructureGenerator {
             return this;
         }
 
-        public TreeGeneratorBuilder shouldAddLeave(FloatPredicate shouldAddLeave) {
+        public TreeGeneratorBuilder shouldAddLeave(ShouldAddLeaf shouldAddLeave) {
             this.shouldAddLeave = shouldAddLeave;
             return this;
         }
@@ -357,4 +356,9 @@ public class TreeGenerator extends StructureGenerator {
         int getBranchThickness(int numBranchingBefore);
     }
 
+    public interface ShouldAddLeaf {
+
+        boolean shouldAffLeaf(float normalizedDist);
+
+    }
 }

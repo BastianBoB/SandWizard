@@ -34,6 +34,8 @@ public class CellParticle extends MovingCell {
 
     @Override
     public boolean moveWithVelocity(ChunkAccessor chunkAccessor, boolean updateDirection) {
+        clampVelocity();
+
         float xDistance = Math.abs(velocityX);
         float yDistance = Math.abs(velocityY);
 
@@ -90,7 +92,7 @@ public class CellParticle extends MovingCell {
     }
 
     public void dieAndReplace(ChunkAccessor chunkAccessor, Cell cell) {
-        trySetNeighboursMoving(chunkAccessor, this.getInChunkX(), this.getInChunkY());
+        trySetNeighboursMoving(chunkAccessor, this.getPosX(), this.getPosY());
 
         chunkAccessor.setCell(cell, this.getPosX(), this.getPosY(), this.getInChunkX(), this.getInChunkY());
     }

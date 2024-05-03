@@ -1,50 +1,57 @@
 package com.basti_bob.sand_wizard.world.explosions;
 
+import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class CircleOutlineGenerator {
 
 
-    public static final HashMap<Integer, List<CellPos>> radiusPointsMap = new HashMap<>();
+    public static final HashMap<Integer, Set<CellPos>> radiusPointsMap = new HashMap<>();
 
-    public static List<CellPos> getCircleOutLine(int radius) {
+    public static Set<CellPos> getCircleOutLine(int radius) {
 
-        return radiusPointsMap.computeIfAbsent(radius, CircleOutlineGenerator::createCircleOutline);
+        return radiusPointsMap.computeIfAbsent(radius, CircleOutlineGenerator::midPointCircle);
     }
 
 
-    private static List<CellPos> createCircleOutline(int radius) {
-        List<CellPos> outline = new ArrayList<>();
+    private static Set<CellPos> midPointCircle(int radius) {
+        Set<CellPos> outline = new HashSet<>();
 
-        int t1 = radius / 16;
-        int x = radius;
-        int y = 0;
+        int x = 0;
+        int y = radius;
+        int d = 1 - radius;
 
-        while (x >= y) {
-            outline.add(new CellPos(x, y));
-            outline.add(new CellPos(y, x));
-            outline.add(new CellPos(-x, y));
-            outline.add(new CellPos(-y, x));
-            outline.add(new CellPos(-x, -y));
-            outline.add(new CellPos(-y, -x));
-            outline.add(new CellPos(x, -y));
-            outline.add(new CellPos(y, -x));
+        drawCirclePoints(outline, x, y);
 
-            y++;
-            t1 += y;
+        while (y > x) {
+            if (d < 0) {
+                d += 2 * x + 3;
+            } else {
+                int xOff = x > 0 ? 1 : - 1;
+                //drawCirclePoints(outline, x + xOff, y);
 
-            int t2 = t1 - x;
-
-            if (t2 >= 0) {
-                t1 = t2;
-                x--;
+                d += 2 * (x - y) + 5;
+                y--;
             }
+            x++;
+            drawCirclePoints(outline, x, y);
         }
 
         return outline;
     }
+
+    private static void drawCirclePoints(Set<CellPos> outline, int x, int y) {
+        // Add points for the current circle quadrant
+        outline.add(new CellPos(x, y));
+        outline.add(new CellPos(-x, y));
+        outline.add(new CellPos(x, -y));
+        outline.add(new CellPos(-x, -y));
+        outline.add(new CellPos(y, x));
+        outline.add(new CellPos(y, -x));
+        outline.add(new CellPos(-y, x));
+        outline.add(new CellPos(-y, -x));
+    }
+
 }

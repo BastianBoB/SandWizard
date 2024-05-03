@@ -26,6 +26,8 @@ public class Chunk implements Supplier<Chunk> {
     private int numActiveFrames;
     public boolean hasBeenModified;
 
+    private boolean loaded;
+
     public final List<Light> affectedLights = new ArrayList<>();
     public final List<Light> lightsInChunk = new ArrayList<>();
 
@@ -202,6 +204,18 @@ public class Chunk implements Supplier<Chunk> {
 
     public boolean isActive() {
         return numActiveFrames > 0;
+    }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
+
+        if(loaded) {
+            this.activateChunk();
+        }
     }
 
     public void updateActive() {

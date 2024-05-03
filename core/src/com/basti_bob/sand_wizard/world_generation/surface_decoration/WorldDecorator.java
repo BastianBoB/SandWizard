@@ -23,8 +23,13 @@ public abstract class WorldDecorator {
             .addStructure(StructureGenerator.PONDS.MEDIUM_ACID, 0.00002f)
             .addStructure(StructureGenerator.PONDS.MEDIUM_LAVA, 0.00004f)
             .addStructure(StructureGenerator.PONDS.MEDIUM_WATER, 0.0001f)
-
             .build();
+
+    public static final WorldDecorator CAVES_TOP = StructureWorldDecorator.builder()
+            .addStructure(StructureGenerator.STALACTITES.STALACTITE_1_TINY, 0.002f)
+            .build();
+
+
 
     public static final WorldDecorator NOTHING = new WorldDecorator() {
         @Override

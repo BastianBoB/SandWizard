@@ -1,9 +1,11 @@
-package com.basti_bob.sand_wizard.util;
+package com.basti_bob.sand_wizard.util.noise;
 
 /*
  * OpenSimplex (Simplectic) Noise in Java.
  * (v1.0.1 With new gradient set and corresponding normalization factor, 9/19/14)
  */
+
+import com.basti_bob.sand_wizard.util.noise.Noise;
 
 public class OpenSimplexNoise implements Noise {
 

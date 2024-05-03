@@ -13,6 +13,8 @@ import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.debug.DebugScreen;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
+import com.basti_bob.sand_wizard.util.noise.AmpFreqNoise;
+import com.basti_bob.sand_wizard.util.noise.Noise;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
@@ -50,7 +52,7 @@ public class SandWizard extends ApplicationAdapter {
 
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
-        player = new Player(world, 0, world.worldGeneration.getTerrainHeight(0));
+        player = new Player(world, 0, world.worldGeneration.getTerrainHeight(0) + 300);
 
         world.test();
 
@@ -62,8 +64,8 @@ public class SandWizard extends ApplicationAdapter {
         float deltaTime = Gdx.graphics.getDeltaTime();
         Gdx.graphics.getDeltaTime();
 
-        if (updateTime > 8)
-            System.out.println(updateTime);
+        //if (updateTime > 8)
+            //System.out.println(updateTime);
 
         float speed = WorldConstants.PLAYER_SPEED;
 
@@ -113,7 +115,7 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 200, 20));
+            world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 32, 2000));
         }
 
         accumulatedTime += deltaTime;
@@ -133,6 +135,8 @@ public class SandWizard extends ApplicationAdapter {
         if (updateTimes % 1500 == 0) {
             //world.test();
         }
+
+        //world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 32, 2000));
 
         updateTime = FunctionRunTime.timeFunction(() -> world.update());
 

@@ -27,19 +27,13 @@ public class Explosion {
         this.strength = strength;
     }
 
-    private enum VisitedState {
-        NOT_STOPPED, STOPPED
-    }
-
     public void explode() {
 
         int iterateRadius = (int) (radius * 1.5f);
-
-        VisitedState[][] visitedPositions = new VisitedState[iterateRadius * 2][iterateRadius * 2];
-
-        Set<CellPos> circleOutlinePositions = CircleOutlineGenerator.getCircleOutLine(iterateRadius);
+        List<CellPos> circleOutlinePositions = CircleOutlineGenerator.getCircleOutLine(iterateRadius);
 
         List<Pair<Cell, Float>> toExplodeCells = new ArrayList<>();
+        HashMap<CellPos, Boolean> visitedPositions = new HashMap<>();
 
         float invRadius = 1f / radius;
 
@@ -52,7 +46,7 @@ public class Explosion {
 
             float factor = Math.max(dx, dy) * invRadius;
 
-            toExplodeCells.addAll(explosionStripe(offsetPos.x, offsetPos.y, iterateRadius, strength * factor, visitedPositions));
+            toExplodeCells.addAll(explosionStripe(offsetPos.x, offsetPos.y, strength * factor, visitedPositions));
         }
 
         for (Pair<Cell, Float> pair : toExplodeCells) {
@@ -62,7 +56,7 @@ public class Explosion {
         System.out.println(a);
     }
 
-    public List<Pair<Cell, Float>> explosionStripe(int xOff, int yOff, int iterateRadius, float strength, VisitedState[][] visitedPositions) {
+    public List<Pair<Cell, Float>> explosionStripe(int xOff, int yOff, float strength, HashMap<CellPos, Boolean> visitedPositions) {
         List<Pair<Cell, Float>> toExplodeCells = new ArrayList<>();
 
         float currentStrength = strength;
@@ -100,26 +94,21 @@ public class Explosion {
             int explodeX = x + x1;
             int explodeY = y + y1;
 
-            int arrayIndexX = x1 + iterateRadius;
-            int arrayIndexY = y1 + iterateRadius;
-
-            VisitedState visitedState = visitedPositions[arrayIndexX][arrayIndexY];
-            if (visitedState == null) {
-                visitedPositions[arrayIndexX][arrayIndexY] = stopped ? VisitedState.STOPPED : VisitedState.NOT_STOPPED;
+            CellPos pos = new CellPos(explodeX, explodeY);
+            Boolean hasStopped = visitedPositions.get(pos);
+            if(hasStopped == null) {
+                visitedPositions.put(pos, stopped);
             } else {
-                switch (visitedState) {
-                    case NOT_STOPPED -> {
-                        continue;
-                    }
-                    case STOPPED -> {
-                        stopped = true;
-                    }
+                if(hasStopped) {
+                    return toExplodeCells;
+                } else {
+                    continue;
                 }
             }
 
 
             Cell cell = world.getCell(explodeX, explodeY);
-            if (cell == null) continue;
+            if(cell == null) continue;
 
             if (cell.getExplosionResistance() > 1) {
                 return toExplodeCells;

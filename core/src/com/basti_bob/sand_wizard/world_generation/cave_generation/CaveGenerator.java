@@ -1,11 +1,9 @@
 package com.basti_bob.sand_wizard.world_generation.cave_generation;
 
-import com.basti_bob.sand_wizard.util.LayeredNoise;
+import com.basti_bob.sand_wizard.util.noise.LayeredNoise;
 import com.basti_bob.sand_wizard.util.MathUtil;
-import com.basti_bob.sand_wizard.util.Noise;
+import com.basti_bob.sand_wizard.util.noise.Noise;
 import com.basti_bob.sand_wizard.world.World;
-
-import java.util.Random;
 
 public class CaveGenerator {
 

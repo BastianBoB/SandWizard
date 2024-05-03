@@ -36,21 +36,23 @@ public abstract class Cell {
 
     private boolean canBeHeated;
     private boolean canBeCooled;
-    private float burningTemperature;
-    private boolean canBurn;
-    private int maxBurningTime;
+
+    private final float burningTemperature;
+    private final int maxBurningTime;
+    private final float fireSpreadChance;
+    private final boolean canBurn;
+
     private int timeBurning;
-    private float fireSpreadChance;
     private float temperature;
-    private boolean burning;
+    private boolean isBurning;
 
-    private float maxCorrosionHealth;
+    private final boolean canCorrode;
+    private final float corrosionResistance;
     private float corrosionHealth;
-    private boolean canCorrode;
 
+    private final boolean canExplode;
+    private final float explosionResistance;
     private float explosionHealth;
-    private float explosionResistance;
-    private boolean canExplode;
 
     public boolean glowsWithCellColor;
     public boolean isLightSource;
@@ -83,12 +85,16 @@ public abstract class Cell {
         this.maxBurningTime = cellProperty.maxBurningTime;
         this.fireSpreadChance = cellProperty.fireSpreadChance;
 
-        this.maxCorrosionHealth = cellProperty.maxCorrosionHealth;
         this.canCorrode = cellProperty.canCorrode;
-        this.corrosionHealth = cellProperty.maxCorrosionHealth;
+        this.corrosionHealth = cellProperty.corrosionHealth;
+        this.corrosionResistance = cellProperty.corrosionResistance;
 
         this.isLightSource = cellProperty.isLightSource;
         this.glowsWithCellColor = cellProperty.glowsWithCellColor;
+
+        this.explosionResistance = cellProperty.explosionResistance;
+        this.canExplode = cellProperty.canExplode;
+        this.explosionHealth = cellProperty.explosionHealth;
 
         if (isLightSource) {
 
@@ -161,32 +167,35 @@ public abstract class Cell {
     }
 
     public boolean explode(ChunkAccessor chunkAccessor, int originX, int originY, float strength) {
+
         if (!canExplode()) return false;
 
-        if (explosionResistance < strength) {
-            float r = (float) Math.random();
-//            if (r < 0 && canBeTurnedToParticle()) {
-//                PVector vel = new PVector(this.x - originX, this.y - originY).normalize().mult((float) (Math.random() * (strength / 20f)));
-//                replaceWithParticle(vel);
-//                return true;
-//            }
-            if (r < 0.3) {
-                replace(CellType.FIRE, chunkAccessor);
-                return true;
-            }
-            die(chunkAccessor);
+        this.explosionHealth -= strength * (1f - explosionResistance);
 
-            return true;
+        if (this.explosionHealth > 0) return false;
+
+
+        float r = world.random.nextFloat();
+        if (r < 0.3) {
+            replace(CellType.EXPLOSION_SPARK, chunkAccessor);
         } else {
-            //this.stainWithColor(chunkAccessor, );
-            return false;
+            die(chunkAccessor);
         }
+
+        return true;
+    }
+
+    public boolean wouldExplode(ChunkAccessor chunkAccessor, int originX, int originY, float strength) {
+
+        if (!canExplode()) return false;
+
+        return this.explosionHealth - strength * (1f - explosionResistance) < 0;
     }
 
     public boolean applyCorrosion(ChunkAccessor chunkAccessor, float amount) {
         if (!this.canCorrode()) return false;
 
-        this.corrosionHealth -= amount;
+        this.corrosionHealth -= amount * (1f - corrosionResistance);
 
         if (this.corrosionHealth < 0) {
             die(chunkAccessor);
@@ -243,7 +252,7 @@ public abstract class Cell {
     }
 
     public void startedBurning(ChunkAccessor chunkAccessor) {
-        this.burning = true;
+        this.isBurning = true;
     }
 
     public boolean die(ChunkAccessor chunkAccessor) {
@@ -312,6 +321,8 @@ public abstract class Cell {
         int cellChunkY = World.getChunkPos(posY);
 
         Chunk cellChunk = chunkAccessor.getChunkFromChunkPos(cellChunkX, cellChunkY);
+
+        if(cellChunk == null) return neighbourCells;
 
         switch (chunkBoarderState) {
 
@@ -667,7 +678,7 @@ public abstract class Cell {
     }
 
     public boolean isBurning() {
-        return burning;
+        return isBurning;
     }
 
     public int getMaxBurningTime() {
@@ -700,10 +711,6 @@ public abstract class Cell {
 
     public float getFireSpreadChance() {
         return fireSpreadChance;
-    }
-
-    public float getMaxCorrosionHealth() {
-        return maxCorrosionHealth;
     }
 
     public float getCorrosionHealth() {

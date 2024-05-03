@@ -1,10 +1,9 @@
 package com.basti_bob.sand_wizard.world_generation.terrain_height_generation;
 
-import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
+import com.basti_bob.sand_wizard.util.noise.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.generators.SpikyTerrainHeightGenerator;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public abstract class TerrainHeightGenerator {

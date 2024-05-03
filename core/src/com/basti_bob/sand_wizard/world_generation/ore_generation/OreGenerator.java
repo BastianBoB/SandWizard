@@ -1,9 +1,8 @@
 package com.basti_bob.sand_wizard.world_generation.ore_generation;
 
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.util.LayeredNoise;
-import com.basti_bob.sand_wizard.util.Noise;
-import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
+import com.basti_bob.sand_wizard.util.noise.LayeredNoise;
+import com.basti_bob.sand_wizard.util.noise.Noise;
 import com.basti_bob.sand_wizard.util.Triplet;
 import com.basti_bob.sand_wizard.world.World;
 

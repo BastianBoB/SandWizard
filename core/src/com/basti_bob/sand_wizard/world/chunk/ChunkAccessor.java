@@ -118,6 +118,17 @@ public interface ChunkAccessor {
         targetChunk.setCell(cell, posX, posY, inChunkX, inChunkY, CellPlaceFlag.NEW);
     }
 
+    default void setCell(Cell cell, int posX, int posY) {
+        Chunk targetChunk = getChunkFromCellPos(posX, posY);
+
+        if (targetChunk == null) return;
+
+        int targetInChunkX = World.getInChunkPos(posX);
+        int targetInChunkY = World.getInChunkPos(posY);
+
+        targetChunk.setCell(cell, posX, posY, targetInChunkX, targetInChunkY, CellPlaceFlag.NEW);
+    }
+
     default void updateMeshColor(Cell cell) {
         Chunk targetChunk = getChunkFromCellPos(cell.getPosX(), cell.getPosY());
 

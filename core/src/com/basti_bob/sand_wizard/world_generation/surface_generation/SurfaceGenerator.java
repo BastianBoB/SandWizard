@@ -1,7 +1,6 @@
 package com.basti_bob.sand_wizard.world_generation.surface_generation;
 
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.util.OpenSimplexNoise;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.ScaledShiftedTerrainHeightGenerator;
 import com.basti_bob.sand_wizard.world_generation.terrain_height_generation.TerrainHeightGenerator;
