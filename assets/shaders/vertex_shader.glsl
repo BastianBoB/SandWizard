@@ -6,11 +6,15 @@ struct Light {
 };
 
 layout(std430, binding = 0) buffer world_lights_data {
-    Light worldLights[];
+    Light[] worldLights;
 };
 
 layout(std430, binding = 1) buffer chunk_lights_data {
-    Light chunkLights[];
+    Light[] chunkLights;
+};
+
+layout(std430, binding = 2) buffer chunk_lights_indices {
+    int[] chunkLightIndices;
 };
 
 
@@ -37,10 +41,7 @@ uniform vec2 u_playerPos;
 uniform vec2 u_cameraPos;
 uniform int u_dayTimeMinutes;
 
-uniform int hasChunkLights;
-
-uniform float[chunkSize] terrain_heights;
-
+uniform float[chunkSize] terrainHeights;
 const vec3 gammaCorrection = vec3(2.2);
 
 const vec3 skyColor1 = vec3(0.91, 0.94, 0.96);
@@ -198,7 +199,7 @@ void main() {
     bool renderSun = sunAngle < 0.2 || sunAngle > PI - 0.2;
 
     int inChunkX = int(mod(int(a_position.x), chunkSize));
-    float terrainHeight = terrain_heights[inChunkX];
+    float terrainHeight = terrainHeights[inChunkX];
     float surfaceDist = a_position.y - terrainHeight;
 
     if (a_empty == 1 && surfaceDist > 0) {
@@ -233,11 +234,14 @@ void main() {
         }
     }
 
-    if(hasChunkLights == 1) {
-        for (int i = 0; i < chunkLights.length(); i++) {
-            summedLightColor += calcLight(chunkLights[i]);
-        }
+    for (int i = 0; i < chunkLightIndices.length(); i++) {
+        int lightArrayIndex = chunkLightIndices[i];
+
+        Light light = chunkLights[lightArrayIndex];
+
+        summedLightColor += calcLight(light);
     }
+
 
     for (int i = 0; i < worldLights.length(); i++) {
         summedLightColor += calcLight(worldLights[i]);

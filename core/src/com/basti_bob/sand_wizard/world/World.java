@@ -56,8 +56,8 @@ public class World implements ChunkAccessor {
 
     public void test() {
         setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 0, (int) (SandWizard.player.ny) + 16);
-        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 100, (int) (SandWizard.player.ny) + 16);
-        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 200, (int) (SandWizard.player.ny) + 16);
+//        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 100, (int) (SandWizard.player.ny) + 16);
+//        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 200, (int) (SandWizard.player.ny) + 16);
     }
 
     public void addStructureToPlace(Structure structure) {

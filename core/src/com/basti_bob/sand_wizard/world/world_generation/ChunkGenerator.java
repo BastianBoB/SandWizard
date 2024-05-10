@@ -111,11 +111,11 @@ public class ChunkGenerator {
     }
 
     public Cell getCellFromMap(int inChunkX, int inChunkY, HashMap<InChunkPos, Cell> queuedCells) {
-        return Empty.getInstance();
+        //return Empty.getInstance();
 
-//        if (queuedCells == null) return null;
-//
-//        return queuedCells.get(InChunkPos.get(inChunkX, inChunkY));
+        if (queuedCells == null) return null;
+
+        return queuedCells.get(InChunkPos.get(inChunkX, inChunkY));
     }
 
 }

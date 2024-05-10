@@ -17,19 +17,26 @@ import com.basti_bob.sand_wizard.world.world_rendering.lighting.ChunkLight;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.Light;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.*;
 
 public class WorldRenderer {
 
     public static final int GL_FRAMEBUFFER_SRGB = 0x8DB9;
 
+    private static final int WORLD_LIGHTS_BUFFER_BLOCK_INDEX = 0;
+    private static final int CHUNK_LIGHTS_BUFFER_BLOCK_INDEX = 1;
+    private static final int LIGHTS_INDICES_BUFFER_BLOCK_INDEX =2;
+
+
     private final World world;
     private final OrthographicCamera camera;
     private final ShaderProgram shader;
     private final ShapeRenderer shapeRenderer;
 
-    private FloatBuffer worldLightBuffer = BufferUtils.newFloatBuffer(10000);
-    private FloatBuffer[] chunkLightBuffers = new FloatBuffer[10000];
+    private FloatBuffer worldLightBuffer = BufferUtils.newFloatBuffer(10000 * Light.NUM_FLOAT_DATA);
+    private FloatBuffer chunkLightBuffer = BufferUtils.newFloatBuffer(10000 * Light.NUM_FLOAT_DATA);
+    private IntBuffer[] chunkLightIndicesBuffers = new IntBuffer[10000];
 
     public WorldRenderer(World world, OrthographicCamera camera) {
         this.shapeRenderer = new ShapeRenderer();
@@ -43,8 +50,8 @@ public class WorldRenderer {
 
         shader = generateShader();
 
-        for (int i = 0; i < chunkLightBuffers.length; i++) {
-            chunkLightBuffers[i] = BufferUtils.newFloatBuffer(i * Light.NUM_FLOAT_DATA);
+        for(int i = 0; i < chunkLightIndicesBuffers.length; i++) {
+            chunkLightIndicesBuffers[i] = BufferUtils.newIntBuffer(i);
         }
     }
 
@@ -66,37 +73,38 @@ public class WorldRenderer {
         shader.setUniformf("u_pointSize", WorldConstants.CELL_SIZE / camera.zoom * 1.05f);
         shader.setUniformi("u_cellSize", WorldConstants.CELL_SIZE);
 
-
         shader.setUniformi("u_dayTimeMinutes", world.updateTimes);
         shader.setUniform2fv("u_cameraPos", new float[]{camera.position.x / WorldConstants.CELL_SIZE, camera.position.y / WorldConstants.CELL_SIZE}, 0, 2);
 
-
         int worldLightSSBO = Gdx.gl31.glGenBuffer();
-        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, worldLightSSBO);
-        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, 0, worldLightSSBO);
-        setWorldLightsBuffer(chunks);
+        setWorldLightBuffer(chunks, worldLightSSBO);
 
         int chunkLightSSBO = Gdx.gl31.glGenBuffer();
-        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, chunkLightSSBO);
-        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, 1, chunkLightSSBO);
+        setChunksLightBuffer(chunks, chunkLightSSBO);
 
+        int chunkLightIndicesSSBO = Gdx.gl31.glGenBuffer();
+        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, chunkLightIndicesSSBO);
+        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, LIGHTS_INDICES_BUFFER_BLOCK_INDEX, chunkLightIndicesSSBO);
+
+        int lastChunkNumLights = 0;
         for (int i = 0; i < chunks.rows; i++) {
 
             ChunkColumnData chunkColumnData = world.chunkProvider.chunkColumns.get(topLeftChunkPos.x + i);
             if (chunkColumnData == null) continue;
 
-            shader.setUniform1fv("terrain_heights", chunkColumnData.terrainHeights, 0, WorldConstants.CHUNK_SIZE);
+            shader.setUniform1fv("terrainHeights", chunkColumnData.terrainHeights, 0, WorldConstants.CHUNK_SIZE);
 
             for (int j = 0; j < chunks.cols; j++) {
                 Chunk chunk = chunks.get(i, j);
                 if (chunk == null) continue;
 
-                modifyChunkLightBuffer(chunk, chunkLightSSBO, chunkColumnData);
+                lastChunkNumLights = setChunkLightIndicesArray(chunk, lastChunkNumLights);
 
                 chunk.mesh.render(shader, GL20.GL_POINTS);
             }
         }
 
+        Gdx.gl31.glDeleteBuffer(chunkLightIndicesSSBO);
         Gdx.gl31.glDeleteBuffer(worldLightSSBO);
         Gdx.gl31.glDeleteBuffer(chunkLightSSBO);
 
@@ -104,46 +112,58 @@ public class WorldRenderer {
             chunkActiveDebugSquares(chunks);
     }
 
-    private void setWorldLightsBuffer(Array2D<Chunk> chunks) {
-        int numLights = world.globalLights.size();
-        int numLightFloats = numLights * Light.NUM_FLOAT_DATA;
-
+    private void setWorldLightBuffer(Array2D<Chunk> chunks, int ssbo) {
         worldLightBuffer.clear();
         for (Light light : world.globalLights) {
             worldLightBuffer.put(light.getData());
         }
-
         worldLightBuffer.flip();
 
-        Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, numLightFloats * 4, worldLightBuffer, GL31.GL_DYNAMIC_DRAW);
+        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, ssbo);
+        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, WORLD_LIGHTS_BUFFER_BLOCK_INDEX, ssbo);
+        Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, 0, worldLightBuffer, GL31.GL_DYNAMIC_DRAW);
     }
 
-    private void modifyChunkLightBuffer(Chunk chunk, int chunkLightSSBO, ChunkColumnData chunkColumnData) {
+    private void setChunksLightBuffer(Array2D<Chunk> chunks, int ssbo) {
+        chunkLightBuffer.clear();
+        int lightArrayIndex = 0;
 
-
-        List<ChunkLight> affectedLights = chunk.affectedLights;
-
-        int numAffectedLights = affectedLights.size();
-        int numLightFloats = numAffectedLights * Light.NUM_FLOAT_DATA;
-
-        if (numAffectedLights == 0) {
-            shader.setUniformi("hasChunkLights", 0);
-        } else {
-            shader.setUniformi("hasChunkLights", 1);
-
-            FloatBuffer chunkLightBuffer = chunkLightBuffers[numAffectedLights];
-            chunkLightBuffer.clear();
-            for (Light light : affectedLights) {
-                if (light == null) continue;
-
+        for(Chunk chunk : chunks.getArray()) {
+            for(ChunkLight light : chunk.lightsInChunk) {
+                light.shaderArrayIndex = lightArrayIndex;
                 chunkLightBuffer.put(light.getData());
-            }
-            chunkLightBuffer.flip();
 
-            Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, numLightFloats * 4, chunkLightBuffer, GL31.GL_DYNAMIC_DRAW);
+                lightArrayIndex++;
+            }
         }
+        chunkLightBuffer.flip();
+
+        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, ssbo);
+        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, CHUNK_LIGHTS_BUFFER_BLOCK_INDEX, ssbo);
+        Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, 0, chunkLightBuffer, GL31.GL_DYNAMIC_DRAW);
     }
 
+    private int setChunkLightIndicesArray(Chunk chunk, int lastChunkNumLights) {
+        List<ChunkLight> lights = chunk.affectedLights;
+        int numLights = lights.size();
+
+        if(!(numLights == 0 && lastChunkNumLights == 0)) {
+
+            IntBuffer lightIndicesBuffer = chunkLightIndicesBuffers[numLights];
+            lightIndicesBuffer.clear();
+
+            for (int k = 0; k < numLights; k++) {
+                ChunkLight light = lights.get(k);
+                if (light == null) continue;
+                lightIndicesBuffer.put(light.shaderArrayIndex);
+            }
+            lightIndicesBuffer.flip();
+
+            Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, 0, lightIndicesBuffer, GL31.GL_DYNAMIC_DRAW);
+        }
+
+        return numLights;
+    }
 
     private void chunkActiveDebugSquares(Array2D<Chunk> chunks) {
         float chunkSize = WorldConstants.CHUNK_SIZE;

@@ -10,10 +10,10 @@ public abstract class Light {
     public static final int NUM_FLOAT_DATA = 7;
 
     private float posX, posY;
-    private final float radius;
-    private final int chunkRadius;
-    private final float intensity;
-    private final float r, g, b;
+    private float radius;
+    private int chunkRadius;
+    private float intensity;
+    private float r, g, b;
     private final float[] data;
 
     public Light(int posX, int posY, float r, float g, float b, float radius, float intensity) {
@@ -40,6 +40,25 @@ public abstract class Light {
 
         data[0] = posX;
         data[1] = posY;
+    }
+
+    public void setRadius(float radius) {
+        this.radius = radius;
+        data[2] = radius;
+    }
+
+    public void setIntensity(float intensity) {
+        this.intensity = intensity;
+        data[3] = intensity;
+    }
+
+    public void setColor(float r, float g, float b) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        data[4] = r;
+        data[5] = g;
+        data[6] = b;
     }
 
     public float[] getData() {

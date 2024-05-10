@@ -51,7 +51,7 @@ public class SandWizard extends ApplicationAdapter {
         worldRenderer = new WorldRenderer(world, camera);
         player = new Player(world, 0, world.worldGeneration.getTerrainHeight(0) + 5);
 
-        world.test();
+        //world.test();
 
         this.debugScreen = new DebugScreen(player);
     }
@@ -126,6 +126,11 @@ public class SandWizard extends ApplicationAdapter {
             renderDebugScreen = !renderDebugScreen;
         }
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+            world.test();
+        }
+
+
         accumulatedTime += deltaTime; //Gdx.graphics.getDeltaTime();
 
         if (accumulatedTime >= fixedDeltaTime) {
@@ -142,7 +147,7 @@ public class SandWizard extends ApplicationAdapter {
         updateTimes++;
 
         if (updateTimes % 150 == 0) {
-            world.test();
+           // world.test();
         }
 
         //world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 32, 2000));

@@ -9,6 +9,7 @@ import com.basti_bob.sand_wizard.world.chunk.Chunk;
 public class ChunkLight extends Light {
 
     private final int chunkRadius;
+    public int shaderArrayIndex;
 
     public ChunkLight(int cellX, int cellY, float r, float g, float b, float radius, float intensity) {
       super(cellX, cellY, r, g, b, radius, intensity);

@@ -60,7 +60,6 @@ public abstract class Cell {
 
     public Light light;
 
-
     public Cell(CellType cellType) {
         this.cellType = cellType;
 
