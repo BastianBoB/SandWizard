@@ -1,5 +1,6 @@
 package com.basti_bob.sand_wizard.world.chunk;
 
+import com.badlogic.gdx.utils.Pool;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.world.ChunkColumnData;
 import com.basti_bob.sand_wizard.world.World;

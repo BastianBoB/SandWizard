@@ -11,7 +11,6 @@ import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.ChunkLight;
-import com.basti_bob.sand_wizard.world.world_rendering.lighting.Light;
 
 import java.util.ArrayList;
 import java.util.List;

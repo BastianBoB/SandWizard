@@ -40,7 +40,6 @@ uniform int u_dayTimeMinutes;
 uniform int hasChunkLights;
 
 uniform float[chunkSize] terrain_heights;
-uniform Light[10000] chunkLightsArray;
 
 const vec3 gammaCorrection = vec3(2.2);
 
@@ -235,7 +234,7 @@ void main() {
     }
 
     if(hasChunkLights == 1) {
-        for (int i = 0; i < chunkLightsArray.length(); i++) {
+        for (int i = 0; i < chunkLights.length(); i++) {
             summedLightColor += calcLight(chunkLights[i]);
         }
     }
