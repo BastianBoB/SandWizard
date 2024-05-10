@@ -4,10 +4,9 @@ import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.world.ChunkColumnData;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
-import com.basti_bob.sand_wizard.world.WorldUpdatingChunkRow;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
-import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
+import com.basti_bob.sand_wizard.world.world_saving.ChunkSaver;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -26,7 +25,7 @@ public class ChunkProvider {
     public ChunkProvider(World world) {
         this.world = world;
 
-        for (int i = 0; i < 15000; i++) {
+        for (int i = 0; i < WorldConstants.CHUNK_POOL_SIZE; i++) {
             unusedChunkPool.push(new Chunk());
         }
     }
@@ -77,7 +76,6 @@ public class ChunkProvider {
     public void addChunk(Chunk chunk) {
         chunks.add(chunk);
         chunkLUT.put(new ChunkPos(chunk.posX, chunk.posY), chunk);
-
 
         WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.posY);
         if (chunkRow == null) {

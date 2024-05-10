@@ -2,24 +2,18 @@ package com.basti_bob.sand_wizard.world;
 
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
-import com.basti_bob.sand_wizard.cells.CellParticle;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.gases.Fire;
-import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
-import com.basti_bob.sand_wizard.util.MathUtil;
-import com.basti_bob.sand_wizard.world.chunk.CellPlaceFlag;
-import com.basti_bob.sand_wizard.world.chunk.Chunk;
-import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
-import com.basti_bob.sand_wizard.world.chunk.ChunkProvider;
+import com.basti_bob.sand_wizard.world.chunk.*;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
-import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
-import com.basti_bob.sand_wizard.world_generation.structures.Structure;
-import com.basti_bob.sand_wizard.world_generation.structures.StructureGenerator;
-import com.basti_bob.sand_wizard.world_saving.ChunkSaver;
+import com.basti_bob.sand_wizard.world.world_generation.ChunkGenerator;
+import com.basti_bob.sand_wizard.world.world_generation.WorldGeneration;
+import com.basti_bob.sand_wizard.world.world_generation.structures.Structure;
+import com.basti_bob.sand_wizard.world.world_rendering.lighting.WorldLight;
+import com.basti_bob.sand_wizard.world.world_saving.ChunkSaver;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
@@ -31,8 +25,10 @@ public class World implements ChunkAccessor {
 
     public final Random random = new Random(0);
 
+    private final ExecutorService executor;
+
     private boolean updateDirection;
-    public int activeChunks;
+    public int activeChunks, loadedChunks;
     public int updateTimes;
 
     public final ChunkProvider chunkProvider;
@@ -44,9 +40,9 @@ public class World implements ChunkAccessor {
     public final Deque<Structure> unplacedStructures = new ArrayDeque<>();
     public final HashMap<ChunkPos, HashMap<InChunkPos, Cell>> unloadedStructureCells = new HashMap<>();
 
-    private final ExecutorService executor;
-
     private final Stack<Explosion> explosions = new Stack<>();
+
+    public final List<WorldLight> globalLights = new ArrayList<>();
 
     public World() {
         this.chunkProvider = new ChunkProvider(this);
@@ -59,67 +55,9 @@ public class World implements ChunkAccessor {
     }
 
     public void test() {
-//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_2.generate(this, 50, (int) worldGeneration.getTerrainHeight(50)));
-//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_3.generate(this, 100, (int) worldGeneration.getTerrainHeight(100)));
-//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_4.generate(this, 150, (int) worldGeneration.getTerrainHeight(150)));
-//        addStructureToPlaceAsync(() -> StructureGenerator.TREES.TREE_5.generate(this, 200, (int) worldGeneration.getTerrainHeight(200)));
-//        addStructureToPlaceAsync(() -> StructureGeneratdeor.TREES.TREE_2.generate(this, 250, (int) worldGeneration.getTerrainHeight(250)));
-
-//        setCell(CellType.FIRE_BREATHING_STONES.UP, 100, 601);
-//        setCell(CellType.FIRE_BREATHING_STONES.DOWN, 100, 599);
-//        setCell(CellType.FIRE_BREATHING_STONES.RIGHT, 101, 600);
-//        setCell(CellType.FIRE_BREATHING_STONES.LEFT, 99, 600);
-//
-//        setCell(CellType.DRIPPING_STONES.WATER, 200, 600);
-//        setCell(CellType.DRIPPING_STONES.LAVA, 250, 600);
-//        setCell(CellType.DRIPPING_STONES.ACID, 300, 600);
-
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_1_LARGE.generate(this, 100, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_1_MEDIUM.generate(this, 100, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_1_SMALL.generate(this, 100, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_1_TINY.generate(this, 100, 825));
-//
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_2_LARGE.generate(this, 200, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_2_MEDIUM.generate(this, 200, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_2_SMALL.generate(this, 200, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_2_TINY.generate(this, 200, 825));
-//
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_3_LARGE.generate(this, 300, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_3_MEDIUM.generate(this, 300, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_3_SMALL.generate(this, 300, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_3_TINY.generate(this, 300, 825));
-//
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_4_LARGE.generate(this, 400, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_4_MEDIUM.generate(this, 400, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_4_SMALL.generate(this, 400, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALAGMITES.STALAGMITE_4_TINY.generate(this, 400, 825));
-
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_1_LARGE.generate(this, 100, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_1_MEDIUM.generate(this, 100, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_1_SMALL.generate(this, 100, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_1_TINY.generate(this, 100, 825));
-//
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_2_LARGE.generate(this, 200, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_2_MEDIUM.generate(this, 200, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_2_SMALL.generate(this, 200, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_2_TINY.generate(this, 200, 825));
-//
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_3_LARGE.generate(this, 300, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_3_MEDIUM.generate(this, 300, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_3_SMALL.generate(this, 300, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_3_TINY.generate(this, 300, 825));
-//
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_4_LARGE.generate(this, 400, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_4_MEDIUM.generate(this, 400, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_4_SMALL.generate(this, 400, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_4_TINY.generate(this, 400, 825));
-//
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_5_LARGE.generate(this, 500, 500));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_5_MEDIUM.generate(this, 500, 650));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_5_SMALL.generate(this, 500, 750));
-//        addStructureToPlaceAsync(() -> StructureGenerator.STALACTITES.STALACTITE_5_TINY.generate(this, 500, 825));
-
-
+        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 0, (int) (SandWizard.player.ny) + 16);
+        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 100, (int) (SandWizard.player.ny) + 16);
+        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 200, (int) (SandWizard.player.ny) + 16);
     }
 
     public void addStructureToPlace(Structure structure) {
@@ -205,12 +143,15 @@ public class World implements ChunkAccessor {
 
     private void updateChunkActiveAndSetCellsNotUpdated() {
         activeChunks = 0;
+        loadedChunks = 0;
 
         List<Callable<Object>> tasks = new ArrayList<>();
 
         for (Chunk chunk : chunkProvider.chunks) {
-
             chunk.updateActive();
+
+            if (!chunk.isLoaded()) continue;
+            loadedChunks++;
 
             if (!chunk.isActive()) continue;
             activeChunks++;
@@ -250,28 +191,20 @@ public class World implements ChunkAccessor {
                 List<Callable<Object>> tasks = new ArrayList<>();
 
                 for (Chunk chunk : separatedChunks) {
-
                     if (!chunk.isActive() || !chunk.isLoaded()) continue;
 
-                    chunk.update(updateDirection);
-                    //tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
+                    tasks.add(Executors.callable(() -> chunk.update(updateDirection)));
                 }
 
-                //run tasks
-                if (tasks.size() == 1) {
-                    try {
+                try {
+                    if (tasks.size() == 1) {
                         tasks.get(0).call();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    try {
+                    } else {
                         executor.invokeAll(tasks);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
             }
         }
     }
@@ -363,7 +296,8 @@ public class World implements ChunkAccessor {
                 neighbourChunk.chunkAccessor.setSurroundingChunk(chunk);
                 chunk.chunkAccessor.setSurroundingChunk(neighbourChunk);
 
-                chunk.affectedLights.addAll(neighbourChunk.lightsInChunk);
+                if (neighbourChunk.lightsInChunk.size() > 0)
+                    chunk.affectedLights.addAll(neighbourChunk.lightsInChunk);
             }
         }
 

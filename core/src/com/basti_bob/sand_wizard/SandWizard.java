@@ -2,27 +2,19 @@ package com.basti_bob.sand_wizard;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.debug.DebugScreen;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
-import com.basti_bob.sand_wizard.util.noise.AmpFreqNoise;
-import com.basti_bob.sand_wizard.util.noise.Noise;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
-import com.basti_bob.sand_wizard.world_generation.ChunkGenerator;
-
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 public class SandWizard extends ApplicationAdapter {
 
@@ -30,7 +22,7 @@ public class SandWizard extends ApplicationAdapter {
 
     public World world;
     public WorldRenderer worldRenderer;
-    public Player player;
+    public static Player player;
 
     private DebugScreen debugScreen;
 
@@ -41,31 +33,43 @@ public class SandWizard extends ApplicationAdapter {
 
     public static int updateTimes = 0;
 
-
-    public float freeMemory, maxMemory, updateTime, renderTime;
+    public static float freeMemory, maxMemory;
+    public static float deltaTimeMs, updateTime, renderTime;
+    public static boolean renderDebugScreen = true;
     public static boolean isUpdating = true;
+
+    public static long previousTime = -1;
 
     @Override
     public void create() {
+        System.out.println(System.getProperty("java.home"));
+
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
 
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
-        player = new Player(world, 0, world.worldGeneration.getTerrainHeight(0) + 300);
+        player = new Player(world, 0, world.worldGeneration.getTerrainHeight(0) + 5);
 
         world.test();
 
-        this.debugScreen = new DebugScreen();
+        this.debugScreen = new DebugScreen(player);
     }
+
 
     @Override
     public void render() {
-        float deltaTime = Gdx.graphics.getDeltaTime();
-        Gdx.graphics.getDeltaTime();
+        if (previousTime == -1) previousTime = System.nanoTime();
 
-        //if (updateTime > 8)
-            //System.out.println(updateTime);
+        long currentTime = System.nanoTime();
+        float deltaTime = (currentTime - previousTime) / 1e9f;
+        previousTime = currentTime;
+
+        deltaTimeMs = deltaTime * 1000f;
+
+        if (deltaTimeMs > 13) {
+            System.out.println(deltaTimeMs + ", " + (updateTime + renderTime));
+        }
 
         float speed = WorldConstants.PLAYER_SPEED;
 
@@ -114,26 +118,31 @@ public class SandWizard extends ApplicationAdapter {
             world.setCell(CellType.GLOWBLOCK, (int) player.nx, (int) player.ny);
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 32, 2000));
         }
 
-        accumulatedTime += deltaTime;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+            renderDebugScreen = !renderDebugScreen;
+        }
+
+        accumulatedTime += deltaTime; //Gdx.graphics.getDeltaTime();
 
         if (accumulatedTime >= fixedDeltaTime) {
-            //if (isUpdating) {
             fixedUpdate(fixedDeltaTime);
-            //}
+
             accumulatedTime -= fixedDeltaTime;
         }
         renderGame();
     }
 
     public void fixedUpdate(float deltaTime) {
+        //world.setCell(CellType.FIRE, (int) player.nx, (int) player.ny);
+
         updateTimes++;
 
-        if (updateTimes % 1500 == 0) {
-            //world.test();
+        if (updateTimes % 150 == 0) {
+            world.test();
         }
 
         //world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 32, 2000));
@@ -152,6 +161,8 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         camera.update();
+
+        debugScreen.worldUpdate();
     }
 
     public void renderGame() {
@@ -161,7 +172,9 @@ public class SandWizard extends ApplicationAdapter {
         renderTime = FunctionRunTime.timeFunction(() -> worldRenderer.render(player));
 
         player.render(camera);
-        debugScreen.render(this);
+
+        if (renderDebugScreen)
+            debugScreen.render();
     }
 
 

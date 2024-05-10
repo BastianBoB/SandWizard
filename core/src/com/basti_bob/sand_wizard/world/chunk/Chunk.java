@@ -10,7 +10,8 @@ import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
-import com.basti_bob.sand_wizard.world.lighting.Light;
+import com.basti_bob.sand_wizard.world.world_rendering.lighting.ChunkLight;
+import com.basti_bob.sand_wizard.world.world_rendering.lighting.Light;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,8 @@ public class Chunk implements Supplier<Chunk> {
 
     private boolean loaded;
 
-    public final List<Light> affectedLights = new ArrayList<>();
-    public final List<Light> lightsInChunk = new ArrayList<>();
+    public final List<ChunkLight> affectedLights = new ArrayList<>();
+    public final List<ChunkLight> lightsInChunk = new ArrayList<>();
 
     public Chunk() {
         mesh = new Mesh(true, WorldConstants.NUM_MESH_VERTICES, 0,

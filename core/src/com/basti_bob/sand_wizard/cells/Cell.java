@@ -3,8 +3,8 @@ package com.basti_bob.sand_wizard.cells;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.cell_properties.CellProperty;
-import com.basti_bob.sand_wizard.cell_properties.PhysicalState;
+import com.basti_bob.sand_wizard.cells.cell_properties.CellProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.PhysicalState;
 import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
@@ -13,7 +13,8 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
-import com.basti_bob.sand_wizard.world.lighting.Light;
+import com.basti_bob.sand_wizard.world.world_rendering.lighting.ChunkLight;
+import com.basti_bob.sand_wizard.world.world_rendering.lighting.Light;
 
 public abstract class Cell {
 
@@ -97,10 +98,8 @@ public abstract class Cell {
         this.explosionHealth = cellProperty.explosionHealth;
 
         if (isLightSource) {
-
             Color lightColor = glowsWithCellColor ? color : cellProperty.lightColor;
-
-            light = new Light(getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
+            light = new ChunkLight(getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
         }
 
         cellProperty.createdCell(this);
@@ -205,17 +204,11 @@ public abstract class Cell {
     }
 
     public void cleanColor(ChunkAccessor chunkAccessor) {
-        updateColor(chunkAccessor, originalColorR, originalColorG, originalColorB);
+        cleanColor(chunkAccessor, 1f);
     }
 
     public void cleanColor(ChunkAccessor chunkAccessor, float factor) {
         stainWithColor(chunkAccessor, originalColorR, originalColorG, originalColorB, factor);
-
-        float newR = MathUtil.lerp(colorR, originalColorR, factor);
-        float newG = MathUtil.lerp(colorG, originalColorG, factor);
-        float newB = MathUtil.lerp(colorB, originalColorB, factor);
-
-        updateColor(chunkAccessor, newR, newG, newB);
     }
 
     public void stainWithColor(ChunkAccessor chunkAccessor, float r, float g, float b, float factor) {
@@ -227,6 +220,8 @@ public abstract class Cell {
     }
 
     public void updateColor(ChunkAccessor chunkAccessor, float r, float g, float b) {
+        if(this.colorR == r && this.colorG == g && this.colorB == b) return;
+
         this.colorR = r;
         this.colorB = b;
         this.colorG = g;

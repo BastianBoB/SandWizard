@@ -1,7 +1,7 @@
 package com.basti_bob.sand_wizard.cells.gases;
 
 import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.cell_properties.property_types.GasProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.GasProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;

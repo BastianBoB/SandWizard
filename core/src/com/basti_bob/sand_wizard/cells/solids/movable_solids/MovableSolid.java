@@ -1,7 +1,7 @@
 package com.basti_bob.sand_wizard.cells.solids.movable_solids;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.basti_bob.sand_wizard.cell_properties.property_types.MovableSolidProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.MovableSolidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;

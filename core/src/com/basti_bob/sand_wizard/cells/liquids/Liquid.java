@@ -1,6 +1,6 @@
 package com.basti_bob.sand_wizard.cells.liquids;
 
-import com.basti_bob.sand_wizard.cell_properties.property_types.LiquidProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.LiquidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;

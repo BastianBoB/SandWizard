@@ -1,9 +1,9 @@
 package com.basti_bob.sand_wizard.cells;
 
 import com.badlogic.gdx.graphics.Color;
-import com.basti_bob.sand_wizard.cell_properties.CellColors;
-import com.basti_bob.sand_wizard.cell_properties.CellProperty;
-import com.basti_bob.sand_wizard.cell_properties.PhysicalState;
+import com.basti_bob.sand_wizard.cells.cell_properties.CellColors;
+import com.basti_bob.sand_wizard.cells.cell_properties.CellProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.PhysicalState;
 import com.basti_bob.sand_wizard.cells.gases.Fire;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.gases.Steam;
