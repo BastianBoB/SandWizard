@@ -11,7 +11,7 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 
 public class Gas extends MovingCell {
 
-    private static final Vector2 GAS_GRAVITY = new Vector2(WorldConstants.GRAVITY.x, WorldConstants.GRAVITY.y * -0.3f);
+    private static final Vector2 GAS_GRAVITY = new Vector2(WorldConstants.GRAVITY.x, WorldConstants.GRAVITY.y * -0.2f);
     private static final float MAX_SIDEWARDS_ACC = 2;
 
     private float dispersionRate;

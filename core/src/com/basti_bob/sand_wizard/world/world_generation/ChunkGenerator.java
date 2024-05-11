@@ -44,7 +44,6 @@ public class ChunkGenerator {
         CaveGenerator caveGenerator = caveBiomeType.caveGenerator;
         WorldDecorator caveBottomDecorator = caveBiomeType.caveBottomDecorator;
         WorldDecorator caveTopDecorator = caveBiomeType.caveTopDecorator;
-        ;
 
 
         boolean generatedNewCell = false;
@@ -99,6 +98,12 @@ public class ChunkGenerator {
 
     private CellType getNewCellType(int cellPosX, int cellPosY, float terrainHeight, boolean isCave, SurfaceGenerator surfaceGenerator, SurfaceGenerator rightSurfaceGenerator, float surfaceInterpolationFactor) {
         if (isCave) return CellType.EMPTY;
+
+//        CellType caveCell = CaveGenerator.BASE.getCaveCellType(world, cellPosX, cellPosY, terrainHeight);
+//        if (caveCell != null) return caveCell;
+//
+//        if (true)
+//            return CellType.EMPTY;
 
         CellType ore = OreGenerator.BASE.getCellType(world, cellPosX, cellPosY, terrainHeight);
         if (ore != null) return ore;

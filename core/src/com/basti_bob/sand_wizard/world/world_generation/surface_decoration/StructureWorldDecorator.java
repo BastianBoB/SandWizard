@@ -47,20 +47,32 @@ public class StructureWorldDecorator extends WorldDecorator {
         }
     }
 
+    public static StructureSurfaceDecoratorBuilder builderFrom(StructureWorldDecorator decorator) {
+        return new StructureSurfaceDecoratorBuilder(decorator);
+    }
+
     public static StructureSurfaceDecoratorBuilder builder() {
         return new StructureSurfaceDecoratorBuilder();
     }
 
     public static class StructureSurfaceDecoratorBuilder {
 
-        private final HashMap<StructureGenerator, Float> structuresAndWeights = new HashMap<>();
+        private final HashMap<StructureGenerator, Float> structuresAndWeights;
+
+        private StructureSurfaceDecoratorBuilder(StructureWorldDecorator decorator) {
+            this.structuresAndWeights = decorator.structuresAndWeights;
+        }
+
+        private StructureSurfaceDecoratorBuilder() {
+            this.structuresAndWeights = new HashMap<>();
+        }
 
         public StructureSurfaceDecoratorBuilder addStructure(StructureGenerator generator, float weight) {
             structuresAndWeights.put(generator, weight);
             return this;
         }
 
-        public StructureSurfaceDecoratorBuilder addStructureList(List<StructureGenerator> generatorList, float totalWeight) {
+        public <T extends StructureGenerator> StructureSurfaceDecoratorBuilder addStructureList(List<T> generatorList, float totalWeight) {
             for (StructureGenerator generator : generatorList) {
                 structuresAndWeights.put(generator, totalWeight / generatorList.size());
             }

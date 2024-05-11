@@ -26,8 +26,7 @@ public class WorldRenderer {
 
     private static final int WORLD_LIGHTS_BUFFER_BLOCK_INDEX = 0;
     private static final int CHUNK_LIGHTS_BUFFER_BLOCK_INDEX = 1;
-    private static final int LIGHTS_INDICES_BUFFER_BLOCK_INDEX =2;
-
+    private static final int LIGHTS_INDICES_BUFFER_BLOCK_INDEX = 2;
 
     private final World world;
     private final OrthographicCamera camera;
@@ -35,7 +34,7 @@ public class WorldRenderer {
     private final ShapeRenderer shapeRenderer;
 
     private FloatBuffer worldLightBuffer = BufferUtils.newFloatBuffer(10000 * Light.NUM_FLOAT_DATA);
-    private FloatBuffer chunkLightBuffer = BufferUtils.newFloatBuffer(10000 * Light.NUM_FLOAT_DATA);
+    private FloatBuffer chunkLightBuffer = BufferUtils.newFloatBuffer(500000 * Light.NUM_FLOAT_DATA);
     private IntBuffer[] chunkLightIndicesBuffers = new IntBuffer[10000];
 
     public WorldRenderer(World world, OrthographicCamera camera) {
@@ -50,7 +49,7 @@ public class WorldRenderer {
 
         shader = generateShader();
 
-        for(int i = 0; i < chunkLightIndicesBuffers.length; i++) {
+        for (int i = 0; i < chunkLightIndicesBuffers.length; i++) {
             chunkLightIndicesBuffers[i] = BufferUtils.newIntBuffer(i);
         }
     }
@@ -62,20 +61,7 @@ public class WorldRenderer {
         return new ShaderProgram(vertexShader, fragmentShader);
     }
 
-    public void render(Player player) {
-
-        Array2D<Chunk> chunks = player.getRenderingChunks();
-
-        ChunkPos topLeftChunkPos = player.topLeftChunkPos;
-
-        shader.bind();
-        shader.setUniformMatrix("u_proj", camera.combined);
-        shader.setUniformf("u_pointSize", WorldConstants.CELL_SIZE / camera.zoom * 1.05f);
-        shader.setUniformi("u_cellSize", WorldConstants.CELL_SIZE);
-
-        shader.setUniformi("u_dayTimeMinutes", world.updateTimes);
-        shader.setUniform2fv("u_cameraPos", new float[]{camera.position.x / WorldConstants.CELL_SIZE, camera.position.y / WorldConstants.CELL_SIZE}, 0, 2);
-
+    public void renderWithLights(Player player, Array2D<Chunk> chunks, ChunkPos topLeftChunkPos) {
         int worldLightSSBO = Gdx.gl31.glGenBuffer();
         setWorldLightBuffer(chunks, worldLightSSBO);
 
@@ -107,6 +93,45 @@ public class WorldRenderer {
         Gdx.gl31.glDeleteBuffer(chunkLightIndicesSSBO);
         Gdx.gl31.glDeleteBuffer(worldLightSSBO);
         Gdx.gl31.glDeleteBuffer(chunkLightSSBO);
+    }
+
+    public void renderWithoutLights(Player player, Array2D<Chunk> chunks, ChunkPos topLeftChunkPos) {
+        for (int i = 0; i < chunks.rows; i++) {
+
+            ChunkColumnData chunkColumnData = world.chunkProvider.chunkColumns.get(topLeftChunkPos.x + i);
+            if (chunkColumnData == null) continue;
+
+            shader.setUniform1fv("terrainHeights", chunkColumnData.terrainHeights, 0, WorldConstants.CHUNK_SIZE);
+
+            for (int j = 0; j < chunks.cols; j++) {
+                Chunk chunk = chunks.get(i, j);
+                if (chunk == null) continue;
+
+                chunk.mesh.render(shader, GL20.GL_POINTS);
+            }
+        }
+    }
+
+    public void render(Player player) {
+
+        Array2D<Chunk> chunks = player.getRenderingChunks();
+        ChunkPos topLeftChunkPos = player.topLeftChunkPos;
+
+        shader.bind();
+        shader.setUniformMatrix("u_proj", camera.combined);
+        shader.setUniformf("u_pointSize", WorldConstants.CELL_SIZE / camera.zoom * 1.05f);
+        shader.setUniformi("u_cellSize", WorldConstants.CELL_SIZE);
+
+        shader.setUniformi("u_dayTimeMinutes", world.updateTimes);
+        shader.setUniform2fv("u_cameraPos", new float[]{camera.position.x / WorldConstants.CELL_SIZE, camera.position.y / WorldConstants.CELL_SIZE}, 0, 2);
+
+        shader.setUniformi("lightingEnabled", SandWizard.lightingEnabled ? 1 : 0);
+
+        if(SandWizard.lightingEnabled) {
+            renderWithLights(player, chunks, topLeftChunkPos);
+        } else {
+            renderWithoutLights(player, chunks, topLeftChunkPos);
+        }
 
         if (SandWizard.renderChunkBoarder)
             chunkActiveDebugSquares(chunks);
@@ -128,8 +153,10 @@ public class WorldRenderer {
         chunkLightBuffer.clear();
         int lightArrayIndex = 0;
 
-        for(Chunk chunk : chunks.getArray()) {
-            for(ChunkLight light : chunk.lightsInChunk) {
+        for (Chunk chunk : chunks.getArray()) {
+            if(chunk == null) continue;
+
+            for (ChunkLight light : chunk.lightsInChunk) {
                 light.shaderArrayIndex = lightArrayIndex;
                 chunkLightBuffer.put(light.getData());
 
@@ -147,7 +174,7 @@ public class WorldRenderer {
         List<ChunkLight> lights = chunk.affectedLights;
         int numLights = lights.size();
 
-        if(!(numLights == 0 && lastChunkNumLights == 0)) {
+        if (!(numLights == 0 && lastChunkNumLights == 0)) {
 
             IntBuffer lightIndicesBuffer = chunkLightIndicesBuffers[numLights];
             lightIndicesBuffer.clear();

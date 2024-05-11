@@ -10,12 +10,12 @@ public class CaveGenerator {
 
     public static final CaveGenerator BASE = new CaveGenerator();
 
-    private final Noise cheeseNoise = new LayeredNoise(8, 1f, 0.005f, 0.6f, 1.8f);
-    private final Noise spaghettiNoise = new LayeredNoise(10, 1f, 0.002f, 0.5f, 2f);
-    private final float cheeseNoiseThreshold = 0.1f;
-    private final float spaghettiNoiseThreshold = 0.15f;
+    private final Noise cheeseNoise = new LayeredNoise(7, 1f, 0.001f, 0.7f, 1.8f);
+    private final Noise spaghettiNoise = new LayeredNoise(5, 1f, 0.001f, 0.6f, 1.8f);
+    private final float cheeseNoiseThreshold = -0.3f;
+    private final float spaghettiNoiseThreshold = 0.1f;
 
-    private final float verticalSquishFactor = 1.8f;
+    private final float verticalSquishFactor = 2f;
     private final float surfaceOffset = 500;
 
     public CaveGenerator() {
@@ -42,7 +42,7 @@ public class CaveGenerator {
     private boolean isCheeseCave(World world, int cellX, int cellY, float evalY, float terrainHeight) {
         if (terrainHeight - cellY < surfaceOffset) return false;
 
-        return cheeseNoise.eval(cellX, evalY) > cheeseNoiseThreshold;
+        return cheeseNoise.eval(cellX, evalY) < cheeseNoiseThreshold;
     }
 
     public boolean isCave(World world, int cellX, int cellY, float terrainHeight) {

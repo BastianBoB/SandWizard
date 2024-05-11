@@ -16,6 +16,9 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SandWizard extends ApplicationAdapter {
 
     private OrthographicCamera camera;
@@ -26,8 +29,7 @@ public class SandWizard extends ApplicationAdapter {
 
     private DebugScreen debugScreen;
 
-    public static boolean renderChunkBoarder;
-
+    public static boolean renderChunkBoarder, lightingEnabled;
     private float accumulatedTime;
     private final float fixedDeltaTime = 1.0f / 60f; // 60 FPS
 
@@ -49,7 +51,7 @@ public class SandWizard extends ApplicationAdapter {
 
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
-        player = new Player(world, 0, world.worldGeneration.getTerrainHeight(0) + 5);
+        player = new Player(world, 0, -1000);
 
         //world.test();
 
@@ -128,6 +130,10 @@ public class SandWizard extends ApplicationAdapter {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
             world.test();
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+            lightingEnabled = !lightingEnabled;
         }
 
 

@@ -64,8 +64,11 @@ public class Steam extends Gas {
         if (lastValidX != getPosX() || lastValidY != getPosY()) {
             chunkAccessor.moveToOrSwap(this, lastValidX, lastValidY);
 
-            if(moveAlongState == MoveAlongState.DIE_OR_REPLACE) {
-                replace(CellType.WATER, chunkAccessor);
+            if (moveAlongState == MoveAlongState.DIE_OR_REPLACE) {
+                if (world.random.nextFloat() < 0.8)
+                    replace(CellType.WATER, chunkAccessor);
+                else
+                    die(chunkAccessor);
             }
 
             return true;
@@ -76,7 +79,7 @@ public class Steam extends Gas {
 
     @Override
     public MoveAlongState moveAlong(ChunkAccessor chunkAccessor, Cell targetCell, int targetX, int targetY, int lastValidX, int lastValidY, boolean updateDirection) {
-        if(targetCell == null) return MoveAlongState.STOP;
+        if (targetCell == null) return MoveAlongState.STOP;
 
         switch (targetCell.getPhysicalState()) {
 

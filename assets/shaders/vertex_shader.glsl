@@ -41,6 +41,8 @@ uniform vec2 u_playerPos;
 uniform vec2 u_cameraPos;
 uniform int u_dayTimeMinutes;
 
+uniform int lightingEnabled;
+
 uniform float[chunkSize] terrainHeights;
 const vec3 gammaCorrection = vec3(2.2);
 
@@ -220,35 +222,37 @@ void main() {
         vertexColor += max(unlitBaseLight, mix(celestialColor, skyColor, skyLightFactor));
     }
 
-    vec3 summedLightColor = unlitBaseLight + mix(vec3(skyLightFactor / 2), vec3(0), clamp(-surfaceDist/32, 0, 1));
+    if(lightingEnabled == 1) {
+        vec3 summedLightColor = unlitBaseLight + mix(vec3(skyLightFactor / 2), vec3(0), clamp(-surfaceDist/32, 0, 1));
 
-    if (a_empty == 1 && surfaceDist > 0) {
-        if (renderMoon) {
-            Light moonLight = Light(moonWorldPos.x, moonWorldPos.y, moonRadius*5, 1, 1, 1, 1);
-            summedLightColor += max(vec3(0), calcLightAroundCircle(moonLight, moonRadius));
+        if (a_empty == 1 && surfaceDist > 0) {
+            if (renderMoon) {
+                Light moonLight = Light(moonWorldPos.x, moonWorldPos.y, moonRadius*5, 1, 1, 1, 1);
+                summedLightColor += max(vec3(0), calcLightAroundCircle(moonLight, moonRadius));
+            }
+
+            if (renderSun) {
+                Light sunLight = Light(sunWorldPos.x, sunWorldPos.y, sunRadius*5, 1, 1, 1, 0);
+                summedLightColor += max(vec3(0), calcLightAroundCircle(sunLight, sunRadius));
+            }
         }
 
-        if (renderSun) {
-            Light sunLight = Light(sunWorldPos.x, sunWorldPos.y, sunRadius*5, 1, 1, 1, 0);
-            summedLightColor += max(vec3(0), calcLightAroundCircle(sunLight, sunRadius));
+        for (int i = 0; i < chunkLightIndices.length(); i++) {
+            int lightArrayIndex = chunkLightIndices[i];
+
+            Light light = chunkLights[lightArrayIndex];
+
+            summedLightColor += calcLight(light);
         }
+
+
+        for (int i = 0; i < worldLights.length(); i++) {
+            summedLightColor += calcLight(worldLights[i]);
+        }
+
+        v_color = gammaCorrect(vertexColor) * summedLightColor;
+    } else {
+        v_color = gammaCorrect(a_vertexColor);
     }
-
-    for (int i = 0; i < chunkLightIndices.length(); i++) {
-        int lightArrayIndex = chunkLightIndices[i];
-
-        Light light = chunkLights[lightArrayIndex];
-
-        summedLightColor += calcLight(light);
-    }
-
-
-    for (int i = 0; i < worldLights.length(); i++) {
-        summedLightColor += calcLight(worldLights[i]);
-    }
-
-    v_color = gammaCorrect(vertexColor) * summedLightColor;
-
-    //v_color = gammaCorrect(a_vertexColor);
 
 }

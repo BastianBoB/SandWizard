@@ -12,6 +12,7 @@ public class CaveBiomeType extends BiomeType {
     public static final List<CaveBiomeType> ALL_TYPES = new ArrayList<>();
 
     public static final CaveBiomeType BASE = new Builder("base", new IntRange(-1, 1), 1f)
+            .caveGenerator(CaveGenerator.BASE)
             .caveBottomDecorator(WorldDecorator.CAVES_BOTTOM)
             .caveTopDecorator(WorldDecorator.CAVES_TOP)
             .build();

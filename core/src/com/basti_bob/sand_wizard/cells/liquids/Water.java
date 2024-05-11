@@ -30,7 +30,10 @@ public class Water extends Liquid {
     public void startedBurning(ChunkAccessor chunkAccessor) {
         super.startedBurning(chunkAccessor);
 
-        replace(CellType.STEAM, chunkAccessor);
+        if (world.random.nextFloat() < 0.8)
+            replace(CellType.STEAM, chunkAccessor);
+        else
+            die(chunkAccessor);
     }
 
     @Override
