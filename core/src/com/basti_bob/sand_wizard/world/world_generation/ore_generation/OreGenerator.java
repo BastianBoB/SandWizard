@@ -1,6 +1,7 @@
 package com.basti_bob.sand_wizard.world.world_generation.ore_generation;
 
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.registry.Registry;
 import com.basti_bob.sand_wizard.util.noise.LayeredNoise;
 import com.basti_bob.sand_wizard.util.noise.Noise;
 import com.basti_bob.sand_wizard.util.Triplet;
@@ -12,19 +13,20 @@ import java.util.List;
 
 public class OreGenerator {
 
-    public static final OreGenerator BASE = OreGenerator.builder()
-            .addOre(CellType.COAL, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
-            .addOre(CellType.IRON_ORE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.005f)
-            .addOre(CellType.ANDESITE, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.1f)
-            .addOre(CellType.DIORITE, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.1f)
-            .addOre(CellType.GRANITE, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.1f)
-            .addOre(CellType.GRAVEL, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.2f)
-            .addOre(CellType.BASALT, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
-            .addOre(CellType.MARBLE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
-            .addOre(CellType.LIMESTONE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
-            .addOre(CellType.SHALE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
+    public static final Registry<OreGenerator> REGISTRY = new Registry<>("ore_generator");
 
-            .build();
+    public static final OreGenerator BASE = REGISTRY.register("base", OreGenerator.builder()
+            .addOre(CellType.MOVABLE_SOLID.COAL, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
+            .addOre(CellType.SOLID.IRON_ORE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.005f)
+            .addOre(CellType.SOLID.ANDESITE, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.1f)
+            .addOre(CellType.SOLID.DIORITE, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.1f)
+            .addOre(CellType.SOLID.GRANITE, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.1f)
+            .addOre(CellType.MOVABLE_SOLID.GRAVEL, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.2f)
+            .addOre(CellType.SOLID.BASALT, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
+            .addOre(CellType.SOLID.MARBLE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
+            .addOre(CellType.SOLID.LIMESTONE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
+            .addOre(CellType.SOLID.SHALE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
+            .build());
 
     private final List<Triplet<CellType, Noise, Float>> generatorList;
 

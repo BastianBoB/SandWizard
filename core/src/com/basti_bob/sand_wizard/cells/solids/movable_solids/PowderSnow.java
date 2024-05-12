@@ -16,7 +16,7 @@ public class PowderSnow extends MovableSolid {
         super.startedBurning(chunkAccessor);
 
         if(world.random.nextFloat() < 0.5) {
-            replace(CellType.WATER, chunkAccessor);
+            replace(CellType.LIQUID.WATER, chunkAccessor);
         } else {
             die(chunkAccessor);
         }

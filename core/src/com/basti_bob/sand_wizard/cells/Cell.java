@@ -175,7 +175,7 @@ public abstract class Cell {
 
         float r = world.random.nextFloat();
         if (r < 0.3) {
-            replace(CellType.EXPLOSION_SPARK, chunkAccessor);
+            replace(CellType.GAS.EXPLOSION_SPARK, chunkAccessor);
         } else {
             die(chunkAccessor);
         }
@@ -236,7 +236,7 @@ public abstract class Cell {
 
                 if (world.random.nextFloat() > this.getFireSpreadChance()) continue;
 
-                chunkAccessor.setCellIfEmpty(CellType.FIRE, this.getPosX() + i, this.getPosY() + j);
+                chunkAccessor.setCellIfEmpty(CellType.GAS.FIRE, this.getPosX() + i, this.getPosY() + j);
             }
         }
     }

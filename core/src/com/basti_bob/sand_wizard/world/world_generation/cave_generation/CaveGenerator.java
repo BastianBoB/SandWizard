@@ -1,6 +1,7 @@
 package com.basti_bob.sand_wizard.world.world_generation.cave_generation;
 
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.registry.Registry;
 import com.basti_bob.sand_wizard.util.noise.LayeredNoise;
 import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.util.noise.Noise;
@@ -8,7 +9,9 @@ import com.basti_bob.sand_wizard.world.World;
 
 public class CaveGenerator {
 
-    public static final CaveGenerator BASE = new CaveGenerator();
+    public static final Registry<CaveGenerator> REGISTRY = new Registry<>("cave_generator");
+
+    public static final CaveGenerator BASE = REGISTRY.register("base", new CaveGenerator());
 
     private final Noise cheeseNoise = new LayeredNoise(7, 1f, 0.001f, 0.7f, 1.8f);
     private final Noise spaghettiNoise = new LayeredNoise(5, 1f, 0.001f, 0.6f, 1.8f);

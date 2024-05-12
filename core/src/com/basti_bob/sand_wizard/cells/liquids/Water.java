@@ -31,7 +31,7 @@ public class Water extends Liquid {
         super.startedBurning(chunkAccessor);
 
         if (world.random.nextFloat() < 0.8)
-            replace(CellType.STEAM, chunkAccessor);
+            replace(CellType.GAS.STEAM, chunkAccessor);
         else
             die(chunkAccessor);
     }
@@ -41,7 +41,7 @@ public class Water extends Liquid {
         super.changeTemperature(chunkAccessor, temperatureChange);
 
         if (this.getTemperature() < 0) {
-            replace(CellType.ICE, chunkAccessor);
+            replace(CellType.SOLID.ICE, chunkAccessor);
         }
     }
 }

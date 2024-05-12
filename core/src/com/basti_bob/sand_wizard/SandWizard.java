@@ -2,7 +2,6 @@ package com.basti_bob.sand_wizard;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -10,14 +9,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.debug.DebugScreen;
 import com.basti_bob.sand_wizard.player.Player;
+import com.basti_bob.sand_wizard.registry.RegistryLoader;
+import com.basti_bob.sand_wizard.registry.RegistryTreePrint;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SandWizard extends ApplicationAdapter {
 
@@ -44,7 +42,8 @@ public class SandWizard extends ApplicationAdapter {
 
     @Override
     public void create() {
-        System.out.println(System.getProperty("java.home"));
+        RegistryLoader.loadRegistries();
+        RegistryTreePrint.printRegistryTree();
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
@@ -101,7 +100,7 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
-            world.setCell(CellType.FIRE, 97, 100);
+            world.setCell(CellType.GAS.FIRE, 97, 100);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.Y)) {
@@ -117,7 +116,7 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
-            world.setCell(CellType.GLOWBLOCK, (int) player.nx, (int) player.ny);
+            world.setCell(CellType.SOLID.GLOWBLOCK.get(), (int) player.nx, (int) player.ny);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {

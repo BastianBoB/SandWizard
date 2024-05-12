@@ -134,13 +134,13 @@ public class Explosion {
                 continue;
             }
 
-            if (cell.getCellType() == CellType.EXPLOSION_SPARK) {
+            if (cell.getCellType() == CellType.GAS.EXPLOSION_SPARK) {
                 continue;
             }
 
             if (cell instanceof Empty) {
                 if (world.random.nextFloat() < 0.05f) {
-                    world.setCell(CellType.EXPLOSION_SPARK, explodeX, explodeY);
+                    world.setCell(CellType.GAS.EXPLOSION_SPARK.get(), explodeX, explodeY);
                 }
                 continue;
             }

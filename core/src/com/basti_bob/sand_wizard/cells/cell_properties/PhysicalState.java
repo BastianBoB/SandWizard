@@ -6,5 +6,5 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum PhysicalState {
-    OTHER, SOLID, LIQUID, GAS;
+    OTHER, SOLID, LIQUID, GAS
 }

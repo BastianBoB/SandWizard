@@ -27,7 +27,7 @@ public class Lava extends Liquid {
                 chunkAccessor.cellActivatesChunk(this.getPosX(), this.getPosY());
 
                 if (world.random.nextFloat() < 0.002) {
-                    chunkAccessor.setCell(CellType.FIRE, this.getPosX(), this.getPosY() + 1);
+                    chunkAccessor.setCell(CellType.GAS.FIRE.get(), this.getPosX(), this.getPosY() + 1);
                 }
 
             } else {

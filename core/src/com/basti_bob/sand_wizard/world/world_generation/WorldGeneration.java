@@ -1,5 +1,6 @@
 package com.basti_bob.sand_wizard.world.world_generation;
 
+import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.util.noise.AmpFreqNoise;
 import com.basti_bob.sand_wizard.world.ChunkColumnData;
@@ -10,6 +11,7 @@ import com.basti_bob.sand_wizard.world.world_generation.biomes.BiomeType;
 import com.basti_bob.sand_wizard.world.world_generation.biomes.CaveBiomeType;
 import com.basti_bob.sand_wizard.world.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -20,14 +22,17 @@ public class WorldGeneration {
     private final Random biomeRandom = new Random();
 
     public final AmpFreqNoise surfaceBiomeNoise = new AmpFreqNoise(0.01f, 1f);
-    private final List<SurfaceBiomeType> surfaceBiomeTypes = SurfaceBiomeType.ALL_TYPES;
+    private final List<SurfaceBiomeType> surfaceBiomeTypes = new ArrayList<>();
     public final int surfaceBiomeBlendingRadius = 5;
 
     public final AmpFreqNoise caveBiomeNoise = new AmpFreqNoise(0.01f, 1f);
-    private final List<CaveBiomeType> caveBiomeTypes = CaveBiomeType.ALL_TYPES;
+    private final List<CaveBiomeType> caveBiomeTypes = new ArrayList<>();
 
     public WorldGeneration(World world) {
         this.world = world;
+
+        surfaceBiomeTypes.addAll(BiomeType.SURFACE.REGISTRY.getAllEntries());
+        caveBiomeTypes.addAll(BiomeType.CAVE.REGISTRY.getAllEntries());
     }
 
     public float getTerrainHeight(int cellPosX) {

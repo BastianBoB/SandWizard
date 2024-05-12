@@ -279,8 +279,8 @@ public class TreeGenerator extends StructureGenerator {
     public static class TreeGeneratorBuilder {
 
         private String rule = "FF+[+F-F-F]-[-F+F+F]";
-        private CellType branchCellType = CellType.WOOD;
-        private CellType leafCellType = CellType.SPRING_LEAF;
+        private CellType branchCellType = CellType.SOLID.WOOD;
+        private CellType leafCellType = CellType.SOLID.SPRING_LEAF;
         private int iterations = 1;
         private float lengthMultiplier = 0.5f;
         private float startLength = 20f;

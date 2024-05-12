@@ -66,7 +66,7 @@ public class Steam extends Gas {
 
             if (moveAlongState == MoveAlongState.DIE_OR_REPLACE) {
                 if (world.random.nextFloat() < 0.8)
-                    replace(CellType.WATER, chunkAccessor);
+                    replace(CellType.LIQUID.WATER, chunkAccessor);
                 else
                     die(chunkAccessor);
             }

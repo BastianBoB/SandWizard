@@ -11,6 +11,7 @@ import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.range.FloatRange;
 import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world.world_generation.biomes.BiomeType;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -88,12 +89,12 @@ public class DebugScreen {
         itemY[0] -= verticalSpace;
 
         addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "surface biome noise: " + decimal(p.getWorld().worldGeneration.getSurfaceBiomeNoise(World.getChunkPos((int) p.nx)))), true));
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "surface biome: " + p.getWorld().worldGeneration.getSurfaceBiomeType(World.getChunkPos((int) p.nx)).name), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "surface biome: " + BiomeType.REGISTRY.getEntryName(p.getWorld().worldGeneration.getSurfaceBiomeType(World.getChunkPos((int) p.nx)))), true));
 
         itemY[0] -= verticalSpace;
 
         addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "cave biome noise: " + decimal(p.getWorld().worldGeneration.getCaveBiomeNoise(World.getChunkPos((int) p.nx), World.getChunkPos((int) p.ny)))), true));
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "cave biome: " + p.getWorld().worldGeneration.getCaveBiomeType(World.getChunkPos((int) p.nx), World.getChunkPos((int) p.ny)).name), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "cave biome: " + BiomeType.REGISTRY.getEntryName(p.getWorld().worldGeneration.getCaveBiomeType(World.getChunkPos((int) p.nx), World.getChunkPos((int) p.ny)))), true));
     }
 
     private void addDebugRenderItem(float[] itemY, DebugRenderItem debugRenderItem) {

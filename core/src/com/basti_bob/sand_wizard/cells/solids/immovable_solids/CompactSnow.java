@@ -13,7 +13,7 @@ public class CompactSnow extends ImmovableSolid {
     public void startedBurning(ChunkAccessor chunkAccessor) {
         super.startedBurning(chunkAccessor);
 
-        replace(CellType.WATER, chunkAccessor);
+        replace(CellType.LIQUID.WATER, chunkAccessor);
     }
 
 }

@@ -2,7 +2,6 @@ package com.basti_bob.sand_wizard.world.world_generation;
 
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
@@ -11,7 +10,7 @@ import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 import com.basti_bob.sand_wizard.world.world_generation.biomes.SurfaceBiomeType;
 import com.basti_bob.sand_wizard.world.world_generation.cave_generation.CaveGenerator;
 import com.basti_bob.sand_wizard.world.world_generation.ore_generation.OreGenerator;
-import com.basti_bob.sand_wizard.world.world_generation.surface_decoration.WorldDecorator;
+import com.basti_bob.sand_wizard.world.world_generation.world_decoration.WorldDecorator;
 import com.basti_bob.sand_wizard.world.world_generation.biomes.CaveBiomeType;
 import com.basti_bob.sand_wizard.world.world_generation.surface_generation.SurfaceGenerator;
 
@@ -80,13 +79,13 @@ public class ChunkGenerator {
                 chunkBuilder.setCell(cellType, cellPosX, cellPosY, i, j);
 
                 if (cellPosY == (int) terrainHeight + 1) {
-                    worldDecorator.decorateSurface(world, cellPosX, cellPosY);
+                    worldDecorator.decorate(world, cellPosX, cellPosY);
                 }
 
                 if (cellPosY < terrainHeight && isCave) {
-                    if (!isCaveAbove) caveTopDecorator.decorateSurface(world, cellPosX, cellPosY);
+                    if (!isCaveAbove) caveTopDecorator.decorate(world, cellPosX, cellPosY);
 
-                    if (!isCaveBelow) caveBottomDecorator.decorateSurface(world, cellPosX, cellPosY);
+                    if (!isCaveBelow) caveBottomDecorator.decorate(world, cellPosX, cellPosY);
                 }
 
                 generatedNewCell = true;

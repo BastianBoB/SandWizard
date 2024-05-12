@@ -8,6 +8,9 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 public class ChunkSaver {
 
     public static final String CHUNK_SAVING_LOCATION = "world/chunks/";
@@ -31,16 +34,16 @@ public class ChunkSaver {
             for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
                 CellType cellType = chunk.getCellFromInChunkPos(i, j).getCellType();
 
-                String idName = cellType.idName;
+                String nameID = CellType.REGISTRY.getEntryNameID(cellType);
 
-                if (lastCellName == null || lastCellName.equals(idName)) {
+                if (lastCellName == null || lastCellName.equals(nameID)) {
                     sameCellCount++;
                 } else {
                     stringBuilder.append(lastCellName).append(",").append(sameCellCount).append(",");
                     sameCellCount = 1;
                 }
 
-                lastCellName = idName;
+                lastCellName = nameID;
             }
         }
 
@@ -62,7 +65,7 @@ public class ChunkSaver {
             int arrayIndex = 0;
             int repeatedCellIteration = 0;
 
-            CellType currentCellType = CellType.fromName(cellsAndNumbers[arrayIndex]);
+            CellType currentCellType = CellType.REGISTRY.getEntryWithId(cellsAndNumbers[arrayIndex]);
             int numRepeatingCells = Integer.parseInt(cellsAndNumbers[arrayIndex + 1]);
 
             for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
@@ -71,12 +74,11 @@ public class ChunkSaver {
                     if (repeatedCellIteration >= numRepeatingCells) {
                         repeatedCellIteration = 0;
                         arrayIndex += 2;
-                        currentCellType = CellType.fromName(cellsAndNumbers[arrayIndex]);
+                        currentCellType = CellType.REGISTRY.getEntryWithId(cellsAndNumbers[arrayIndex]);
                         numRepeatingCells = Integer.parseInt(cellsAndNumbers[arrayIndex + 1]);
                     }
 
                     chunkBuilder.setCell(currentCellType, i, j);
-
                     repeatedCellIteration++;
                 }
             }

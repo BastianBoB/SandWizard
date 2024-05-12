@@ -12,7 +12,7 @@ public class WorldConstants {
 
     public static final boolean SAVE_CHUNK_DATA = false;
     public static final boolean PLAYER_FREE_MOVE = true;
-    public static final float PLAYER_SPEED = 2f;
+    public static final float PLAYER_SPEED = 4f;
 
     public static final float START_TEMPERATURE = 30f;
 

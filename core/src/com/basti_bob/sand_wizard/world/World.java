@@ -3,6 +3,7 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.chunk.*;
@@ -58,14 +59,12 @@ public class World implements ChunkAccessor {
 
         for (int i = -320; i <= 320; i += 5) {
             for (int j = -320; j <= 320; j += 5) {
-                setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + i, (int) (SandWizard.player.ny) + j);
+                setCell(CellType.SOLID.GLOWBLOCK.get(), (int) (SandWizard.player.nx) + i, (int) (SandWizard.player.ny) + j);
 
             }
         }
 
-        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 0, (int) (SandWizard.player.ny) + 16);
-//        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 100, (int) (SandWizard.player.ny) + 16);
-//        setCell(CellType.GLOWBLOCK, (int) (SandWizard.player.nx) + 200, (int) (SandWizard.player.ny) + 16);
+        setCell(CellType.SOLID.GLOWBLOCK.get(), (int) (SandWizard.player.nx) + 0, (int) (SandWizard.player.ny) + 16);
     }
 
     public void addStructureToPlace(Structure structure) {
@@ -136,7 +135,10 @@ public class World implements ChunkAccessor {
 
         for (Map.Entry<InChunkPos, Cell> cellEntry : toPlaceCells.entrySet()) {
             InChunkPos inChunkPos = cellEntry.getKey();
-            chunk.setCellWithInChunkPos(cellEntry.getValue(), inChunkPos.x, inChunkPos.y, CellPlaceFlag.NEW);
+
+            if(chunk.getCellFromInChunkPos(inChunkPos.x, inChunkPos.y) instanceof Empty) {
+                chunk.setCellWithInChunkPos(cellEntry.getValue(), inChunkPos.x, inChunkPos.y, CellPlaceFlag.NEW);
+            }
         }
     }
 

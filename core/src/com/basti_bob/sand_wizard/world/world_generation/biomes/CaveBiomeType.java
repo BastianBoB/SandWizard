@@ -1,46 +1,32 @@
 package com.basti_bob.sand_wizard.world.world_generation.biomes;
 
+import com.basti_bob.sand_wizard.util.range.FloatRange;
 import com.basti_bob.sand_wizard.util.range.IntRange;
 import com.basti_bob.sand_wizard.world.world_generation.cave_generation.CaveGenerator;
-import com.basti_bob.sand_wizard.world.world_generation.surface_decoration.WorldDecorator;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.basti_bob.sand_wizard.world.world_generation.world_decoration.WorldDecorator;
 
 public class CaveBiomeType extends BiomeType {
-
-    public static final List<CaveBiomeType> ALL_TYPES = new ArrayList<>();
-
-    public static final CaveBiomeType BASE = new Builder("base", new IntRange(-1, 1), 1f)
-            .caveGenerator(CaveGenerator.BASE)
-            .caveBottomDecorator(WorldDecorator.CAVES_BOTTOM)
-            .caveTopDecorator(WorldDecorator.CAVES_TOP)
-            .build();
 
     public final CaveGenerator caveGenerator;
     public final WorldDecorator caveBottomDecorator;
     public final WorldDecorator caveTopDecorator;
 
     public CaveBiomeType(Builder builder) {
-        super(builder.name, builder.noiseRange, builder.weight);
+        super(builder.noiseRange, builder.weight);
         this.caveGenerator = builder.caveGenerator;
         this.caveBottomDecorator = builder.caveBottomDecorator;
         this.caveTopDecorator = builder.caveTopDecorator;
-
-        ALL_TYPES.add(this);
     }
 
     public static class Builder {
 
-        public final String name;
-        public final IntRange noiseRange;
+        public final FloatRange noiseRange;
         public final float weight;
         public CaveGenerator caveGenerator = CaveGenerator.BASE;
-        public WorldDecorator caveBottomDecorator = WorldDecorator.CAVES_BOTTOM;
-        public WorldDecorator caveTopDecorator = WorldDecorator.CAVES_BOTTOM;
+        public WorldDecorator caveBottomDecorator = WorldDecorator.CAVE.BASE_BOTTOM;
+        public WorldDecorator caveTopDecorator = WorldDecorator.CAVE.BASE_TOP;
 
-        public Builder(String name, IntRange noiseRange, float weight) {
-            this.name = name;
+        public Builder(FloatRange noiseRange, float weight) {
             this.noiseRange = noiseRange;
             this.weight = weight;
         }

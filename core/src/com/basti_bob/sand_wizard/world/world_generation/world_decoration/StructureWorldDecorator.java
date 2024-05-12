@@ -1,4 +1,4 @@
-package com.basti_bob.sand_wizard.world.world_generation.surface_decoration;
+package com.basti_bob.sand_wizard.world.world_generation.world_decoration;
 
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.world_generation.structures.StructureGenerator;
@@ -23,7 +23,7 @@ public class StructureWorldDecorator extends WorldDecorator {
     }
 
     @Override
-    public void decorateSurface(World world, int cellX, int cellY) {
+    public void decorate(World world, int cellX, int cellY) {
         float randomWeight = world.random.nextFloat();
 
         if(randomWeight > totalWeight) return;
