@@ -136,9 +136,9 @@ public class World implements ChunkAccessor {
         for (Map.Entry<InChunkPos, Cell> cellEntry : toPlaceCells.entrySet()) {
             InChunkPos inChunkPos = cellEntry.getKey();
 
-            if(chunk.getCellFromInChunkPos(inChunkPos.x, inChunkPos.y) instanceof Empty) {
-                chunk.setCellWithInChunkPos(cellEntry.getValue(), inChunkPos.x, inChunkPos.y, CellPlaceFlag.NEW);
-            }
+            //if(chunk.getCellFromInChunkPos(inChunkPos.x, inChunkPos.y) instanceof Empty) {
+            chunk.setCellWithInChunkPos(cellEntry.getValue(), inChunkPos.x, inChunkPos.y, CellPlaceFlag.NEW);
+            // }
         }
     }
 
