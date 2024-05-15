@@ -12,9 +12,19 @@ public class WeightedMultiTerrainHeightGenerator extends TerrainHeightGenerator 
     private final float totalWeight;
 
     public WeightedMultiTerrainHeightGenerator(WeightedMultiTerrainHeightGeneratorBuilder builder) {
+        super(getMaxHeight(builder.terrainHeightGeneratorsAndWeights));
+
         this.terrainHeightGeneratorsAndWeights = builder.terrainHeightGeneratorsAndWeights;
 
         this.totalWeight = (float) terrainHeightGeneratorsAndWeights.stream().mapToDouble(Pair::getValue).sum();
+    }
+
+    private static float getMaxHeight(List<Pair<TerrainHeightGenerator, Float>> terrainHeightGeneratorsAndWeights) {
+        int max = 0;
+        for (Pair<TerrainHeightGenerator, Float> pair : terrainHeightGeneratorsAndWeights) {
+            max += pair.getLeft().getMaxTerrainHeight() * pair.getRight();
+        }
+        return max;
     }
 
     public static WeightedMultiTerrainHeightGeneratorBuilder builder() {

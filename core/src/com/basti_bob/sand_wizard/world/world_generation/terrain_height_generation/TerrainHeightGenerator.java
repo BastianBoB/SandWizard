@@ -10,9 +10,9 @@ import java.util.Random;
 public abstract class TerrainHeightGenerator {
 
     public static final Random random = new Random(0);
-    
+
     public static final Registry<TerrainHeightGenerator> REGISTRY = new Registry<>("terrain_height_generator");
-    
+
     public static final TerrainHeightGenerator FLAT = REGISTRY.register("flat", FLAT(0));
 
     public static final TerrainHeightGenerator SPIKY_MOUNTAIN_PEAKS = REGISTRY.register("spiky_mountain_peaks", ScaledShiftedTerrainHeightGenerator.normalToRange(
@@ -46,7 +46,7 @@ public abstract class TerrainHeightGenerator {
 
 
     public static TerrainHeightGenerator FLAT(int y) {
-        return new TerrainHeightGenerator() {
+        return new TerrainHeightGenerator(y) {
             @Override
             public float getTerrainHeight(World world, int cellPosX) {
                 return y;
@@ -57,10 +57,10 @@ public abstract class TerrainHeightGenerator {
     public static class NORMALS {
 
         public static TerrainHeightGenerator NORMAL(float frequency) {
-            return new TerrainHeightGenerator() {
+            return new TerrainHeightGenerator(1) {
                 @Override
                 public float getTerrainHeight(World world, int cellPosX) {
-                    return (float) openSimplexNoise.eval(cellPosX * frequency, 0f, 0f);
+                    return openSimplexNoise.eval(cellPosX * frequency);
                 }
             };
         }
@@ -105,5 +105,12 @@ public abstract class TerrainHeightGenerator {
 
     public final OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise(random.nextLong());
 
+    private final float maxTerrainHeight;
+    public TerrainHeightGenerator(float maxTerrainHeight) {this.maxTerrainHeight = maxTerrainHeight;}
+
     public abstract float getTerrainHeight(World world, int cellPosX);
+
+    public float getMaxTerrainHeight() {
+        return maxTerrainHeight;
+    }
 }

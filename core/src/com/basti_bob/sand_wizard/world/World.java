@@ -3,7 +3,6 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.chunk.*;
@@ -11,6 +10,8 @@ import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_generation.ChunkGenerator;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.StructurePlacingManager;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
 import com.basti_bob.sand_wizard.world.world_generation.WorldGeneration;
 import com.basti_bob.sand_wizard.world.world_generation.structures.Structure;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.WorldLight;
@@ -35,11 +36,11 @@ public class World implements ChunkAccessor {
     public final ChunkProvider chunkProvider;
     public final ChunkGenerator chunkGenerator;
     public final WorldGeneration worldGeneration;
+    public final StructurePlacingManager structurePlacingManager;
 
     public final ConcurrentHashMap<ChunkPos, Pair<Boolean, Supplier<Chunk>>> chunksToRemoveOrAdd = new ConcurrentHashMap<>();
 
     public final Deque<Structure> unplacedStructures = new ArrayDeque<>();
-    public final HashMap<ChunkPos, HashMap<InChunkPos, Cell>> unloadedStructureCells = new HashMap<>();
 
     private final Stack<Explosion> explosions = new Stack<>();
 
@@ -49,6 +50,7 @@ public class World implements ChunkAccessor {
         this.chunkProvider = new ChunkProvider(this);
         this.worldGeneration = new WorldGeneration(this);
         this.chunkGenerator = new ChunkGenerator(this);
+        this.structurePlacingManager = new StructurePlacingManager(this);
 
         int numThreads = Runtime.getRuntime().availableProcessors();
         System.out.println(numThreads);
@@ -110,35 +112,17 @@ public class World implements ChunkAccessor {
             while (iterator.hasNext()) {
 
                 Map.Entry<ChunkPos, Pair<Boolean, Supplier<Chunk>>> entry = iterator.next();
-                ChunkPos chunkPos = entry.getKey();
                 boolean add = entry.getValue().getLeft();
                 Chunk chunk = entry.getValue().getRight().get();
 
                 if (add) {
                     addChunk(chunk);
-
-                    HashMap<InChunkPos, Cell> toPlaceCells = unloadedStructureCells.get(chunkPos);
-                    if (toPlaceCells != null) {
-                        placeStructureCellsInChunk(toPlaceCells, chunk);
-                        unloadedStructureCells.remove(chunkPos);
-                    }
-
+                    structurePlacingManager.loadedChunk(chunk, entry.getKey());
                 } else {
                     removeChunk(chunk);
                 }
                 iterator.remove();
             }
-        }
-    }
-
-    public void placeStructureCellsInChunk(HashMap<InChunkPos, Cell> toPlaceCells, Chunk chunk) {
-
-        for (Map.Entry<InChunkPos, Cell> cellEntry : toPlaceCells.entrySet()) {
-            InChunkPos inChunkPos = cellEntry.getKey();
-
-            //if(chunk.getCellFromInChunkPos(inChunkPos.x, inChunkPos.y) instanceof Empty) {
-            chunk.setCellWithInChunkPos(cellEntry.getValue(), inChunkPos.x, inChunkPos.y, CellPlaceFlag.NEW);
-            // }
         }
     }
 

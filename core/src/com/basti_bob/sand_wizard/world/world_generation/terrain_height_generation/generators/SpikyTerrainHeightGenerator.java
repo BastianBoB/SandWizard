@@ -10,6 +10,7 @@ public class SpikyTerrainHeightGenerator extends TerrainHeightGenerator {
     private final int stepSize;
 
     public SpikyTerrainHeightGenerator(TerrainHeightGenerator baseGenerator, int stepSize) {
+        super(baseGenerator.getMaxTerrainHeight());
         this.baseGenerator = baseGenerator;
         this.stepSize = stepSize;
     }

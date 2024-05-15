@@ -39,11 +39,9 @@ public abstract class WorldDecorator {
         public static final WorldDecorator BASE_TOP = REGISTRY.register("base_top", StructureWorldDecorator.builder()
                 .build());
 
-        public static final WorldDecorator STALACTITES = REGISTRY.register("stalactites", StructureWorldDecorator.builder()
-                .addStructureList(StructureGenerator.STALACTITES.REGISTRY.getAllEntries(), 0.01f).build());
+        public static final WorldDecorator STALACTITES = REGISTRY.register("stalactites", new StalactiteWorldDecorator());
 
-        public static final WorldDecorator STALAGMITES = REGISTRY.register("stalagmites", StructureWorldDecorator.builder()
-                .addStructureList(StructureGenerator.STALAGMITES.REGISTRY.getAllEntries(), 0.01f).build());
+        public static final WorldDecorator STALAGMITES = REGISTRY.register("stalagmites", new StalagmiteWorldDecorator());
     }
 
     public static final WorldDecorator NOTHING = REGISTRY.register("nothing", new WorldDecorator() {

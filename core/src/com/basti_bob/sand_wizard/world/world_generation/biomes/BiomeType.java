@@ -1,8 +1,10 @@
 package com.basti_bob.sand_wizard.world.world_generation.biomes;
 
+import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.range.FloatRange;
 import com.basti_bob.sand_wizard.util.range.IntRange;
 import com.basti_bob.sand_wizard.registry.Registry;
+import com.basti_bob.sand_wizard.world.world_generation.ore_generation.OreGenerator;
 import com.basti_bob.sand_wizard.world.world_generation.world_decoration.WorldDecorator;
 import com.basti_bob.sand_wizard.world.world_generation.surface_generation.SurfaceGenerator;
 import com.basti_bob.sand_wizard.world.world_generation.terrain_height_generation.TerrainHeightGenerator;
@@ -36,7 +38,7 @@ public class BiomeType {
                 .terrainHeightGenerator(TerrainHeightGenerator.HILLS)
                 .surfaceDecorator(WorldDecorator.SURFACE.HILLS).build());
 
-        public static final SurfaceBiomeType FLOWER_FIELD = REGISTRY.register("flower_field", new SurfaceBiomeType.Builder( new FloatRange(0, 0.3f), 0.1f)
+        public static final SurfaceBiomeType FLOWER_FIELD = REGISTRY.register("flower_field", new SurfaceBiomeType.Builder(new FloatRange(0, 0.3f), 0.1f)
                 .surfaceGenerator(SurfaceGenerator.GRASS_FIELD)
                 .terrainHeightGenerator(TerrainHeightGenerator.HILLS)
                 .surfaceDecorator(WorldDecorator.SURFACE.FLOWER_FIELD).build());
@@ -50,9 +52,13 @@ public class BiomeType {
 
         public static final Registry<CaveBiomeType> REGISTRY = new Registry<>("cave", BiomeType.REGISTRY);
 
-        public static final CaveBiomeType BASE = REGISTRY.register("base", new CaveBiomeType.Builder(new FloatRange(-1, 0.2f), 1f).build());
+        public static final CaveBiomeType BASE = REGISTRY.register("base", new CaveBiomeType.Builder(new FloatRange(-1, 0.2f), 1f)
+                .caveCellType(CellType.SOLID.STONE)
+                .oreGenerator(OreGenerator.BASE).build());
 
         public static final CaveBiomeType STALACTITES = REGISTRY.register("stalactites", new CaveBiomeType.Builder(new FloatRange(0.2f, 1), 1f)
+                .caveCellType(CellType.SOLID.STALACTITE_CAVE_STONE)
+                .oreGenerator(OreGenerator.STALACTITE)
                 .caveTopDecorator(WorldDecorator.CAVE.STALACTITES)
                 .caveBottomDecorator(WorldDecorator.CAVE.STALAGMITES).build());
 

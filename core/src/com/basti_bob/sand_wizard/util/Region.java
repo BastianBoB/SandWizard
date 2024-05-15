@@ -1,4 +1,4 @@
-package com.basti_bob.sand_wizard.world.world_generation.util;
+package com.basti_bob.sand_wizard.util;
 
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.coordinates.CellPos;
@@ -19,6 +19,14 @@ public class Region {
         this.centerX = (int) ((startX + endX) / 2f);
         this.centerY = (int) ((startY + endY) / 2f);
         this.center = new CellPos(centerX, centerY);
+    }
+
+    public int getWidth() {
+        return endX - startX;
+    }
+
+    public int getHeight() {
+        return endY - startY;
     }
 
     public float getDistanceToCenter(float x, float y) {

@@ -12,10 +12,20 @@ public class LayerSurfaceGenerator extends SurfaceGenerator {
     private final List<Pair<Integer, CellType>> verticalOffsetToCellType;
 
     public LayerSurfaceGenerator(List<Pair<Integer, CellType>> verticalOffsetToCellType) {
+        super(getMaxSurfaceHeight(verticalOffsetToCellType));
+
         this.verticalOffsetToCellType = verticalOffsetToCellType;
 
         verticalOffsetToCellType.sort(Map.Entry.comparingByKey());
         Collections.reverse(verticalOffsetToCellType);
+    }
+
+    private static int getMaxSurfaceHeight(List<Pair<Integer, CellType>> verticalOffsetToCellType) {
+        int maxSurfaceHeight = 0;
+        for (Pair<Integer, CellType> pair : verticalOffsetToCellType) {
+            maxSurfaceHeight += pair.getLeft();
+        }
+        return maxSurfaceHeight;
     }
 
     @Override

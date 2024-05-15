@@ -47,6 +47,8 @@ public class CellType implements Supplier<Cell> {
         public static final CellType SHALE = REGISTRY.register("shale", new CellType(PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.SHALE));
         public static final CellType STALACTITE_LIGHT = REGISTRY.register("stalactite_light", new CellType(PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.STALACTITE_LIGHT));
         public static final CellType STALACTITE_DARK = REGISTRY.register("stalactite_dark", new CellType(PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.STALACTITE_DARK));
+        public static final CellType STALACTITE_CAVE_STONE = REGISTRY.register("stalactite_cave_stone", new CellType(PhysicalState.SOLID, CellProperty.STONE, ImmovableSolid::new, CellColors.STALACTITE_CAVE_STONE));
+
         public static final CellType COMPACT_SNOW = REGISTRY.register("compact_snow", new CellType(PhysicalState.SOLID, CellProperty.COMPACT_SNOW, CompactSnow::new, CellColors.COMPACT_SNOW));
         public static final CellType WOOD = REGISTRY.register("wood", new CellType(PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.WOOD));
         public static final CellType RED_WOOD = REGISTRY.register("red_wood", new CellType(PhysicalState.SOLID, CellProperty.WOOD, ImmovableSolid::new, CellColors.RED_WOOD));

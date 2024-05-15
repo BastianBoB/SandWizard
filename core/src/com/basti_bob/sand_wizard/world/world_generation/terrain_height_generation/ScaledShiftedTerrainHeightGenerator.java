@@ -9,13 +9,14 @@ public class ScaledShiftedTerrainHeightGenerator extends TerrainHeightGenerator 
     private final float shift;
 
     public ScaledShiftedTerrainHeightGenerator(TerrainHeightGenerator baseTerrainHeightGenerator, float scale, float shift) {
+        super(baseTerrainHeightGenerator.getMaxTerrainHeight() * scale + shift);
         this.baseTerrainHeightGenerator = baseTerrainHeightGenerator;
         this.scale = scale;
         this.shift = shift;
     }
 
     public static ScaledShiftedTerrainHeightGenerator normalToRange(TerrainHeightGenerator baseTerrainHeightGenerator, float minY, float maxY) {
-        float scale = (maxY - minY)/2f;
+        float scale = (maxY - minY) / 2f;
         float shift = minY + scale;
 
         return new ScaledShiftedTerrainHeightGenerator(baseTerrainHeightGenerator, scale, shift);

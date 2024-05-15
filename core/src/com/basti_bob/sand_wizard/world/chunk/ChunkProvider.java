@@ -1,12 +1,11 @@
 package com.basti_bob.sand_wizard.world.chunk;
 
-import com.badlogic.gdx.utils.Pool;
-import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.world.ChunkColumnData;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
 import com.basti_bob.sand_wizard.world.world_saving.ChunkSaver;
 
 import java.util.*;
@@ -53,7 +52,7 @@ public class ChunkProvider {
             if (savedChunk != null) return savedChunk::buildChunk;
         }
 
-        HashMap<InChunkPos, Cell> queuedCells = world.unloadedStructureCells.get(chunkPos);
+        HashMap<InChunkPos, ToPlaceStructureCell> queuedCells = world.structurePlacingManager.getUnloadedStructureCells(chunkPos);
         if (queuedCells != null) {
             return world.chunkGenerator.generateWithCells(poolChunk, chunkX, chunkY, queuedCells)::buildChunk;
         }

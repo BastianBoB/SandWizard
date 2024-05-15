@@ -7,6 +7,8 @@ import com.basti_bob.sand_wizard.util.range.IntRange;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.world_generation.structures.Structure;
 import com.basti_bob.sand_wizard.world.world_generation.structures.StructureGenerator;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.PlacePriority;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
 
 public class PondGenerator extends StructureGenerator {
 
@@ -43,7 +45,7 @@ public class PondGenerator extends StructureGenerator {
             int waterYStart = (int) Math.min(world.worldGeneration.getTerrainHeight(startX + i), startY);
 
             for (int y = waterYStart; y >= startY - height; y--)
-                structureBuilder.addCell(cellType, startX + i, y);
+                structureBuilder.addCell(new ToPlaceStructureCell(cellType.createCell(), PlacePriority.NATURE), startX + i, y);
         }
 
         return structureBuilder.build();

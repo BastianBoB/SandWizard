@@ -13,7 +13,22 @@ public class BottomTerrainSurfaceGenerator extends SurfaceGenerator {
     private final Pair<CellType, TerrainHeightGenerator>[] cellsAndGenerators;
 
     private BottomTerrainSurfaceGenerator(BottomTerrainSurfaceGeneratorBuilder builder) {
+        super(getMaxHeight(builder.cellsAndGenerators));
+
         this.cellsAndGenerators = builder.cellsAndGenerators.toArray(new Pair[0]);
+    }
+
+
+    private static int getMaxHeight(List<Pair<CellType, TerrainHeightGenerator>> cellsAndGenerators) {
+        int maxSurfaceHeight = 0;
+        for (Pair<CellType, TerrainHeightGenerator> pair : cellsAndGenerators) {
+            TerrainHeightGenerator terrainHeightGenerator = pair.getRight();
+
+            if(terrainHeightGenerator == null) continue;
+
+            maxSurfaceHeight += terrainHeightGenerator.getMaxTerrainHeight();
+        }
+        return maxSurfaceHeight;
     }
 
     @Override
@@ -30,7 +45,7 @@ public class BottomTerrainSurfaceGenerator extends SurfaceGenerator {
             if (cellY - terrainHeight >= totalOffset) return pair.getLeft();
         }
 
-        return cellsAndGenerators[cellsAndGenerators.length - 1].getLeft();
+        return null;
     }
 
     public static BottomTerrainSurfaceGeneratorBuilder builder() {

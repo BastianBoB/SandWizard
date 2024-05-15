@@ -23,9 +23,16 @@ public class OreGenerator {
             .addOre(CellType.SOLID.GRANITE, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.1f)
             .addOre(CellType.MOVABLE_SOLID.GRAVEL, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.2f)
             .addOre(CellType.SOLID.BASALT, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
-            .addOre(CellType.SOLID.MARBLE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
-            .addOre(CellType.SOLID.LIMESTONE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
+            .addOre(CellType.SOLID.MARBLE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.001f)
+            .addOre(CellType.SOLID.LIMESTONE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.001f)
             .addOre(CellType.SOLID.SHALE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
+            .build());
+
+    public static final OreGenerator STALACTITE = REGISTRY.register("stalactite", OreGenerator.builder()
+            .addOre(CellType.SOLID.IRON_ORE, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.005f)
+            .addOre(CellType.SOLID.GRANITE, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.1f)
+            .addOre(CellType.MOVABLE_SOLID.GRAVEL, new LayeredNoise(5, 1f, 0.02f, 0.6f, 1.5f), 0.2f)
+            .addOre(CellType.SOLID.BASALT, new LayeredNoise(5, 1f, 0.01f, 0.6f, 1.5f), 0.01f)
             .build());
 
     private final List<Triplet<CellType, Noise, Float>> generatorList;

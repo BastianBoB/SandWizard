@@ -6,15 +6,17 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.PlacePriority;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class Structure {
 
-    private final HashMap<ChunkPos, HashMap<InChunkPos, Cell>> chunksWithCells;
+    private final HashMap<ChunkPos, HashMap<InChunkPos, ToPlaceStructureCell>> chunksWithCells;
 
-    private Structure(HashMap<ChunkPos, HashMap<InChunkPos, Cell>> chunksWithCells) {
+    private Structure(HashMap<ChunkPos, HashMap<InChunkPos, ToPlaceStructureCell>> chunksWithCells) {
         this.chunksWithCells = chunksWithCells;
     }
 
@@ -22,18 +24,18 @@ public class Structure {
 
         Set<ChunkPos> toLoadChunks = new HashSet<>();
 
-        for (Map.Entry<ChunkPos, HashMap<InChunkPos, Cell>> entry : chunksWithCells.entrySet()) {
+        for (Map.Entry<ChunkPos, HashMap<InChunkPos, ToPlaceStructureCell>> entry : chunksWithCells.entrySet()) {
 
             ChunkPos chunkPos = entry.getKey();
             Chunk chunk = world.chunkProvider.getChunk(chunkPos);
 
-            HashMap<InChunkPos, Cell> toPlaceCells = entry.getValue();
+            HashMap<InChunkPos, ToPlaceStructureCell> toPlaceCells = entry.getValue();
 
             if (chunk == null) {
                 toLoadChunks.add(chunkPos);
-                world.unloadedStructureCells.put(chunkPos, toPlaceCells);
+                world.structurePlacingManager.addUnloadedStructureCells(chunkPos, toPlaceCells);
             } else {
-                world.placeStructureCellsInChunk(toPlaceCells, chunk);
+                world.structurePlacingManager.placeStructureCellsInChunk(toPlaceCells, chunk);
             }
         }
 
@@ -50,26 +52,22 @@ public class Structure {
 
     public static class Builder {
 
-        private final HashMap<ChunkPos, HashMap<InChunkPos, Cell>> chunksWithCells = new HashMap<>();
+        private final HashMap<ChunkPos, HashMap<InChunkPos, ToPlaceStructureCell>> chunksWithCells = new HashMap<>();
 
         public Builder() {
 
         }
 
-        public void addCell(CellType cellType, int cellX, int cellY) {
-            addCell(cellType.createCell(), cellX, cellY);
-        }
-
-        public void addCell(Cell cell, int cellX, int cellY) {
+        public void addCell(ToPlaceStructureCell toPlaceStructureCell, int cellX, int cellY) {
             int chunkX = World.getChunkPos(cellX);
             int chunkY = World.getChunkPos(cellY);
 
             int inChunkX = World.getInChunkPos(cellX);
             int inChunkY = World.getInChunkPos(cellY);
 
-            HashMap<InChunkPos, Cell> chunkCells = chunksWithCells.computeIfAbsent(new ChunkPos(chunkX, chunkY), k -> new HashMap<>());
+            HashMap<InChunkPos, ToPlaceStructureCell> chunkCells = chunksWithCells.computeIfAbsent(new ChunkPos(chunkX, chunkY), k -> new HashMap<>());
 
-            chunkCells.put(InChunkPos.get(inChunkX, inChunkY), cell);
+            chunkCells.put(InChunkPos.get(inChunkX, inChunkY), toPlaceStructureCell);
         }
 
 

@@ -6,7 +6,9 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 import com.basti_bob.sand_wizard.world.world_generation.structures.Structure;
 import com.basti_bob.sand_wizard.world.world_generation.structures.StructureGenerator;
-import com.basti_bob.sand_wizard.world.world_generation.util.Region;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.PlacePriority;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
+import com.basti_bob.sand_wizard.util.Region;
 
 import java.awt.geom.Line2D;
 import java.util.*;
@@ -52,7 +54,6 @@ public class TreeGenerator extends StructureGenerator {
         List<Branch> branches = generateBranches();
 
         Set<CellPos> allBranchPositions = new HashSet<>();
-        Set<CellPos> allLeafPositions = new HashSet<>();
 
         for (Branch branch : branches) {
             allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
@@ -78,16 +79,20 @@ public class TreeGenerator extends StructureGenerator {
                 boolean overLaps = allBranchPositions.contains(leafPosition);
 //
                 if (!overLaps)
-                    structureBuilder.addCell(leafCellType, leafPosition.x + startX, leafPosition.y + startY);
+                    addCellType(structureBuilder, leafCellType, leafPosition.x + startX, leafPosition.y + startY);
             }
         }
 
         for (CellPos point : allBranchPositions) {
 
-            structureBuilder.addCell(branchCellType, point.x + startX, point.y + startY);
+            addCellType(structureBuilder, branchCellType, point.x + startX, point.y + startY);
         }
 
         return structureBuilder.build();
+    }
+
+    private void addCellType(Structure.Builder structureBuilder, CellType cellType, int x, int y) {
+        structureBuilder.addCell(new ToPlaceStructureCell(cellType.createCell(), PlacePriority.NATURE), x, y);
     }
 
     public List<CellPos> generateLeaves(float posX, float posY, int leafRadius) {

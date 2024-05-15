@@ -270,9 +270,7 @@ public class Player {
         int generateY = WorldConstants.PLAYER_CHUNK_LOAD_RADIUS_Y;
 
 
-
         CompletableFuture.runAsync(() -> {
-
             if (Math.abs(chunkXDiff) == 1) {
                 for (int i = -generateY; i <= generateY; i++) {
                     world.loadChunkAsync(newChunkX + generateX * chunkXDiff, newChunkY + i);
@@ -284,7 +282,6 @@ public class Player {
                     world.loadChunkAsync(newChunkX + i, newChunkY + generateY * chunkYDiff);
                 }
             }
-
 
             for (Chunk chunk : world.chunkProvider.chunks) {
                 if (Math.abs(chunk.posX - newChunkX) > WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_X || Math.abs(chunk.posY - newChunkY) > WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_Y) {

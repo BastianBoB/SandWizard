@@ -29,7 +29,7 @@ public class CellColors {
     public static final CellColors SHALE = new CellColors(c(105, 105, 105), c(128, 128, 128), c(169, 169, 169));
     public static final CellColors STALACTITE_LIGHT = new CellColors(c(150, 90, 70), c(162, 104, 84), c(179, 125, 97));
     public static final CellColors STALACTITE_DARK = new CellColors(c(98, 56, 42), c(120, 71, 50), c(139, 81, 61));
-
+    public static final CellColors STALACTITE_CAVE_STONE = new CellColors(c(49, 28, 21), c(60, 35, 25), c(69, 40, 30));
 
     public static final CellColors SAND = new CellColors(c(223, 190, 147), c(204, 168, 121), c(187, 156, 104));
     public static final CellColors FINE_SAND = new CellColors(c(255, 240, 180), c(255, 220, 140), c(255, 200, 100));

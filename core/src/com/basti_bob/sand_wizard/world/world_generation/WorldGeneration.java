@@ -9,6 +9,7 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.world_generation.biomes.SurfaceBiomeType;
 import com.basti_bob.sand_wizard.world.world_generation.biomes.BiomeType;
 import com.basti_bob.sand_wizard.world.world_generation.biomes.CaveBiomeType;
+import com.basti_bob.sand_wizard.world.world_generation.cave_generation.CaveGenerator;
 import com.basti_bob.sand_wizard.world.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
 import java.util.ArrayList;
@@ -50,6 +51,12 @@ public class WorldGeneration {
 
     public CaveBiomeType getCaveBiomeType(int chunkPosX, int chunkPosY) {
         return BiomeType.calculateBiomeWithNoiseValue(caveBiomeTypes, biomeRandom, getCaveBiomeNoise(chunkPosX, chunkPosY));
+    }
+
+    public boolean isCave(int cellPosX, int cellPosY) {
+        CaveGenerator caveGenerator = world.worldGeneration.getCaveBiomeType(World.getChunkPos(cellPosX), World.getChunkPos(cellPosY)).caveGenerator;
+
+        return caveGenerator.isCave(world, cellPosX, cellPosY, getTerrainHeight(cellPosX));
     }
 
 

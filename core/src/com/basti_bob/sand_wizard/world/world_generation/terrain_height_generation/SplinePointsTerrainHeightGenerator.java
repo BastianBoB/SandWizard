@@ -11,9 +11,19 @@ public class SplinePointsTerrainHeightGenerator extends TerrainHeightGenerator {
     private final List<Vector2> splinePoints;
 
     public SplinePointsTerrainHeightGenerator(SplinePointsTerrainHeightGeneratorBuilder builder) {
+        super(getMaxHeight(builder.splinePoints));
         this.frequency = builder.frequency;
         this.splinePoints = builder.splinePoints;
         splinePoints.sort(Comparator.comparingDouble(v -> v.x));
+    }
+
+    private static float getMaxHeight(List<Vector2> splinePoints) {
+        float max = Integer.MIN_VALUE;
+        for (Vector2 splinePoint : splinePoints) {
+            if(splinePoint.y > max) max = splinePoint.y;
+        }
+
+        return max;
     }
 
     public static SplinePointsTerrainHeightGeneratorBuilder builder(float frequency) {
@@ -22,7 +32,7 @@ public class SplinePointsTerrainHeightGenerator extends TerrainHeightGenerator {
 
     @Override
     public float getTerrainHeight(World world, int cellPosX) {
-        float noise = (float) this.openSimplexNoise.eval(cellPosX * frequency, 0, 0);
+        float noise = this.openSimplexNoise.eval(cellPosX * frequency);
 
         Vector2 point1 = splinePoints.get(0);
         Vector2 point2 = splinePoints.get(1);
