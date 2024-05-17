@@ -15,16 +15,16 @@ public class Registry<T> {
     public final String name;
 
     public Registry<? super T> parentRegistry;
-    public List<Registry<?>> childRegistries = new ArrayList<>();
+    public final List<Registry<?>> childRegistries = new ArrayList<>();
 
-    public BiMap<String, T> idEntryMap = HashBiMap.create();
+    public final BiMap<String, T> idEntryMap = HashBiMap.create();
 
-    public BiMap<String, RegistryObject<? extends T>> idRegistryObjectMap = HashBiMap.create();
+    public final BiMap<String, RegistryObject<? extends T>> idRegistryObjectMap = HashBiMap.create();
 
-    public List<RegistryObject<? extends T>> allRegistryObjects = new ArrayList<>();
-    public List<RegistryObject<T>> ownRegistryObjects = new ArrayList<>();
+    public final List<RegistryObject<? extends T>> allRegistryObjects = new ArrayList<>();
+    public final List<RegistryObject<T>> ownRegistryObjects = new ArrayList<>();
 
-    private List<T> allEntries = new ArrayList<>();
+    private final List<T> allEntries = new ArrayList<>();
 
     public Registry(String name, Registry<? super T> parentRegistry) {
         this(name, parentRegistry.nameID + "." + name);

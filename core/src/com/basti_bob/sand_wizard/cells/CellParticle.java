@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.cells;
 
 import com.basti_bob.sand_wizard.cells.cell_properties.PhysicalState;
 import com.basti_bob.sand_wizard.cells.util.MoveAlongState;
+import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class CellParticle extends MovingCell {

@@ -8,10 +8,12 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 
 public class ChunkBuilder {
 
+    private final World world;
     private final Chunk chunk;
     private final float[] vertices;
 
     public ChunkBuilder(World world, Chunk oldChunk, int posX, int posY) {
+        this.world = world;
         this.chunk = oldChunk;
 
         int cs = WorldConstants.CHUNK_SIZE;

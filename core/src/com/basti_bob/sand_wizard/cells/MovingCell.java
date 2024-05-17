@@ -1,6 +1,7 @@
 package com.basti_bob.sand_wizard.cells;
 
 import com.basti_bob.sand_wizard.cells.util.MoveAlongState;
+import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 

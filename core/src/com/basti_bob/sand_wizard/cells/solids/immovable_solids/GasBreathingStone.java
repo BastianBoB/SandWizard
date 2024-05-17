@@ -5,6 +5,7 @@ import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.util.range.FloatRange;
 import com.basti_bob.sand_wizard.util.range.IntRange;
+import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class GasBreathingStone extends ImmovableSolid {
@@ -35,7 +36,7 @@ public class GasBreathingStone extends ImmovableSolid {
 
         float angleFactor = (Math.abs(angleRange.max - angleRange.min) % MathUtil.TWO_PI) / MathUtil.TWO_PI;
 
-        this.centerOff = (int) Math.ceil(amount / angleFactor / 6f) + 1;
+        this.centerOff = (int) Math.ceil(amount / angleFactor / 6f);
     }
 
     @Override

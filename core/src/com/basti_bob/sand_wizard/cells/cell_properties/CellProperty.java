@@ -5,6 +5,8 @@ import com.basti_bob.sand_wizard.cells.cell_properties.property_types.GasPropert
 import com.basti_bob.sand_wizard.cells.cell_properties.property_types.LiquidProperty;
 import com.basti_bob.sand_wizard.cells.cell_properties.property_types.MovableSolidProperty;
 import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.util.range.FloatRange;
+import com.basti_bob.sand_wizard.util.range.IntRange;
 
 import java.util.function.Consumer;
 
@@ -29,10 +31,10 @@ public class CellProperty {
     public static final LiquidProperty OIL = LiquidProperty.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
     public static final LiquidProperty LAVA = LiquidProperty.builder().allLiquid(2f, 5f).allLight(8f, 0.5f, CellColors.c(255, 128, 0)).build();
 
-    public static final GasProperty METHANE = GasProperty.builder().allGas(1f, 1f, 300).build();
-    public static final GasProperty STEAM = GasProperty.builder().allGas(1.5f, 0.5f, 300).build();
-    public static final GasProperty FIRE = GasProperty.builder().allGas(1f, 1f, 40).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
-    public static final GasProperty EXPLOSION_SPARK = GasProperty.builder().allGas(1f, 1f, 10).build();
+    public static final GasProperty METHANE = GasProperty.builder().allGas(1f, 1f, new IntRange(180, 300)).build();
+    public static final GasProperty STEAM = GasProperty.builder().allGas(1.5f, 0.5f, new IntRange(180, 300)).build();
+    public static final GasProperty FIRE = GasProperty.builder().allGas(1f, 1f, new IntRange(20, 50)).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
+    public static final GasProperty EXPLOSION_SPARK = GasProperty.builder().allGas(1f, 1f, new IntRange(5, 20)).build();
 
     public static final CellProperty FLOWER_PETAL = CellProperty.builder().allBurn(100, 10, 0.5f).build();
     public static final CellProperty GLOWBLOCK = CellProperty.builder().allLight(31f, 2f, Color.YELLOW).build();

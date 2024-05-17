@@ -1,8 +1,11 @@
 package com.basti_bob.sand_wizard.cells.other;
 
+import com.badlogic.gdx.graphics.Color;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.cell_properties.CellProperty;
 import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 
 public class Empty extends Cell {
 
@@ -10,6 +13,13 @@ public class Empty extends Cell {
 
     private Empty(CellType cellType) {
         super(cellType);
+
+        Color color = cellType.getCellColors().getColor(null);
+        this.setColor(color.r, color.g, color.b);
+
+        this.originalColorR = color.r;
+        this.originalColorG = color.g;
+        this.originalColorB = color.b;
     }
 
     public static Empty getInstance() {
@@ -18,6 +28,11 @@ public class Empty extends Cell {
         }
 
         return INSTANCE;
+    }
+
+    @Override
+    public void addedToWorld(World world, Chunk chunk, int posX, int posY) {
+
     }
 
     @Override

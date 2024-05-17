@@ -48,7 +48,7 @@ const vec3 gammaCorrection = vec3(2.2);
 
 const vec3 skyColor1 = vec3(0.91, 0.94, 0.96);
 const vec3 skyColor2 = vec3(0.23, 0.58, 0.82);
-const vec3 unlitBaseLight = vec3(0.05);
+const vec3 unlitBaseLight = vec3(0.1);
 
 #define PI 3.14159265359
 

@@ -23,17 +23,20 @@ public class WorldConstants {
     public static final int PLAYER_CHUNK_RENDER_RADIUS_X = 11;
     public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = 7;
 
-//    public static final int PLAYER_CHUNK_RENDER_RADIUS_X = (int) (31 * M);
-//    public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = (int) (27 * M);
-
     public static final int PLAYER_CHUNK_UPDATE_RADIUS_X = 13;
     public static final int PLAYER_CHUNK_UPDATE_RADIUS_Y = 9;
+
+//    public static final int PLAYER_CHUNK_RENDER_RADIUS_X = (int) (41 * M);
+//    public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = (int) (37 * M);
+//
+//    public static final int PLAYER_CHUNK_UPDATE_RADIUS_X = (int) (18 * M);
+//    public static final int PLAYER_CHUNK_UPDATE_RADIUS_Y = (int) (14 * M);
 
     public static final int PLAYER_CHUNK_LOAD_RADIUS_X = (int) (21 * M);
     public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = (int) (17 * M);
 
-    public static final int PLAYER_CHUNK_UNLOAD_RADIUS_X = (int) (31 * M);
-    public static final int PLAYER_CHUNK_UNLOAD_RADIUS_Y = (int) (27 * M);
+    public static final int PLAYER_CHUNK_UNLOAD_RADIUS_X = (int) (41 * M);
+    public static final int PLAYER_CHUNK_UNLOAD_RADIUS_Y = (int) (37 * M);
 
     public static final int CHUNK_POOL_SIZE = (int) (1.2f * (PLAYER_CHUNK_UNLOAD_RADIUS_X * 2 + 1) * (PLAYER_CHUNK_UNLOAD_RADIUS_Y * 2 + 1));
 }

@@ -27,7 +27,9 @@ public abstract class Cell {
     private int inChunkY;
 
     private float colorR, colorG, colorB;
-    private final float originalColorR, originalColorG, originalColorB;
+    protected float originalColorR;
+    protected float originalColorG;
+    protected float originalColorB;
 
     public boolean gotUpdated;
 
@@ -63,14 +65,6 @@ public abstract class Cell {
     public Cell(CellType cellType) {
         this.cellType = cellType;
 
-        Color color = cellType.getCellColors().getColor(world);
-        this.colorR = color.r;
-        this.colorG = color.g;
-        this.colorB = color.b;
-        this.originalColorR = colorR;
-        this.originalColorG = colorG;
-        this.originalColorB = colorB;
-
         CellProperty cellProperty = cellType.getCellProperty();
 
         this.friction = cellProperty.friction;
@@ -96,11 +90,6 @@ public abstract class Cell {
         this.canExplode = cellProperty.canExplode;
         this.explosionHealth = cellProperty.explosionHealth;
 
-        if (isLightSource) {
-            Color lightColor = glowsWithCellColor ? color : cellProperty.lightColor;
-            light = new ChunkLight(getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
-        }
-
         cellProperty.createdCell(this);
     }
 
@@ -113,19 +102,22 @@ public abstract class Cell {
     public void addedToWorld(World world, Chunk chunk, int posX, int posY) {
         this.world = world;
 
-        if (!(this instanceof Empty))
-            this.setPosition(posX, posY);
+        CellProperty cellProperty = cellType.getCellProperty();
+        Color color = cellType.getCellColors().getColor(world);
+        this.colorR = color.r;
+        this.colorG = color.g;
+        this.colorB = color.b;
+        this.originalColorR = colorR;
+        this.originalColorG = colorG;
+        this.originalColorB = colorB;
 
         if (isLightSource) {
+            Color lightColor = glowsWithCellColor ? color : cellProperty.lightColor;
+            light = new ChunkLight(getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
             light.placedInChunk(chunk);
         }
-    }
 
-    public void addedToWorld(World world, int posX, int posY) {
-        this.world = world;
-
-        if (!(this instanceof Empty))
-            this.setPosition(posX, posY);
+        this.setPosition(posX, posY);
     }
 
     public void movedInNewChunk(Chunk previousChunk, Chunk newChunk) {

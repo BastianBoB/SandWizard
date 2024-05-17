@@ -8,6 +8,7 @@ import com.basti_bob.sand_wizard.cells.MovingCell;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
 import com.basti_bob.sand_wizard.cells.util.MoveAlongState;
+import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class MovableSolid extends MovingCell {

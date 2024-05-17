@@ -6,6 +6,8 @@ import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;
 import com.basti_bob.sand_wizard.cells.util.MoveAlongState;
+import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 
@@ -26,7 +28,15 @@ public class Gas extends MovingCell {
 
         this.dispersionRate = cellProperty.dispersionRate;
         this.density = cellProperty.density;
-        this.lifeTime = cellProperty.lifeTime;
+    }
+
+    @Override
+    public void addedToWorld(World world, Chunk chunk, int posX, int posY) {
+        super.addedToWorld(world, chunk, posX, posY);
+
+        GasProperty cellProperty = (GasProperty) cellType.getCellProperty();
+
+        this.lifeTime = cellProperty.lifeTime.getRandom(world.random);
     }
 
     @Override

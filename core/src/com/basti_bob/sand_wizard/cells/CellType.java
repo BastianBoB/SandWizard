@@ -19,14 +19,16 @@ import com.basti_bob.sand_wizard.registry.Registry;
 import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.util.range.FloatRange;
 import com.basti_bob.sand_wizard.util.range.IntRange;
+import com.basti_bob.sand_wizard.world.World;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
 
 import java.util.function.Supplier;
 
-public class CellType implements Supplier<Cell> {
+public class CellType {
 
     public static final Registry<CellType> REGISTRY = new Registry<>("cell_type");
 
-    public static final CellType EMPTY = REGISTRY.register("empty", new CellType(PhysicalState.OTHER, CellProperty.EMPTY, (cellType -> Empty.getInstance()), CellColors.EMPTY)); //(x, y, world) -> Empty.getInstance()
+    public static final CellType EMPTY = REGISTRY.register("empty", new CellType(PhysicalState.OTHER, CellProperty.EMPTY, cellType -> Empty.getInstance(), CellColors.EMPTY)); //(x, y, world) -> Empty.getInstance()
     public static final CellType PARTICLE = REGISTRY.register("particle", new CellType(PhysicalState.OTHER, CellProperty.EMPTY, null, CellColors.EMPTY));
 
     public static class SOLID {
@@ -100,7 +102,7 @@ public class CellType implements Supplier<Cell> {
         public static CellType get(CellType gasType, float minAngle, float maxAngle) {
 
             return new CellType(PhysicalState.SOLID, CellProperty.STONE, cellType -> new GasBreathingStone(cellType, gasType,
-                    new IntRange(180, 240), new IntRange(30, 60), 3, new FloatRange(minAngle, maxAngle), new FloatRange(3f, 5f), new IntRange(10, 25)), CellColors.STONE);
+                    new IntRange(360, 480), new IntRange(5, 60), 3, new FloatRange(minAngle, maxAngle), new FloatRange(3f, 5f), new IntRange(10, 25)), CellColors.STONE);
         }
     }
 
@@ -199,13 +201,8 @@ public class CellType implements Supplier<Cell> {
         return cellColors;
     }
 
-    public interface CellSupplier {
+    private interface CellSupplier {
         Cell create(CellType cellType);
-    }
-
-    @Override
-    public Cell get() {
-        return cellSupplier.create(this);
     }
 
     public Cell createCell() {

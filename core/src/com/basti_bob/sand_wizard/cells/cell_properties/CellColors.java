@@ -8,7 +8,6 @@ import java.util.List;
 
 public class CellColors {
 
-
     public static final CellColors EMPTY = new CellColors(c(40, 40, 40)); //c(255, 255, 255)); //hC(0x080808));
     public static final CellColors STONE = new CellColors(c(85, 85, 85), c(75, 71, 68), c(70, 70, 70), c(61, 55, 51), c(51, 44, 40));
     public static final CellColors GRASS = new CellColors(c(19, 109, 21), c(38, 139, 7), c(65, 152, 10));
@@ -77,7 +76,9 @@ public class CellColors {
     }
 
     public Color getColor(World world) {
-        int i = (int) (MathUtils.random() * colors.size());
+        if(colors.size() == 1) return colors.get(0);
+
+        int i = world.random.nextInt(colors.size());
         return colors.get(i);
     }
 

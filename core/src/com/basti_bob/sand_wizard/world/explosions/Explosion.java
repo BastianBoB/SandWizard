@@ -140,7 +140,7 @@ public class Explosion {
 
             if (cell instanceof Empty) {
                 if (world.random.nextFloat() < 0.05f) {
-                    world.setCell(CellType.GAS.EXPLOSION_SPARK.get(), explodeX, explodeY);
+                    world.setCell(CellType.GAS.EXPLOSION_SPARK.createCell(), explodeX, explodeY);
                 }
                 continue;
             }

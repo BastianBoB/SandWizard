@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.Array2D;
-import com.basti_bob.sand_wizard.world.ChunkColumnData;
+import com.basti_bob.sand_wizard.world.world_generation.chunk_data.ChunkColumnData;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
@@ -75,7 +75,7 @@ public class WorldRenderer {
         int lastChunkNumLights = 0;
         for (int i = 0; i < chunks.rows; i++) {
 
-            ChunkColumnData chunkColumnData = world.chunkProvider.chunkColumns.get(topLeftChunkPos.x + i);
+            ChunkColumnData chunkColumnData = world.worldGeneration.chunkColumnDataMap.get(topLeftChunkPos.x + i);
             if (chunkColumnData == null) continue;
 
             shader.setUniform1fv("terrainHeights", chunkColumnData.terrainHeights, 0, WorldConstants.CHUNK_SIZE);
@@ -98,7 +98,7 @@ public class WorldRenderer {
     public void renderWithoutLights(Player player, Array2D<Chunk> chunks, ChunkPos topLeftChunkPos) {
         for (int i = 0; i < chunks.rows; i++) {
 
-            ChunkColumnData chunkColumnData = world.chunkProvider.chunkColumns.get(topLeftChunkPos.x + i);
+            ChunkColumnData chunkColumnData = world.worldGeneration.chunkColumnDataMap.get(topLeftChunkPos.x + i);
             if (chunkColumnData == null) continue;
 
             shader.setUniform1fv("terrainHeights", chunkColumnData.terrainHeights, 0, WorldConstants.CHUNK_SIZE);
@@ -221,7 +221,7 @@ public class WorldRenderer {
 
         shapeRenderer.setColor(chunk.isLoaded() ? (chunk.isActive() ? activeColor : inActiveColor) : unloadedColor);
 
-        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 2;
+        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 0;
         shapeRenderer.rect(chunkRenderX, chunkRenderY, rectSize, rectSize);
     }
 }

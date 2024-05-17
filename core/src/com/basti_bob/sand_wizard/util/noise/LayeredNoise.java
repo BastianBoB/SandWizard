@@ -3,7 +3,6 @@ package com.basti_bob.sand_wizard.util.noise;
 public class LayeredNoise implements Noise {
 
     private final Noise[] noises;
-
     public LayeredNoise(int numOctaves, float startAmp, float startFreq, float ampMultiplier, float freqMultiplier) {
         super();
 
@@ -11,6 +10,7 @@ public class LayeredNoise implements Noise {
         float frequency = startFreq;
 
         this.noises = new Noise[numOctaves];
+
 
         for (int i = 0; i < numOctaves; i++) {
             noises[i] = new AmpFreqNoise(frequency, amplitude);

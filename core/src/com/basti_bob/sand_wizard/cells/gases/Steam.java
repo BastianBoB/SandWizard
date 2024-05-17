@@ -3,6 +3,7 @@ package com.basti_bob.sand_wizard.cells.gases;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.util.MoveAlongState;
+import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class Steam extends Gas {

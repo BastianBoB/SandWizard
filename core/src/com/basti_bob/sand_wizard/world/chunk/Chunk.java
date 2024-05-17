@@ -82,7 +82,7 @@ public class Chunk implements Supplier<Chunk> {
     }
 
     public void setCell(Cell cell, int cellPosX, int cellPosY, int inChunkPosX, int inChunkPosY, CellPlaceFlag flag) {
-        if (!(cell instanceof Empty))
+        if (!(cell instanceof Empty) && flag != CellPlaceFlag.NEW)
             cell.setPosition(cellPosX, cellPosY);
 
         setCellAndUpdate(cell, cellPosX, cellPosY, inChunkPosX, inChunkPosY, flag);

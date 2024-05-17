@@ -116,7 +116,7 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
-            world.setCell(CellType.SOLID.GLOWBLOCK.get(), (int) player.nx, (int) player.ny);
+            world.setCell(CellType.SOLID.GLOWBLOCK.createCell(), (int) player.nx, (int) player.ny);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {

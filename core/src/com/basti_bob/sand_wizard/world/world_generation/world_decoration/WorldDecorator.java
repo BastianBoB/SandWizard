@@ -3,6 +3,8 @@ package com.basti_bob.sand_wizard.world.world_generation.world_decoration;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.registry.Registry;
 import com.basti_bob.sand_wizard.world.world_generation.structures.StructureGenerator;
+import com.basti_bob.sand_wizard.world.world_generation.world_decoration.speleothems.StalactiteWorldDecorator;
+import com.basti_bob.sand_wizard.world.world_generation.world_decoration.speleothems.StalagmiteWorldDecorator;
 
 public abstract class WorldDecorator {
 

@@ -10,6 +10,8 @@ import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_generation.ChunkGenerator;
+import com.basti_bob.sand_wizard.world.world_generation.structures.StructureGenerator;
+import com.basti_bob.sand_wizard.world.world_generation.structures.static_structure.StaticStructureGenerator;
 import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.StructurePlacingManager;
 import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
 import com.basti_bob.sand_wizard.world.world_generation.WorldGeneration;
@@ -59,14 +61,25 @@ public class World implements ChunkAccessor {
 
     public void test() {
 
-        for (int i = -320; i <= 320; i += 5) {
-            for (int j = -320; j <= 320; j += 5) {
-                setCell(CellType.SOLID.GLOWBLOCK.get(), (int) (SandWizard.player.nx) + i, (int) (SandWizard.player.ny) + j);
+        int x = 0;
+        int y = (int) SandWizard.player.ny;
+        for (StaticStructureGenerator generator : StructureGenerator.STALAGMITES.LARGE.FIRE_BREATHING.REGISTRY.getAllEntries()) {
+            int finalX = x;
+            int finalY = y;
+            addStructureToPlaceAsync(() -> generator.generate(this, finalX, finalY));
 
-            }
+            x += (generator.getWidth() / 32 + 2) * 32;
         }
 
-        setCell(CellType.SOLID.GLOWBLOCK.get(), (int) (SandWizard.player.nx) + 0, (int) (SandWizard.player.ny) + 16);
+        x = 0;
+        y = (int) SandWizard.player.ny + 300;
+        for (StaticStructureGenerator generator : StructureGenerator.STALACTITES.LARGE.WATER_DRIPPING.REGISTRY.getAllEntries()) {
+            int finalX = x;
+            int finalY = y;
+            addStructureToPlaceAsync(() -> generator.generate(this, finalX, finalY));
+
+            x += (generator.getWidth() / 32 + 2) * 32;
+        }
     }
 
     public void addStructureToPlace(Structure structure) {
@@ -128,6 +141,7 @@ public class World implements ChunkAccessor {
 
 
     private void placeStructures() {
+
         if (!unplacedStructures.isEmpty()) {
             Structure structure = unplacedStructures.pop();
 

@@ -5,10 +5,14 @@ import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
+import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
-import com.basti_bob.sand_wizard.world.world_generation.ore_generation.OreGenerator;
+import com.basti_bob.sand_wizard.world.world_generation.biomes.CaveBiomeType;
+import com.basti_bob.sand_wizard.world.world_generation.chunk_data.ChunkCaveData;
+import com.basti_bob.sand_wizard.world.world_generation.chunk_data.TempChunkCreationData;
 import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.PlacePriority;
 import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
+import com.basti_bob.sand_wizard.world.world_generation.world_decoration.WorldDecorator;
 
 import java.util.HashMap;
 
@@ -30,7 +34,8 @@ public class ChunkGenerator {
 
         ChunkBuilder chunkBuilder = new ChunkBuilder(world, oldChunk, chunkPosX, chunkPosY);
 
-        ChunkCreationData chunkData = new ChunkCreationData(worldGeneration, chunkPosX, chunkPosY);
+        TempChunkCreationData chunkCreationData = new TempChunkCreationData(worldGeneration, chunkPosX, chunkPosY);
+        ChunkCaveData chunkCaveData = worldGeneration.getOrCreateChunkCaveData(chunkPosX, chunkPosY);
 
 
         for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
@@ -38,51 +43,58 @@ public class ChunkGenerator {
             int cellPosX = chunkBuilder.getCellPosX(i);
             float terrainHeight = worldGeneration.getTerrainHeight(cellPosX);
             float surfaceInterpolationFactor = i / (float) WorldConstants.CHUNK_SIZE;
-            boolean generatedNewCell = false;
-            boolean isCave = false, isCaveAbove = false, isCaveBelow = false;
-
 
             for (int j = 0; j < WorldConstants.CHUNK_SIZE; j++) {
 
                 int cellPosY = chunkBuilder.getCellPosY(j);
 
-                if (j == 0 || !generatedNewCell) {
-                    isCave = chunkData.caveGenerator.isCave(world, cellPosX, cellPosY, terrainHeight);
-                    isCaveAbove = chunkData.caveGenerator.isCave(world, cellPosX, cellPosY + 1, terrainHeight);
-                    isCaveBelow = chunkData.caveGenerator.isCave(world, cellPosX, cellPosY - 1, terrainHeight);
-                } else {
-                    isCaveBelow = isCave;
-                    isCave = isCaveAbove;
-                    isCaveAbove = chunkData.caveGenerator.isCave(world, cellPosX, cellPosY + 1, terrainHeight);
-                }
+                boolean isCave = chunkCaveData.isCaveWithInChunkPos(i, j);
+                boolean isCaveAbove = (j == WorldConstants.CHUNK_SIZE - 1) ? worldGeneration.isCave(cellPosX, cellPosY + 1) : chunkCaveData.isCaveWithInChunkPos(i, j + 1);
+                boolean isCaveBelow = (j == 0) ? worldGeneration.isCave(cellPosX, cellPosY - 1) : chunkCaveData.isCaveWithInChunkPos(i, j - 1);
 
-                CellType newCellType = getNewCellType(cellPosX, cellPosY, terrainHeight, isCave, surfaceInterpolationFactor, chunkData);
+                CellType newCellType = getNewCellType(cellPosX, cellPosY, terrainHeight, isCave, surfaceInterpolationFactor, chunkCreationData);
 
                 ToPlaceStructureCell toPlaceStructureCell = getCellFromMap(i, j, queuedCells);
+
                 if (toPlaceStructureCell != null && !(toPlaceStructureCell.getPlacePriority() == PlacePriority.REPLACE_EMPTY && newCellType != CellType.EMPTY)) {
                     chunkBuilder.setCell(toPlaceStructureCell.getCell(), cellPosX, cellPosY, i, j);
-                    generatedNewCell = false;
                 } else {
                     chunkBuilder.setCell(newCellType, cellPosX, cellPosY, i, j);
-                    generatedNewCell = true;
                 }
 
-                if (cellPosY == (int) terrainHeight + 1) {
-                    chunkData.surfaceDecorator.decorate(world, cellPosX, cellPosY);
-                }
+                decorateChunk(cellPosX, cellPosY, terrainHeight, isCaveBelow, isCave, isCaveAbove, chunkCreationData);
 
-                if (cellPosY < terrainHeight && isCave) {
-                    if (!isCaveAbove) chunkData.caveTopDecorator.decorate(world, cellPosX, cellPosY);
-
-                    if (!isCaveBelow) chunkData.caveBottomDecorator.decorate(world, cellPosX, cellPosY);
-                }
+                //chunkBuilder.setCell(CellType.EMPTY, cellPosX, cellPosY, i, j);
             }
         }
 
         return chunkBuilder;
     }
 
-    private CellType getNewCellType(int cellPosX, int cellPosY, float terrainHeight, boolean isCave, float surfaceInterpolationFactor, ChunkCreationData chunkData) {
+    private void decorateChunk(int cellPosX, int cellPosY, float terrainHeight, boolean isCaveBelow, boolean isCave, boolean isCaveAbove, TempChunkCreationData chunkData) {
+        if (cellPosY == (int) terrainHeight + 1) {
+
+            for (WorldDecorator surfaceDecorator : chunkData.surfaceDecorators) {
+                surfaceDecorator.decorate(world, cellPosX, cellPosY);
+            }
+        }
+
+        if (cellPosY < terrainHeight && isCave) {
+            if (!isCaveAbove) {
+                for (WorldDecorator caveTopDecorator : chunkData.caveTopDecorators) {
+                    caveTopDecorator.decorate(world, cellPosX, cellPosY);
+                }
+            }
+
+            if (!isCaveBelow) {
+                for (WorldDecorator caveBottomDecorator : chunkData.caveBottomDecorators) {
+                    caveBottomDecorator.decorate(world, cellPosX, cellPosY);
+                }
+            }
+        }
+    }
+
+    private CellType getNewCellType(int cellPosX, int cellPosY, float terrainHeight, boolean isCave, float surfaceInterpolationFactor, TempChunkCreationData chunkData) {
 
         if (isCave) return CellType.EMPTY;
 
@@ -93,7 +105,9 @@ public class ChunkGenerator {
 //            return CellType.EMPTY;
 
         CellType ore = chunkData.oreGenerator.getCellType(world, cellPosX, cellPosY, terrainHeight);
-        if (ore != null) return ore;
+        if (ore != null) {
+            return ore;
+        }
 
 
         CellType surfaceCellType;
@@ -111,8 +125,25 @@ public class ChunkGenerator {
             return surfaceCellType;
         }
 
-        CellType caveBiomeCellType = chunkData.caveBiomeType.caveCellType;
-        return caveBiomeCellType;
+        if (!isCaveBiomeEdgeChunk(chunkData.chunkPos, chunkData.caveBiomeType)) {
+            return chunkData.caveBiomeType.caveCellType;
+        }
+
+        float interpolatedChunkPosX = cellPosX / (float) WorldConstants.CHUNK_SIZE;
+        float interpolatedChunkPosY = cellPosY / (float) WorldConstants.CHUNK_SIZE;
+
+        return worldGeneration.getInterpolatedCaveBiomeType(interpolatedChunkPosX, interpolatedChunkPosY).caveCellType;
+    }
+
+    private boolean isCaveBiomeEdgeChunk(ChunkPos chunkPos, CaveBiomeType caveBiomeType) {
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if (i == 0 && j == 0) continue;
+
+                if (worldGeneration.getCaveBiomeType(chunkPos.x + i, chunkPos.y + j) != caveBiomeType) return true;
+            }
+        }
+        return false;
     }
 
     public ToPlaceStructureCell getCellFromMap(int inChunkX, int inChunkY, HashMap<InChunkPos, ToPlaceStructureCell> queuedCells) {

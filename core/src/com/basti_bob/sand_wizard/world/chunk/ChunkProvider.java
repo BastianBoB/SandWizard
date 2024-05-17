@@ -1,6 +1,7 @@
 package com.basti_bob.sand_wizard.world.chunk;
 
-import com.basti_bob.sand_wizard.world.ChunkColumnData;
+import com.basti_bob.sand_wizard.world.world_generation.chunk_data.ChunkCaveData;
+import com.basti_bob.sand_wizard.world.world_generation.chunk_data.ChunkColumnData;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
@@ -18,7 +19,6 @@ public class ChunkProvider {
     public final HashMap<ChunkPos, Chunk> chunkLUT = new HashMap<>();
 
     public final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingRows = new TreeMap<>();
-    public final HashMap<Integer, ChunkColumnData> chunkColumns = new HashMap<>();
 
     private final Stack<Chunk> unusedChunkPool = new Stack<>();
 
@@ -28,10 +28,6 @@ public class ChunkProvider {
         for (int i = 0; i < WorldConstants.CHUNK_POOL_SIZE; i++) {
             unusedChunkPool.push(new Chunk());
         }
-    }
-
-    public ChunkColumnData getOrCreateChunkColumn(int chunkX) {
-        return chunkColumns.computeIfAbsent(chunkX, key -> new ChunkColumnData(world, key));
     }
 
     public Chunk getChunk(ChunkPos chunkPos) {

@@ -2,22 +2,22 @@ package com.basti_bob.sand_wizard.world.world_generation.world_decoration;
 
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.world_generation.structures.StructureGenerator;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class StructureWorldDecorator extends WorldDecorator {
 
-    private final HashMap<StructureGenerator, Float> structuresAndWeights;
+    private final List<Pair<StructureGenerator, Float>> structuresAndWeights;
 
     private final float totalWeight;
-    public StructureWorldDecorator(HashMap<StructureGenerator, Float> structuresAndWeights) {
+    public StructureWorldDecorator(List<Pair<StructureGenerator, Float>> structuresAndWeights) {
         this.structuresAndWeights = structuresAndWeights;
 
         float totalWeight = 0;
-        for (Float value : structuresAndWeights.values()) {
-            totalWeight += value;
+        for (Pair<StructureGenerator, Float> pair : structuresAndWeights) {
+            totalWeight += pair.getRight();
         }
         this.totalWeight = totalWeight;
     }
@@ -30,12 +30,12 @@ public class StructureWorldDecorator extends WorldDecorator {
 
         StructureGenerator generator = null;
         float currentWeight = 0;
-        for (Map.Entry<StructureGenerator, Float> entry : structuresAndWeights.entrySet()) {
+        for (Pair<StructureGenerator, Float> pair : structuresAndWeights) {
 
-            currentWeight += entry.getValue();
+            currentWeight += pair.getRight();
 
             if (randomWeight < currentWeight) {
-                generator = entry.getKey();
+                generator = pair.getLeft();
                 break;
             }
         }
@@ -47,34 +47,28 @@ public class StructureWorldDecorator extends WorldDecorator {
         }
     }
 
-    public static StructureSurfaceDecoratorBuilder builderFrom(StructureWorldDecorator decorator) {
-        return new StructureSurfaceDecoratorBuilder(decorator);
+
+    public static StructureWorldDecoratorBuilder builder() {
+        return new StructureWorldDecoratorBuilder();
     }
 
-    public static StructureSurfaceDecoratorBuilder builder() {
-        return new StructureSurfaceDecoratorBuilder();
-    }
+    public static class StructureWorldDecoratorBuilder {
 
-    public static class StructureSurfaceDecoratorBuilder {
+        private final List<Pair<StructureGenerator, Float>> structuresAndWeights;
 
-        private final HashMap<StructureGenerator, Float> structuresAndWeights;
 
-        private StructureSurfaceDecoratorBuilder(StructureWorldDecorator decorator) {
-            this.structuresAndWeights = decorator.structuresAndWeights;
+        private StructureWorldDecoratorBuilder() {
+            this.structuresAndWeights = new ArrayList<>();
         }
 
-        private StructureSurfaceDecoratorBuilder() {
-            this.structuresAndWeights = new HashMap<>();
-        }
-
-        public StructureSurfaceDecoratorBuilder addStructure(StructureGenerator generator, float weight) {
-            structuresAndWeights.put(generator, weight);
+        public StructureWorldDecoratorBuilder addStructure(StructureGenerator generator, float weight) {
+            structuresAndWeights.add(Pair.of(generator, weight));
             return this;
         }
 
-        public <T extends StructureGenerator> StructureSurfaceDecoratorBuilder addStructureList(List<T> generatorList, float totalWeight) {
+        public <T extends StructureGenerator> StructureWorldDecoratorBuilder addStructureList(List<T> generatorList, float totalWeight) {
             for (StructureGenerator generator : generatorList) {
-                structuresAndWeights.put(generator, totalWeight / generatorList.size());
+                structuresAndWeights.add(Pair.of(generator, totalWeight / generatorList.size()));
             }
             return this;
         }

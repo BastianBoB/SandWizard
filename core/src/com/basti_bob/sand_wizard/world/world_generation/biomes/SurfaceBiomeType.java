@@ -6,17 +6,20 @@ import com.basti_bob.sand_wizard.world.world_generation.world_decoration.WorldDe
 import com.basti_bob.sand_wizard.world.world_generation.surface_generation.SurfaceGenerator;
 import com.basti_bob.sand_wizard.world.world_generation.terrain_height_generation.TerrainHeightGenerator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SurfaceBiomeType extends BiomeType {
 
     public final SurfaceGenerator surfaceGenerator;
     public final TerrainHeightGenerator terrainHeightGenerator;
-    public final WorldDecorator worldDecorator;
+    public final List<WorldDecorator> worldDecorators;
 
     public SurfaceBiomeType(Builder builder) {
         super(builder.noiseRange, builder.weight);
         this.surfaceGenerator = builder.surfaceGenerator;
         this.terrainHeightGenerator = builder.terrainHeightGenerator;
-        this.worldDecorator = builder.worldDecorator;
+        this.worldDecorators = builder.worldDecorators;
     }
 
     public static class Builder {
@@ -25,7 +28,7 @@ public class SurfaceBiomeType extends BiomeType {
         public final float weight;
         public SurfaceGenerator surfaceGenerator = SurfaceGenerator.STONE_ONLY;
         public TerrainHeightGenerator terrainHeightGenerator = TerrainHeightGenerator.FLAT;
-        public WorldDecorator worldDecorator = WorldDecorator.NOTHING;
+        public List<WorldDecorator> worldDecorators = new ArrayList<>();
 
         public Builder(FloatRange noiseRange, float weight) {
             this.noiseRange = noiseRange;
@@ -42,8 +45,8 @@ public class SurfaceBiomeType extends BiomeType {
             return this;
         }
 
-        public Builder surfaceDecorator(WorldDecorator worldDecorator) {
-            this.worldDecorator = worldDecorator;
+        public Builder addSurfaceDecorator(WorldDecorator worldDecorator) {
+            this.worldDecorators.add(worldDecorator);
             return this;
         }
 
