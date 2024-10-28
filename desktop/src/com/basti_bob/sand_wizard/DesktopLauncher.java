@@ -7,11 +7,11 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL31, 3, 1);
+		config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL31, 3, 2);
 
 		Graphics.Monitor monitor = Lwjgl3ApplicationConfiguration.getMonitors()[2];
 
-		config.useVsync(false);
+		//config.useVsync(false);
 		//config.setForegroundFPS(90);
 
 		float scale = 1f;

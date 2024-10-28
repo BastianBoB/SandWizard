@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.basti_bob.sand_wizard.SandWizard;
+import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.world_generation.chunk_data.ChunkColumnData;
@@ -133,6 +134,10 @@ public class WorldRenderer {
             renderWithoutLights(player, chunks, topLeftChunkPos);
         }
 
+        for(Entity entity : world.entities) {
+            entity.render(camera, shapeRenderer);
+        }
+
         if (SandWizard.renderChunkBoarder)
             chunkActiveDebugSquares(chunks);
     }
@@ -204,8 +209,8 @@ public class WorldRenderer {
                 Chunk chunk = chunks.get(chunkI, chunkJ);
                 if (chunk == null) continue;
 
-                float chunkRenderX = (chunk.posX * chunkSize) * WorldConstants.CELL_SIZE;
-                float chunkRenderY = (chunk.posY * chunkSize) * WorldConstants.CELL_SIZE;
+                float chunkRenderX = (chunk.getPosX() * chunkSize) * WorldConstants.CELL_SIZE;
+                float chunkRenderY = (chunk.getPosY() * chunkSize) * WorldConstants.CELL_SIZE;
 
                 renderChunkActiveDebugSquare(chunk, chunkRenderX, chunkRenderY);
             }

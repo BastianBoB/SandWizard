@@ -25,7 +25,7 @@ public class WorldGeneration {
 
     private final World world;
 
-    private final Random biomeRandom = new Random();
+    private final Random random;
 
     public final Noise surfaceBiomeNoise = new AmpFreqNoise(0.01f, 1f);
     private final List<SurfaceBiomeType> surfaceBiomeTypes = new ArrayList<>();
@@ -39,6 +39,7 @@ public class WorldGeneration {
 
     public WorldGeneration(World world) {
         this.world = world;
+        this.random = new Random(WorldConstants.WORLD_GENERATION_SEED);
 
         surfaceBiomeTypes.addAll(BiomeType.SURFACE.REGISTRY.getAllEntries());
         caveBiomeTypes.addAll(BiomeType.CAVE.REGISTRY.getAllEntries());
@@ -73,7 +74,7 @@ public class WorldGeneration {
     }
 
     public CaveBiomeType getInterpolatedCaveBiomeType(float interpolatedChunkPosX, float interpolatedChunkPosY) {
-        return BiomeType.calculateBiomeWithNoiseValue(caveBiomeTypes, biomeRandom, getInterpolatedCaveBiomeNoise(interpolatedChunkPosX, interpolatedChunkPosY));
+        return BiomeType.calculateBiomeWithNoiseValue(caveBiomeTypes, random, getInterpolatedCaveBiomeNoise(interpolatedChunkPosX, interpolatedChunkPosY));
     }
 
     public boolean isCave(int cellPosX, int cellPosY) {
@@ -123,11 +124,11 @@ public class WorldGeneration {
 
 
     public SurfaceBiomeType calculateSurfaceBiomeType(int chunkPosX) {
-        return BiomeType.calculateBiomeWithNoiseValue(surfaceBiomeTypes, biomeRandom, getSurfaceBiomeNoise(chunkPosX));
+        return BiomeType.calculateBiomeWithNoiseValue(surfaceBiomeTypes, random, getSurfaceBiomeNoise(chunkPosX));
     }
 
     public CaveBiomeType calculateCaveBiomeType(int chunkPosX, int chunkPosY) {
-        return BiomeType.calculateBiomeWithNoiseValue(caveBiomeTypes, biomeRandom, getCaveBiomeNoise(chunkPosX, chunkPosY));
+        return BiomeType.calculateBiomeWithNoiseValue(caveBiomeTypes, random, getCaveBiomeNoise(chunkPosX, chunkPosY));
     }
 
     public float getSurfaceBiomeNoise(int chunkX) {

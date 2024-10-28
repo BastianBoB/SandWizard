@@ -4,14 +4,13 @@ import java.util.Random;
 
 public class AmpFreqNoise implements Noise {
 
-    private static final Random random = new Random();
-
-    private final OpenSimplexNoise noise = new OpenSimplexNoise(random.nextLong());
+    private final OpenSimplexNoise noise;
     private final float frequency, amplitude;
 
     public AmpFreqNoise(float frequency, float amplitude) {
         this.frequency = frequency;
         this.amplitude = amplitude;
+        noise = new OpenSimplexNoise(new Random().nextLong());
     }
 
     @Override

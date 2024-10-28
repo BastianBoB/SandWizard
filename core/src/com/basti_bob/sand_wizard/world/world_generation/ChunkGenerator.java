@@ -37,6 +37,7 @@ public class ChunkGenerator {
         TempChunkCreationData chunkCreationData = new TempChunkCreationData(worldGeneration, chunkPosX, chunkPosY);
         ChunkCaveData chunkCaveData = worldGeneration.getOrCreateChunkCaveData(chunkPosX, chunkPosY);
 
+        if(queuedCells != null) chunkBuilder.isModifiedChunk = true;
 
         for (int i = 0; i < WorldConstants.CHUNK_SIZE; i++) {
 
@@ -64,7 +65,9 @@ public class ChunkGenerator {
 
                 decorateChunk(cellPosX, cellPosY, terrainHeight, isCaveBelow, isCave, isCaveAbove, chunkCreationData);
 
-                //chunkBuilder.setCell(CellType.EMPTY, cellPosX, cellPosY, i, j);
+//                if(chunkPosX % 6 == 0 && chunkPosY % 6 == 0) {
+//                    chunkBuilder.setCell(CellType.LIQUID.LAVA, cellPosX, cellPosY, i, j);
+//                }
             }
         }
 

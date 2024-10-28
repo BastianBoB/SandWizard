@@ -22,7 +22,8 @@ public class Chunk implements Supplier<Chunk> {
     public Array2D<Cell> grid;
     public NeighbourChunkAccessor chunkAccessor;
     public Mesh mesh;
-    public int posX, posY;
+    private int posX;
+    private int posY;
     private int numActiveFrames;
     public boolean hasBeenModified;
 
@@ -42,7 +43,6 @@ public class Chunk implements Supplier<Chunk> {
     }
 
     public void gotAddedToWorld() {
-        this.hasBeenModified = false;
         this.numActiveFrames = 5;
     }
 
@@ -270,4 +270,20 @@ public class Chunk implements Supplier<Chunk> {
 //            }
 //
 //   }
+
+    public int getPosX() {
+        return posX;
+    }
+
+    public int getPosY() {
+        return posY;
+    }
+
+    public void setPosX(int posX) {
+        this.posX = posX;
+    }
+
+    public void setPosY(int posY) {
+        this.posY = posY;
+    }
 }

@@ -29,7 +29,7 @@ public class CellType {
     public static final Registry<CellType> REGISTRY = new Registry<>("cell_type");
 
     public static final CellType EMPTY = REGISTRY.register("empty", new CellType(PhysicalState.OTHER, CellProperty.EMPTY, cellType -> Empty.getInstance(), CellColors.EMPTY)); //(x, y, world) -> Empty.getInstance()
-    public static final CellType PARTICLE = REGISTRY.register("particle", new CellType(PhysicalState.OTHER, CellProperty.EMPTY, null, CellColors.EMPTY));
+    public static final CellType PARTICLE = REGISTRY.register("particle", new CellType(PhysicalState.OTHER, CellProperty.EMPTY, cellType -> new CellParticle(CellType.EMPTY.createCell()), CellColors.EMPTY));
 
     public static class SOLID {
         public static final Registry<CellType> REGISTRY = new Registry<>("solid", CellType.REGISTRY);

@@ -18,12 +18,12 @@ public class WorldUpdatingChunkRow {
     }
 
     public void addChunk(Chunk chunk) {
-        int i = Math.floorMod(chunk.posX, 3);
+        int i = Math.floorMod(chunk.getPosX(), 3);
         separateChunksList[i].add(chunk);
     }
 
     public void removeChunk(Chunk chunk) {
-        int i = Math.floorMod(chunk.posX, 3);
+        int i = Math.floorMod(chunk.getPosX(), 3);
         separateChunksList[i].remove(chunk);
     }
 

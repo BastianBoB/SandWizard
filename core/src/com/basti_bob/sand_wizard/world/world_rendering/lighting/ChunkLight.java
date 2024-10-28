@@ -32,7 +32,7 @@ public class ChunkLight extends Light {
 
         for (int i = -chunkRadius; i <= chunkRadius; i++) {
             for (int j = -chunkRadius; j <= chunkRadius; j++) {
-                Chunk targetChunk = chunk.world.getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
+                Chunk targetChunk = chunk.world.getChunkFromChunkPos(chunk.getPosX() + i, chunk.getPosY() + j);
 
                 if (targetChunk != null) {
 
@@ -57,7 +57,7 @@ public class ChunkLight extends Light {
 
         for (int i = -chunkRadius; i <= chunkRadius; i++) {
             for (int j = -chunkRadius; j <= chunkRadius; j++) {
-                Chunk targetChunk = chunk.world.getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
+                Chunk targetChunk = chunk.world.getChunkFromChunkPos(chunk.getPosX() + i, chunk.getPosY() + j);
 
                 if (targetChunk == null) continue;
 

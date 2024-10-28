@@ -28,4 +28,12 @@ public enum Direction {
             case RIGHT -> LEFT;
         };
     }
+
+    public boolean isHorizontal() {
+        return this == LEFT || this == RIGHT;
+    }
+
+    public boolean isVertical() {
+        return this == UP || this == DOWN;
+    }
 }

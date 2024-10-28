@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
@@ -16,15 +17,8 @@ import com.basti_bob.sand_wizard.world.world_rendering.lighting.WorldLight;
 
 import java.util.concurrent.CompletableFuture;
 
-public class Player {
+public class Player extends Entity {
 
-    private final EntityHitBox hitBox;
-    private final World world;
-    private float ox;
-    private float oy;
-    public float nx;
-    public float ny;
-    public float xVel, yVel;
     public boolean onGround;
     private int stepUpHeight = 6;
     private int fastStepUpHeight = 2;
@@ -36,28 +30,36 @@ public class Player {
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1,
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_Y * 2 + 1);
 
-    private final ShapeRenderer shapeRenderer;
     private final WorldLight light;
 
     public Player(World world, float x, float y) {
-        this.shapeRenderer = new ShapeRenderer();
-
-        this.world = world;
-        this.ox = x;
-        this.oy = y;
-        this.nx = x;
-        this.ny = y;
-        this.hitBox = new EntityHitBox(8, 16);
+        super(world, x, y, new EntityHitBox(8, 16));
 
         this.loadChunksAround(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
 
         Color c = Color.WHITE;
-        this.light = new WorldLight((int) ox, (int) oy, c.r, c.g, c.b, 127f, 1f);
+        this.light = new WorldLight((int) ox, (int) oy, c.r, c.g, c.b, 63f, 1f);
         this.light.placedInWorld(world);
     }
 
-    public void update(float deltaTime) {
+    @Override
+    protected void updateMoving() {
+        if (WorldConstants.PLAYER_FREE_MOVE) {
+            this.moveBy(xVel, yVel);
+        }
+
+        super.updateMoving();
+    }
+
+    @Override
+    protected void applyGravity() {
+        if (WorldConstants.PLAYER_FREE_MOVE) return;
+
+        super.applyGravity();
+    }
+
+    public void update() {
 
         if (WorldConstants.PLAYER_FREE_MOVE) {
             this.moveBy(xVel, yVel);
@@ -68,7 +70,7 @@ public class Player {
             this.yVel += WorldConstants.GRAVITY.y;
             this.xVel *= 0.95;
 
-            moveWithVelocity(deltaTime);
+            moveWithVelocity();
         }
 
         updatePosition();
@@ -83,7 +85,7 @@ public class Player {
         this.yVel = 8;
     }
 
-    public void render(Camera camera) {
+    public void render(Camera camera, ShapeRenderer shapeRenderer) {
         int s = WorldConstants.CELL_SIZE;
 
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -101,18 +103,12 @@ public class Player {
         return new Vector2(nx, ny);
     }
 
+    public Vector2 getFeetPosition() {
+        return new Vector2(nx, ny - hitBox.getHeight()/2f);
+    }
+
     public Vector2 getHeadPosition() {
-        return new Vector2(nx, ny + hitBox.getHeight());
-    }
-
-    public void moveTo(float x, float y) {
-        this.nx = x;
-        this.ny = y;
-    }
-
-    public void moveBy(float x, float y) {
-        moveTo(ox + x, oy + y);
-
+        return new Vector2(nx, ny + hitBox.getHeight()/2f);
     }
 
     public int getDownY(int i) {
@@ -120,18 +116,20 @@ public class Player {
     }
 
     public int getUpY(int i) {
-        return (int) (this.oy + this.hitBox.getHeight()) + i;
+        return (int) (this.oy + hitBox.getHeight()) + i;
     }
 
     public int getRightX(int i) {
-        return (int) (this.ox + this.hitBox.getWidth() / 2f) + i;
+        return (int) (this.ox + hitBox.getWidth() / 2f) + i;
     }
 
     public int getLeftX(int i) {
-        return (int) (this.ox - this.hitBox.getWidth() / 2f) - i;
+        return (int) (this.ox - hitBox.getWidth() / 2f) - i;
     }
 
-    private void moveWithVelocity(float deltaTime) {
+    private void moveWithVelocity() {
+
+
         clampVelocity();
 
         float targetX = ox + xVel;
@@ -246,15 +244,15 @@ public class Player {
     private void enteredNewChunk(Chunk previousChunk, Chunk newChunk) {
         if (newChunk == null || previousChunk == null) return;
 
-        if (!(Math.abs(previousChunk.posX - newChunk.posX) == 1 || Math.abs(previousChunk.posY - newChunk.posY) == 1)) {
+        if (!(Math.abs(previousChunk.getPosX() - newChunk.getPosX()) == 1 || Math.abs(previousChunk.getPosY() - newChunk.getPosY()) == 1)) {
             System.out.println("Player moved more than 1 chunk");
         }
 
-        int oldChunkX = previousChunk.posX;
-        int oldChunkY = previousChunk.posY;
+        int oldChunkX = previousChunk.getPosX();
+        int oldChunkY = previousChunk.getPosY();
 
-        int newChunkX = newChunk.posX;
-        int newChunkY = newChunk.posY;
+        int newChunkX = newChunk.getPosX();
+        int newChunkY = newChunk.getPosY();
 
         generateAndRemoveChunks(oldChunkX, oldChunkY, newChunkX, newChunkY);
         loadAndUnloadChunks(oldChunkX, oldChunkY, newChunkX, newChunkY);
@@ -283,9 +281,10 @@ public class Player {
                 }
             }
 
-            for (Chunk chunk : world.chunkProvider.chunks) {
-                if (Math.abs(chunk.posX - newChunkX) > WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_X || Math.abs(chunk.posY - newChunkY) > WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_Y) {
-                    world.unloadChunkAsync(chunk.posX, chunk.posY);
+            for (Chunk chunk : world.chunkProvider.getChunks()) {
+                if (Math.abs(chunk.getPosX() - newChunkX) > WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_X
+                        || Math.abs(chunk.getPosY() - newChunkY) > WorldConstants.PLAYER_CHUNK_UNLOAD_RADIUS_Y) {
+                    world.unloadChunkAsync(chunk.getPosX(), chunk.getPosY());
                 }
             }
         });
@@ -315,7 +314,7 @@ public class Player {
 
     private void setChunkLoaded(int chunkX, int chunkY, boolean loaded) {
         Chunk chunk = world.getChunkFromChunkPos(chunkX, chunkY);
-        if(chunk == null) return;
+        if (chunk == null) return;
 
         chunk.setLoaded(loaded);
     }
@@ -351,7 +350,7 @@ public class Player {
             for (int j = -createY; j <= createY; j++) {
                 Chunk chunk = world.loadChunk(chunkPosX + i, chunkPosY + j);
 
-                if(i >= -loadX && i <= loadX && j >= -loadY && j <= loadY)
+                if (i >= -loadX && i <= loadX && j >= -loadY && j <= loadY)
                     chunk.setLoaded(true);
             }
         }

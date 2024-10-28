@@ -3,19 +3,19 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
-import com.basti_bob.sand_wizard.world.chunk.*;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
+import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
+import com.basti_bob.sand_wizard.world.chunk.ChunkProvider;
+import com.basti_bob.sand_wizard.world.chunk.WorldUpdatingChunkRow;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
-import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_generation.ChunkGenerator;
-import com.basti_bob.sand_wizard.world.world_generation.structures.StructureGenerator;
-import com.basti_bob.sand_wizard.world.world_generation.structures.static_structure.StaticStructureGenerator;
-import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.StructurePlacingManager;
-import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
 import com.basti_bob.sand_wizard.world.world_generation.WorldGeneration;
 import com.basti_bob.sand_wizard.world.world_generation.structures.Structure;
+import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.StructurePlacingManager;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.WorldLight;
 import com.basti_bob.sand_wizard.world.world_saving.ChunkSaver;
 import org.apache.commons.lang3.tuple.Pair;
@@ -35,6 +35,7 @@ public class World implements ChunkAccessor {
     public int activeChunks, loadedChunks;
     public int updateTimes;
 
+    public final ChunkSaver chunkSaver;
     public final ChunkProvider chunkProvider;
     public final ChunkGenerator chunkGenerator;
     public final WorldGeneration worldGeneration;
@@ -48,7 +49,10 @@ public class World implements ChunkAccessor {
 
     public final List<WorldLight> globalLights = new ArrayList<>();
 
+    public final List<Entity> entities = new ArrayList<>();
+
     public World() {
+        this.chunkSaver = new ChunkSaver();
         this.chunkProvider = new ChunkProvider(this);
         this.worldGeneration = new WorldGeneration(this);
         this.chunkGenerator = new ChunkGenerator(this);
@@ -61,25 +65,6 @@ public class World implements ChunkAccessor {
 
     public void test() {
 
-        int x = 0;
-        int y = (int) SandWizard.player.ny;
-        for (StaticStructureGenerator generator : StructureGenerator.STALAGMITES.LARGE.FIRE_BREATHING.REGISTRY.getAllEntries()) {
-            int finalX = x;
-            int finalY = y;
-            addStructureToPlaceAsync(() -> generator.generate(this, finalX, finalY));
-
-            x += (generator.getWidth() / 32 + 2) * 32;
-        }
-
-        x = 0;
-        y = (int) SandWizard.player.ny + 300;
-        for (StaticStructureGenerator generator : StructureGenerator.STALACTITES.LARGE.WATER_DRIPPING.REGISTRY.getAllEntries()) {
-            int finalX = x;
-            int finalY = y;
-            addStructureToPlaceAsync(() -> generator.generate(this, finalX, finalY));
-
-            x += (generator.getWidth() / 32 + 2) * 32;
-        }
     }
 
     public void addStructureToPlace(Structure structure) {
@@ -95,13 +80,16 @@ public class World implements ChunkAccessor {
 
         addAndRemoveChunks();
         placeStructures();
-
         updateChunkActiveAndSetCellsNotUpdated();
 
         if (SandWizard.isUpdating) {
             updateAllCells();
             float time = FunctionRunTime.timeFunction(() -> updateExplosions());
             if (time > 0.1) System.out.println("UPDATE EXPLOSION: " + time);
+        }
+
+        for(Entity entity : entities) {
+            entity.update();
         }
     }
 
@@ -110,7 +98,7 @@ public class World implements ChunkAccessor {
     }
 
     private void chunkToRemove(Chunk chunk) {
-        ChunkPos pos = new ChunkPos(chunk.posX, chunk.posY);
+        ChunkPos pos = new ChunkPos(chunk.getPosX(), chunk.getPosY());
 
         if (chunksToRemoveOrAdd.containsKey(pos)) return;
 
@@ -134,6 +122,7 @@ public class World implements ChunkAccessor {
                 } else {
                     removeChunk(chunk);
                 }
+
                 iterator.remove();
             }
         }
@@ -155,7 +144,7 @@ public class World implements ChunkAccessor {
 
         List<Callable<Object>> tasks = new ArrayList<>();
 
-        for (Chunk chunk : chunkProvider.chunks) {
+        for (Chunk chunk : chunkProvider.getChunks()) {
             chunk.updateActive();
 
             if (!chunk.isLoaded()) continue;
@@ -176,7 +165,6 @@ public class World implements ChunkAccessor {
                 }
             }));
         }
-
 
         try {
             executor.invokeAll(tasks);
@@ -258,7 +246,7 @@ public class World implements ChunkAccessor {
         if (chunk == null) return;
 
         if (WorldConstants.SAVE_CHUNK_DATA && chunk.hasBeenModified)
-            ChunkSaver.writeChunk(chunk);
+            chunkSaver.writeChunk(chunk);
 
         removeChunk(chunk);
     }
@@ -268,7 +256,7 @@ public class World implements ChunkAccessor {
         if (chunk == null) return;
 
         if (WorldConstants.SAVE_CHUNK_DATA && chunk.hasBeenModified)
-            ChunkSaver.writeChunk(chunk);
+            chunkSaver.writeChunkAsync(chunk);
 
         chunkToRemove(chunk);
     }
@@ -296,7 +284,7 @@ public class World implements ChunkAccessor {
             for (int j = -1; j <= 1; j++) {
                 if (i == 0 && j == 0) continue;
 
-                Chunk neighbourChunk = getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
+                Chunk neighbourChunk = getChunkFromChunkPos(chunk.getPosX() + i, chunk.getPosY() + j);
 
                 if (neighbourChunk == null) continue;
 
@@ -320,7 +308,7 @@ public class World implements ChunkAccessor {
             for (int j = -1; j <= 1; j++) {
                 if (i == 0 && j == 0) continue;
 
-                Chunk neighbourChunk = getChunkFromChunkPos(chunk.posX + i, chunk.posY + j);
+                Chunk neighbourChunk = getChunkFromChunkPos(chunk.getPosX() + i, chunk.getPosY() + j);
 
                 if (neighbourChunk == null) continue;
 

@@ -2,7 +2,9 @@ package com.basti_bob.sand_wizard.world.world_saving;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
@@ -11,19 +13,30 @@ import com.basti_bob.sand_wizard.world.chunk.ChunkBuilder;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class ChunkSaver {
 
-    public static final String CHUNK_SAVING_LOCATION = "world/chunks/";
+    public final String CHUNK_SAVING_LOCATION = "world/chunks/";
 
-    private static String getChunkFileLocation(int chunkX, int chunkY) {
+    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
+
+    private String getChunkFileLocation(int chunkX, int chunkY) {
         return CHUNK_SAVING_LOCATION + chunkX + "," + chunkY;
     }
 
-    public static void writeChunk(Chunk chunk) {
+    public void writeChunkAsync(Chunk chunk) {
+        executorService.submit(() -> writeChunk(chunk));
+    }
 
-        System.out.println("Saved chunk: " + chunk.posX + " , " + chunk.posY);
+    public void writeChunk(Chunk chunk) {
 
-        FileHandle file = Gdx.files.local(getChunkFileLocation(chunk.posX, chunk.posY));
+        FileHandle file = Gdx.files.local(getChunkFileLocation(chunk.getPosX(), chunk.getPosY()));
 
         int sameCellCount = 0;
         String lastCellName = null;
@@ -53,8 +66,8 @@ public class ChunkSaver {
     }
 
 
-    public static ChunkBuilder readChunk(World world, Chunk oldChunk, int chunkX, int chunkY) {
-        try {
+    public ChunkBuilder readChunk(World world, Chunk oldChunk, int chunkX, int chunkY) {
+        //try {
             FileHandle file = Gdx.files.local(getChunkFileLocation(chunkX, chunkY));
             if (!file.exists()) return null;
 
@@ -84,10 +97,11 @@ public class ChunkSaver {
             }
 
             return chunkBuilder;
-        } catch (Exception e) {
-            System.out.println("FAILED READING CHUNK at: " + chunkX + ", " + chunkY);
-            return null;
-        }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+////            System.out.println("FAILED READING CHUNK at: " + chunkX + ", " + chunkY);
+////            return null;
+//        }
     }
 
 

@@ -97,7 +97,7 @@ public class BiomeType {
         if (potentialBiomes.size() == 0) throw new RuntimeException("no biome in noise range");
         if (potentialBiomes.size() == 1) return potentialBiomes.get(0);
 
-        random.setSeed((long) noiseValue * 10000000);
+        random.setSeed((long) (noiseValue * 0.5f + 0.5) * Long.MAX_VALUE);
         float randomWeight = random.nextFloat() * totalWeight;
         float currentWeight = 0;
 

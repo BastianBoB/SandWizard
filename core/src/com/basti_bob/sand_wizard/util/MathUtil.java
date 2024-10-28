@@ -20,4 +20,15 @@ public class MathUtil {
     public static float clamp(float value, float min, float max) {
         return Math.max(min, Math.min(max, value));
     }
+
+    public static float dist(float x1, float y1, float x2, float y2) {
+        return (float) Math.sqrt(distSqr(x1, y1, x2, y2));
+    }
+
+    public static float distSqr(float x1, float y1, float x2, float y2) {
+        float dx = x2 - x1;
+        float dy = y2 - y1;
+
+        return dx*dx + dy*dy;
+    }
 }

@@ -58,7 +58,7 @@ public class DebugScreen {
 
         itemY[0] -= verticalSpace;
 
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "generated chunks: " + p.getWorld().chunkProvider.chunks.size()), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "generated chunks: " + p.getWorld().chunkProvider.getChunks().size()), true));
         addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "loaded chunks: " + p.getWorld().loadedChunks), true));
         addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "active chunks: " + p.getWorld().activeChunks), true));
 
@@ -82,19 +82,19 @@ public class DebugScreen {
 
         itemY[0] -= verticalSpace;
 
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "player pos: " + decimal(p.nx) + ", " + decimal(p.ny)), true));
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "player chunk pos: " + World.getChunkPos((int) p.nx) + ", " + World.getChunkPos((int) p.ny)), true));
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "player vel: " + decimal(p.xVel) + ", " + decimal(p.yVel)), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "player pos: " + decimal(p.getPosition().x) + ", " + decimal(p.getPosition().y)), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "player chunk pos: " + World.getChunkPos((int) p.getPosition().x) + ", " + World.getChunkPos((int) p.getPosition().y)), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "player vel: " + decimal(p.getxVel()) + ", " + decimal(p.getyVel())), true));
 
         itemY[0] -= verticalSpace;
 
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "surface biome noise: " + decimal(p.getWorld().worldGeneration.getSurfaceBiomeNoise(World.getChunkPos((int) p.nx)))), true));
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "surface biome: " + BiomeType.REGISTRY.getEntryName(p.getWorld().worldGeneration.getSurfaceBiomeType(World.getChunkPos((int) p.nx)))), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "surface biome noise: " + decimal(p.getWorld().worldGeneration.getSurfaceBiomeNoise(World.getChunkPos((int) p.getPosition().x)))), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "surface biome: " + BiomeType.REGISTRY.getEntryName(p.getWorld().worldGeneration.getSurfaceBiomeType(World.getChunkPos((int) p.getPosition().x)))), true));
 
         itemY[0] -= verticalSpace;
 
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "cave biome noise: " + decimal(p.getWorld().worldGeneration.getCaveBiomeNoise(World.getChunkPos((int) p.nx), World.getChunkPos((int) p.ny)))), true));
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "cave biome: " + BiomeType.REGISTRY.getEntryName(p.getWorld().worldGeneration.getCaveBiomeType(World.getChunkPos((int) p.nx), World.getChunkPos((int) p.ny)))), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "cave biome noise: " + decimal(p.getWorld().worldGeneration.getCaveBiomeNoise(World.getChunkPos((int) p.getPosition().x), World.getChunkPos((int) p.getPosition().y)))), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "cave biome: " + BiomeType.REGISTRY.getEntryName(p.getWorld().worldGeneration.getCaveBiomeType(World.getChunkPos((int) p.getPosition().x), World.getChunkPos((int) p.getPosition().y)))), true));
     }
 
     private void addDebugRenderItem(float[] itemY, DebugRenderItem debugRenderItem) {

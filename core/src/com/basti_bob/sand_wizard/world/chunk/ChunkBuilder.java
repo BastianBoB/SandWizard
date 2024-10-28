@@ -11,6 +11,7 @@ public class ChunkBuilder {
     private final World world;
     private final Chunk chunk;
     private final float[] vertices;
+    public boolean isModifiedChunk;
 
     public ChunkBuilder(World world, Chunk oldChunk, int posX, int posY) {
         this.world = world;
@@ -19,8 +20,8 @@ public class ChunkBuilder {
         int cs = WorldConstants.CHUNK_SIZE;
 
         this.chunk.world = world;
-        this.chunk.posX = posX;
-        this.chunk.posY = posY;
+        this.chunk.setPosX(posX);
+        this.chunk.setPosY(posY);
         this.vertices = new float[WorldConstants.NUM_MESH_VERTICES];
 
         for (int j = 0; j < cs; j++) {
@@ -39,11 +40,11 @@ public class ChunkBuilder {
 //    }
 
     public int getCellPosX(int inChunkPosX) {
-        return inChunkPosX + WorldConstants.CHUNK_SIZE * chunk.posX;
+        return inChunkPosX + WorldConstants.CHUNK_SIZE * chunk.getPosX();
     }
 
     public int getCellPosY(int inChunkPosY) {
-        return inChunkPosY + WorldConstants.CHUNK_SIZE * chunk.posY;
+        return inChunkPosY + WorldConstants.CHUNK_SIZE * chunk.getPosY();
     }
 
     public void setCell(CellType cellType, int inChunkPosX, int inChunkPosY) {
@@ -68,6 +69,7 @@ public class ChunkBuilder {
 
     public Chunk buildChunk() {
         chunk.mesh.setVertices(vertices);
+        chunk.hasBeenModified = isModifiedChunk;
 
         return chunk;
     }

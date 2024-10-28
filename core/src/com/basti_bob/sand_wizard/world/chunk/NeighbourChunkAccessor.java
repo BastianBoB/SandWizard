@@ -26,15 +26,15 @@ public class NeighbourChunkAccessor implements ChunkAccessor {
     }
 
     public void setSurroundingChunk(Chunk chunk) {
-        int gridX = chunk.posX - centerChunk.posX + 1;
-        int gridY = chunk.posY - centerChunk.posY + 1;
+        int gridX = chunk.getPosX() - centerChunk.getPosX() + 1;
+        int gridY = chunk.getPosY() - centerChunk.getPosY() + 1;
 
         surroundingChunks.set(gridX, gridY, chunk);
     }
 
     public void removeSurroundingChunk(Chunk chunk) {
-        int gridX = chunk.posX - centerChunk.posX + 1;
-        int gridY = chunk.posY - centerChunk.posY + 1;
+        int gridX = chunk.getPosX() - centerChunk.getPosX() + 1;
+        int gridY = chunk.getPosY() - centerChunk.getPosY() + 1;
 
         surroundingChunks.set(gridX, gridY, null);
     }
@@ -49,8 +49,8 @@ public class NeighbourChunkAccessor implements ChunkAccessor {
 
     @Override
     public Chunk getChunkFromChunkPos(int targetChunkX, int targetChunkY) {
-        int gridX = targetChunkX - centerChunk.posX + 1;
-        int gridY = targetChunkY - centerChunk.posY + 1;
+        int gridX = targetChunkX - centerChunk.getPosX() + 1;
+        int gridY = targetChunkY - centerChunk.getPosY() + 1;
 
         if(gridX < 0 || gridX > 2 || gridY < 0 || gridY > 2) return null;
 

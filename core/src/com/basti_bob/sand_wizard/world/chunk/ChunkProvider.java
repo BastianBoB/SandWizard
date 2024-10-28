@@ -15,8 +15,8 @@ import java.util.function.Supplier;
 public class ChunkProvider {
 
     public final World world;
-    public final ArrayList<Chunk> chunks = new ArrayList<>();
-    public final HashMap<ChunkPos, Chunk> chunkLUT = new HashMap<>();
+    private final ArrayList<Chunk> chunks = new ArrayList<>();
+    private final HashMap<ChunkPos, Chunk> chunkLUT = new HashMap<>();
 
     public final SortedMap<Integer, WorldUpdatingChunkRow> chunkUpdatingRows = new TreeMap<>();
 
@@ -43,9 +43,11 @@ public class ChunkProvider {
         Chunk poolChunk = getChunkFromPool();
 
         if (WorldConstants.SAVE_CHUNK_DATA) {
-            ChunkBuilder savedChunk = ChunkSaver.readChunk(world, poolChunk, chunkX, chunkY);
+
+            ChunkBuilder savedChunk = world.chunkSaver.readChunk(world, poolChunk, chunkX, chunkY);
 
             if (savedChunk != null) return savedChunk::buildChunk;
+
         }
 
         HashMap<InChunkPos, ToPlaceStructureCell> queuedCells = world.structurePlacingManager.getUnloadedStructureCells(chunkPos);
@@ -71,24 +73,24 @@ public class ChunkProvider {
 
     public void addChunk(Chunk chunk) {
         chunks.add(chunk);
-        chunkLUT.put(new ChunkPos(chunk.posX, chunk.posY), chunk);
+        chunkLUT.put(new ChunkPos(chunk.getPosX(), chunk.getPosY()), chunk);
 
-        WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.posY);
+        WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.getPosY());
         if (chunkRow == null) {
-            chunkRow = new WorldUpdatingChunkRow(chunk.posY);
-            chunkUpdatingRows.put(chunk.posY, chunkRow);
+            chunkRow = new WorldUpdatingChunkRow(chunk.getPosY());
+            chunkUpdatingRows.put(chunk.getPosY(), chunkRow);
         }
         chunkRow.addChunk(chunk);
     }
 
     public void removeChunk(Chunk chunk) {
         chunks.remove(chunk);
-        chunkLUT.remove(new ChunkPos(chunk.posX, chunk.posY), chunk);
+        chunkLUT.remove(new ChunkPos(chunk.getPosX(), chunk.getPosY()), chunk);
 
-        WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.posY);
+        WorldUpdatingChunkRow chunkRow = chunkUpdatingRows.get(chunk.getPosY());
         chunkRow.removeChunk(chunk);
         if (chunkRow.isEmpty()) {
-            chunkUpdatingRows.remove(chunk.posY);
+            chunkUpdatingRows.remove(chunk.getPosY());
         }
 
 
@@ -97,5 +99,13 @@ public class ChunkProvider {
 
     private Chunk getChunkFromPool() {
         return unusedChunkPool.pop();
+    }
+
+    public ArrayList<Chunk> getChunks() {
+        return chunks;
+    }
+
+    public HashMap<ChunkPos, Chunk> getChunkLUT() {
+        return chunkLUT;
     }
 }
