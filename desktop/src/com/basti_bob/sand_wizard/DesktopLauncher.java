@@ -9,7 +9,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL31, 3, 2);
 
-		Graphics.Monitor monitor = Lwjgl3ApplicationConfiguration.getMonitors()[2];
+		Graphics.Monitor monitor = Lwjgl3ApplicationConfiguration.getMonitors()[0];
 
 		//config.useVsync(false);
 		//config.setForegroundFPS(90);

@@ -5,14 +5,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.debug.DebugScreen;
-import com.basti_bob.sand_wizard.entities.spider.Spider;
+import com.basti_bob.sand_wizard.entities.enemies.spider.Spider;
+import com.basti_bob.sand_wizard.entities.item_entities.ItemEntity;
+import com.basti_bob.sand_wizard.items.ItemStack;
+import com.basti_bob.sand_wizard.items.ItemType;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.registry.RegistryLoader;
-import com.basti_bob.sand_wizard.registry.RegistryTreePrint;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
@@ -45,22 +46,22 @@ public class SandWizard extends ApplicationAdapter {
     public static long previousTime = -1;
 
     @Override
-    public void create()  {
+    public void create() {
 
         System.out.println(Gdx.gl.glGetString(GL_VERSION));
 
         RegistryLoader.loadRegistries();
-       //RegistryTreePrint.printRegistryTree();
+        //RegistryTreePrint.printRegistryTree();
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
 
         world = new World();
         worldRenderer = new WorldRenderer(world, camera);
-        player = new Player(world, 0, 1000);
+        player = new Player(world, 0, 800);
         world.entities.add(player);
 
-        world.entities.add(new Spider(world, 0, 1000));
+        //world.entities.add(new Spider(world, 0, 800));
 
         //world.test();
 
@@ -70,6 +71,7 @@ public class SandWizard extends ApplicationAdapter {
 
     @Override
     public void render() {
+
         if (previousTime == -1) previousTime = System.nanoTime();
 
         long currentTime = System.nanoTime();
@@ -99,6 +101,16 @@ public class SandWizard extends ApplicationAdapter {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
             renderChunkBoarder = !renderChunkBoarder;
+            //world.entities.add(new Spider(world, player.getPosition().x, player.getPosition().y));
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            player.openInventory = !player.openInventory;
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+            player.inventory.getItemStorage().receiveItemStack(new ItemStack(ItemType.SWORD, 1));
+            player.inventory.getItemStorage().receiveItemStack(new ItemStack(ItemType.STONE, 30));
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
@@ -134,7 +146,7 @@ public class SandWizard extends ApplicationAdapter {
             world.test();
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
             lightingEnabled = !lightingEnabled;
         }
 
@@ -150,12 +162,14 @@ public class SandWizard extends ApplicationAdapter {
     }
 
     public void fixedUpdate(float deltaTime) {
+        //world.entities.add(new ItemEntity(world, player.getPosition().x, player.getPosition().y));
+
         //world.setCell(CellType.FIRE, (int) player.nx, (int) player.ny);
 
         updateTimes++;
 
         if (updateTimes % 150 == 0) {
-           // world.test();
+            // world.test();
         }
 
         //world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 32, 2000));
@@ -163,7 +177,7 @@ public class SandWizard extends ApplicationAdapter {
         updateTime = FunctionRunTime.timeFunction(() -> world.update());
 
 
-        camera.position.lerp(new Vector3(player.getPosition().scl(WorldConstants.CELL_SIZE), 0), 0.2f);
+        camera.position.lerp(new Vector3(player.getHeadPosition().scl(WorldConstants.CELL_SIZE), 0), 0.2f);
 
         if (updateTimes % 5 == 0) {
             Runtime runtime = Runtime.getRuntime();

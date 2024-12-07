@@ -46,7 +46,6 @@ public class WorldRenderer {
 
         ShaderProgram.pedantic = true;
         Gdx.gl.glEnable(GL32.GL_VERTEX_PROGRAM_POINT_SIZE);
-        Gdx.gl.glEnable(GL_FRAMEBUFFER_SRGB);
 
         shader = generateShader();
 
@@ -115,6 +114,8 @@ public class WorldRenderer {
 
     public void render(Player player) {
 
+        Gdx.gl.glEnable(GL_FRAMEBUFFER_SRGB);
+
         Array2D<Chunk> chunks = player.getRenderingChunks();
         ChunkPos topLeftChunkPos = player.topLeftChunkPos;
 
@@ -133,6 +134,8 @@ public class WorldRenderer {
         } else {
             renderWithoutLights(player, chunks, topLeftChunkPos);
         }
+
+        Gdx.gl.glDisable(GL_FRAMEBUFFER_SRGB);
 
         for(Entity entity : world.entities) {
             entity.render(camera, shapeRenderer);

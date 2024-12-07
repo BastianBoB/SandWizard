@@ -82,6 +82,8 @@ public class World implements ChunkAccessor {
         placeStructures();
         updateChunkActiveAndSetCellsNotUpdated();
 
+
+
         if (SandWizard.isUpdating) {
             updateAllCells();
             float time = FunctionRunTime.timeFunction(() -> updateExplosions());

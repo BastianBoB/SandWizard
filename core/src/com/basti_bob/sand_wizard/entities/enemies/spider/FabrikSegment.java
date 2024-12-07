@@ -1,6 +1,4 @@
-package com.basti_bob.sand_wizard.entities.spider;
-
-import com.basti_bob.sand_wizard.util.MathUtil;
+package com.basti_bob.sand_wizard.entities.enemies.spider;
 
 public class FabrikSegment {
 

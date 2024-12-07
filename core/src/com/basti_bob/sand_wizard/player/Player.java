@@ -7,12 +7,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
+import com.basti_bob.sand_wizard.inventory.PlayerInventory;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
-import com.basti_bob.sand_wizard.world.world_rendering.lighting.Light;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.WorldLight;
 
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +25,8 @@ public class Player extends Entity {
 
     public ChunkPos topLeftChunkPos;
     public ChunkPos bottomRightChunkPos;
+    public PlayerInventory inventory;
+    public boolean openInventory = false;
 
     private final Array2D<Chunk> renderingChunks = new Array2D<>(Chunk.class,
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1,
@@ -41,6 +43,7 @@ public class Player extends Entity {
         Color c = Color.WHITE;
         this.light = new WorldLight((int) ox, (int) oy, c.r, c.g, c.b, 63f, 1f);
         this.light.placedInWorld(world);
+        this.inventory = new PlayerInventory();
     }
 
     @Override
@@ -86,17 +89,9 @@ public class Player extends Entity {
     }
 
     public void render(Camera camera, ShapeRenderer shapeRenderer) {
-        int s = WorldConstants.CELL_SIZE;
+        super.render(camera, shapeRenderer);
 
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.BLUE);
-
-        float rw = hitBox.getWidth() * s;
-        float rh = hitBox.getHeight() * s;
-
-        shapeRenderer.rect(this.nx * s - rw / 2f, this.ny * s, rw, rh);
-        shapeRenderer.end();
+        if(openInventory) inventory.render();
     }
 
     public Vector2 getPosition() {

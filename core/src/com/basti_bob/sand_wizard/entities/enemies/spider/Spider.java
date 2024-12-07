@@ -1,10 +1,8 @@
-package com.basti_bob.sand_wizard.entities.spider;
+package com.basti_bob.sand_wizard.entities.enemies.spider;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
-import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
@@ -14,9 +12,7 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class Spider extends Entity {
@@ -119,6 +115,8 @@ public class Spider extends Entity {
             }
         }
         shapeRenderer.end();
+
+        super.render(camera, shapeRenderer);
     }
 
     private CellPos getClosestSolidCellAlongPath(float x1, float y1, float x2, float y2) {

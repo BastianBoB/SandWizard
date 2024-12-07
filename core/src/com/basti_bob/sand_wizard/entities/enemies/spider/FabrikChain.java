@@ -1,6 +1,5 @@
-package com.basti_bob.sand_wizard.entities.spider;
+package com.basti_bob.sand_wizard.entities.enemies.spider;
 
-import javax.swing.text.Segment;
 import java.util.ArrayList;
 
 public class FabrikChain {

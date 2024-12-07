@@ -137,7 +137,19 @@ public class Entity {
     }
 
     public void render(Camera camera, ShapeRenderer shapeRenderer) {
+        if(WorldConstants.RENDER_ENTITY_HITBOX) {
+            int s = WorldConstants.CELL_SIZE;
 
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            shapeRenderer.setColor(Color.BLUE);
+
+            float rw = hitBox.getWidth() * s;
+            float rh = hitBox.getHeight() * s;
+
+            shapeRenderer.rect(this.nx * s - rw / 2f, this.ny * s - rh / 2f, rw, rh);
+            shapeRenderer.end();
+        }
     }
 
     public void moveTo(float x, float y) {
