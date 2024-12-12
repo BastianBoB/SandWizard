@@ -2,22 +2,15 @@ package com.basti_bob.sand_wizard.items;
 
 public class ItemStack {
 
-    public static final ItemStack EMPTY_ITEM_STACK = new ItemStack(ItemType.EMPTY, 0);
-
     private final ItemType itemType;
-    private final int maxAmount;
     private int amount;
 
-    public ItemStack(ItemType itemType) {
-        this(itemType, 1);
-    }
+    public static final ItemStack EMPTY_ITEM_STACK = new ItemStack(ItemType.EMPTY, 0);
 
     public ItemStack(ItemType itemType, int amount) {
         this.itemType = itemType;
-        this.maxAmount = itemType.getMaxAmount();
         this.amount = amount;
     }
-
 
     public ItemType getItemType() {
         return itemType;
@@ -27,23 +20,35 @@ public class ItemStack {
         return amount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void addAmount(int amountToAdd) {
+        amount = Math.min(amount + amountToAdd, getMaxAmount());
     }
 
-    public void addAmount(int amount) {
-        this.amount += amount;
-    }
-
-    public void removeAmount(int amount) {
-        this.amount -= amount;
-    }
-
-    public void setToMaxAmount() {
-        this.amount = getMaxAmount();
+    public void removeAmount(int amountToRemove) {
+        amount = Math.max(amount - amountToRemove, 0);
     }
 
     public int getMaxAmount() {
-        return maxAmount;
+        return itemType.getMaxStackSize();
+    }
+
+    public boolean isEmpty() {
+        return amount == 0 || itemType == ItemType.EMPTY;
+    }
+
+    public ItemStack split(int splitAmount) {
+        if (splitAmount > amount) {
+            splitAmount = amount;
+        }
+        amount -= splitAmount;
+        return new ItemStack(itemType, splitAmount);
+    }
+
+    public ItemStack splitInHalf() {
+        return split(getAmount() / 2);
+    }
+
+    public void setToMaxAmount() {
+        this.amount = itemType.getMaxStackSize();
     }
 }

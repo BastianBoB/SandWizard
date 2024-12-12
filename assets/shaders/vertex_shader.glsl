@@ -141,7 +141,7 @@ float lightFactor(float distanceSqr, float r) {
     float invRsqr = 1.0 / (r*r);
     float v = -distanceSqr * invRsqr;
 
-    return max(0, exp(4 * v) * (v+1));
+    return max(0, exp(3 * v) * (v+1));
 }
 
 vec3 calcLight(Light light) {

@@ -15,7 +15,7 @@ public class TextRenderItem extends DebugRenderItem {
         this.textSupplier = textSupplier;
         this.scale = scale;
         this.text = textSupplier.get(debugScreen.player);
-        this.spriteBatch = debugScreen.spriteBatch;
+        this.spriteBatch = debugScreen.getGuiManager().getSpriteBatch();
     }
 
     @Override
@@ -26,8 +26,8 @@ public class TextRenderItem extends DebugRenderItem {
     @Override
     public void render() {
         spriteBatch.begin();
-        debugScreen.font.getData().setScale(scale);
-        debugScreen.font.draw(debugScreen.spriteBatch, text, x, y);
+        debugScreen.getGuiManager().getFont().getData().setScale(scale);
+        debugScreen.getGuiManager().getFont().draw(spriteBatch, text, x, y);
         spriteBatch.end();
     }
 

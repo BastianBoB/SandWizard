@@ -96,4 +96,8 @@ public abstract class Light {
     public float getB() {
         return b;
     }
+
+    public boolean isEmittingLight() {
+        return true;
+    }
 }

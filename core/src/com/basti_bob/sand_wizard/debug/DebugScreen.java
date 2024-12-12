@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.player.Player;
+import com.basti_bob.sand_wizard.rendering.GuiElement;
+import com.basti_bob.sand_wizard.rendering.GuiManager;
 import com.basti_bob.sand_wizard.util.range.FloatRange;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.world_generation.biomes.BiomeType;
@@ -21,34 +23,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class DebugScreen {
+public class DebugScreen extends GuiElement {
 
     protected final Player player;
-    protected final SpriteBatch spriteBatch;
-    protected final BitmapFont font;
-    protected final GlyphLayout glyphLayout;
-    protected final ShapeRenderer shapeRenderer;
-    private final OrthographicCamera hudCamera;
     private final List<DebugRenderItem> debugRenderItems = new ArrayList<>();
 
     private final DecimalFormat decimalFormat = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.US));
 
     public DebugScreen(Player player) {
+        super();
+
         this.player = player;
-
-        hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        hudCamera.position.set(hudCamera.viewportWidth / 2.0f, hudCamera.viewportHeight / 2.0f, 1.0f);
-
-        spriteBatch = new SpriteBatch();
-        font = new BitmapFont();
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-
-        glyphLayout = new GlyphLayout();
-        shapeRenderer = new ShapeRenderer();
 
         float verticalSpace = 15;
         float itemX = 50;
-        float[] itemY = {hudCamera.viewportHeight - 50};
+        float[] itemY = {Gdx.graphics.getHeight() - 50};
 
         addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "fps: " + Gdx.graphics.getFramesPerSecond()), false));
 
@@ -64,10 +53,7 @@ public class DebugScreen {
 
         itemY[0] -= verticalSpace;
 
-        int maxLength = 500;
-        int lineGraphWidth = 300;
         boolean onlyWorldUpdate = false;
-        boolean connectedLines = true;
         addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "world update time: " + decimal(SandWizard.updateTime) + "ms"), onlyWorldUpdate));
         addDebugRenderItem(itemY, 20, getLineGraphRenderer(itemX, itemY, p -> SandWizard.updateTime));
 
@@ -113,9 +99,9 @@ public class DebugScreen {
     private TextRenderItem getTextRenderItem(float itemX, float[] itemY, TextRenderItem.TextSupplier textSupplier, boolean worldUpdate) {
         String text = textSupplier.get(player);
 
-        glyphLayout.setText(font, text);
-        float textWidth = glyphLayout.width;
-        float textHeight = glyphLayout.height;
+        guiManager.getGlyphLayout().setText(guiManager.getFont(), text);
+        float textWidth = guiManager.getGlyphLayout().width;
+        float textHeight = guiManager.getGlyphLayout().height;
 
         return new TextRenderItem(this, itemX, itemY[0], textWidth, textHeight, worldUpdate, textSupplier, 1);
     }
@@ -130,11 +116,8 @@ public class DebugScreen {
         }
     }
 
+    @Override
     public void render() {
-        hudCamera.update();
-
-        shapeRenderer.setProjectionMatrix(hudCamera.combined);
-        spriteBatch.setProjectionMatrix(hudCamera.combined);
 
         for (DebugRenderItem renderItem : debugRenderItems) {
             renderItem.renderUpdate(player);

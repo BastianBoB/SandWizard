@@ -8,23 +8,32 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.debug.DebugScreen;
-import com.basti_bob.sand_wizard.entities.enemies.spider.Spider;
-import com.basti_bob.sand_wizard.entities.item_entities.ItemEntity;
+import com.basti_bob.sand_wizard.input.InputHandler;
 import com.basti_bob.sand_wizard.items.ItemStack;
 import com.basti_bob.sand_wizard.items.ItemType;
+import com.basti_bob.sand_wizard.items.crafting.ToolStationInventory;
+import com.basti_bob.sand_wizard.items.inventory.ChestInventory;
+import com.basti_bob.sand_wizard.items.inventory.PlayerAndSecondInventoryScreen;
+import com.basti_bob.sand_wizard.player.OnlyPlayerInventoryScreen;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.registry.RegistryLoader;
+import com.basti_bob.sand_wizard.rendering.GuiManager;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.badlogic.gdx.graphics.GL20.GL_FALSE;
 import static com.badlogic.gdx.graphics.GL20.GL_VERSION;
 
 public class SandWizard extends ApplicationAdapter {
 
-    private OrthographicCamera camera;
+    private OrthographicCamera worldCamera;
+    public static GuiManager guiManager;
 
     public World world;
     public WorldRenderer worldRenderer;
@@ -45,27 +54,36 @@ public class SandWizard extends ApplicationAdapter {
 
     public static long previousTime = -1;
 
+    public static ChestInventory chestInventory;
+    public static ToolStationInventory toolStationInventory;
+    public static PlayerAndSecondInventoryScreen chestInventoryScreen;
+
     @Override
     public void create() {
-
-        System.out.println(Gdx.gl.glGetString(GL_VERSION));
+        Gdx.input.setInputProcessor(InputHandler.getInstance());
 
         RegistryLoader.loadRegistries();
+
         //RegistryTreePrint.printRegistryTree();
 
-        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.update();
+        worldCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        worldCamera.update();
+
+        guiManager = new GuiManager();
+        guiManager.update();
 
         world = new World();
-        worldRenderer = new WorldRenderer(world, camera);
+        worldRenderer = new WorldRenderer(world, worldCamera);
         player = new Player(world, 0, 800);
         world.entities.add(player);
 
         //world.entities.add(new Spider(world, 0, 800));
 
-        //world.test();
-
         this.debugScreen = new DebugScreen(player);
+
+        chestInventory = new ChestInventory();
+        toolStationInventory = new ToolStationInventory();
+        chestInventoryScreen = new PlayerAndSecondInventoryScreen(chestInventory);
     }
 
 
@@ -94,9 +112,9 @@ public class SandWizard extends ApplicationAdapter {
 
         float zoom = 1 * deltaTime;
 
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) camera.zoom *= 1 - zoom;
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) camera.zoom *= 1 + zoom;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) camera.zoom = 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) worldCamera.zoom *= 1 - zoom;
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) worldCamera.zoom *= 1 + zoom;
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) worldCamera.zoom = 1;
 
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
@@ -105,7 +123,18 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            player.openInventory = !player.openInventory;
+            if (player.openedInventoryScreen)
+                player.closeInventoryScreen();
+            else
+                player.onlyPlayerInventoryScreen.playerOpenedScreen(player);
+
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+            if (player.openedInventoryScreen)
+                player.closeInventoryScreen();
+            else
+                chestInventoryScreen.playerOpenedScreen(player);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
@@ -134,9 +163,9 @@ public class SandWizard extends ApplicationAdapter {
         }
 
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            world.addExplosion(new Explosion(world, (int) player.getPosition().x, (int) player.getPosition().y, 32, 2000));
-        }
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+//            world.addExplosion(new Explosion(world, (int) player.getPosition().x, (int) player.getPosition().y, 32, 2000));
+//        }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
             renderDebugScreen = !renderDebugScreen;
@@ -150,7 +179,6 @@ public class SandWizard extends ApplicationAdapter {
             lightingEnabled = !lightingEnabled;
         }
 
-
         accumulatedTime += deltaTime; //Gdx.graphics.getDeltaTime();
 
         if (accumulatedTime >= FIXED_DELTA_TIME) {
@@ -158,26 +186,17 @@ public class SandWizard extends ApplicationAdapter {
 
             accumulatedTime -= FIXED_DELTA_TIME;
         }
+
+        worldCamera.update();
+        guiManager.update();
+
         renderGame();
     }
 
     public void fixedUpdate(float deltaTime) {
-        //world.entities.add(new ItemEntity(world, player.getPosition().x, player.getPosition().y));
-
-        //world.setCell(CellType.FIRE, (int) player.nx, (int) player.ny);
 
         updateTimes++;
-
-        if (updateTimes % 150 == 0) {
-            // world.test();
-        }
-
-        //world.addExplosion(new Explosion(world, (int) player.nx, (int) player.ny, 32, 2000));
-
         updateTime = FunctionRunTime.timeFunction(() -> world.update());
-
-
-        camera.position.lerp(new Vector3(player.getHeadPosition().scl(WorldConstants.CELL_SIZE), 0), 0.2f);
 
         if (updateTimes % 5 == 0) {
             Runtime runtime = Runtime.getRuntime();
@@ -185,7 +204,8 @@ public class SandWizard extends ApplicationAdapter {
             maxMemory = runtime.maxMemory() >> 20;
         }
 
-        camera.update();
+        worldCamera.position.lerp(new Vector3(player.getHeadPosition().scl(WorldConstants.CELL_SIZE), 0), 0.2f);
+
 
         debugScreen.worldUpdate();
     }

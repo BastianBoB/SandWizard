@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
-import com.basti_bob.sand_wizard.inventory.PlayerInventory;
+import com.basti_bob.sand_wizard.items.inventory.PlayerAndSecondInventoryScreen;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
@@ -26,7 +26,10 @@ public class Player extends Entity {
     public ChunkPos topLeftChunkPos;
     public ChunkPos bottomRightChunkPos;
     public PlayerInventory inventory;
-    public boolean openInventory = false;
+    public OnlyPlayerInventoryScreen onlyPlayerInventoryScreen;
+    public PlayerAndSecondInventoryScreen inventoryScreen;
+
+    public boolean openedInventoryScreen = false;
 
     private final Array2D<Chunk> renderingChunks = new Array2D<>(Chunk.class,
             WorldConstants.PLAYER_CHUNK_RENDER_RADIUS_X * 2 + 1,
@@ -40,10 +43,24 @@ public class Player extends Entity {
         this.loadChunksAround(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
 
-        Color c = Color.WHITE;
-        this.light = new WorldLight((int) ox, (int) oy, c.r, c.g, c.b, 63f, 1f);
+        Color c = new Color(1f, 0.5f, 0f, 1f);
+        this.light = new WorldLight((int) ox, (int) oy, c.r, c.g, c.b, 63f, 0.5f);
         this.light.placedInWorld(world);
-        this.inventory = new PlayerInventory();
+
+        this.inventory = new PlayerInventory(this);
+        this.onlyPlayerInventoryScreen = new OnlyPlayerInventoryScreen();
+    }
+
+    public void openInventoryScreen(PlayerAndSecondInventoryScreen screen) {
+        inventoryScreen = screen;
+
+        this.openedInventoryScreen = true;
+    }
+
+    public void closeInventoryScreen() {
+        inventoryScreen.playerClosedScreen();
+        inventoryScreen = null;
+        this.openedInventoryScreen = false;
     }
 
     @Override
@@ -67,11 +84,11 @@ public class Player extends Entity {
         if (WorldConstants.PLAYER_FREE_MOVE) {
             this.moveBy(xVel, yVel);
 
-            this.xVel *= 0.95;
-            this.yVel *= 0.95;
+            this.xVel *= 0.95f;
+            this.yVel *= 0.95f;
         } else {
             this.yVel += WorldConstants.GRAVITY.y;
-            this.xVel *= 0.95;
+            this.xVel *= 0.95f;
 
             moveWithVelocity();
         }
@@ -91,7 +108,7 @@ public class Player extends Entity {
     public void render(Camera camera, ShapeRenderer shapeRenderer) {
         super.render(camera, shapeRenderer);
 
-        if(openInventory) inventory.render();
+        if (openedInventoryScreen) inventoryScreen.render();
     }
 
     public Vector2 getPosition() {
@@ -99,11 +116,11 @@ public class Player extends Entity {
     }
 
     public Vector2 getFeetPosition() {
-        return new Vector2(nx, ny - hitBox.getHeight()/2f);
+        return new Vector2(nx, ny - hitBox.getHeight() / 2f);
     }
 
     public Vector2 getHeadPosition() {
-        return new Vector2(nx, ny + hitBox.getHeight()/2f);
+        return new Vector2(nx, ny + hitBox.getHeight() / 2f);
     }
 
     public int getDownY(int i) {
@@ -166,7 +183,7 @@ public class Player extends Entity {
                     this.ny = this.ny + stepHeight;
                 } else if (stepHeight < this.stepUpHeight) {
                     this.ny = this.ny + stepHeight;
-                    this.xVel *= 0.5;
+                    this.xVel *= 0.5f;
                 } else {
                     this.xVel = 0;
                     break;
@@ -183,14 +200,6 @@ public class Player extends Entity {
             this.nx = targetX;
         }
 
-    }
-
-    public void clampVelocity() {
-        if (xVel > WorldConstants.CHUNK_SIZE) xVel = WorldConstants.CHUNK_SIZE;
-        else if (xVel < -WorldConstants.CHUNK_SIZE) xVel = -WorldConstants.CHUNK_SIZE;
-
-        if (yVel > WorldConstants.CHUNK_SIZE) yVel = WorldConstants.CHUNK_SIZE;
-        else if (yVel < -WorldConstants.CHUNK_SIZE) yVel = -WorldConstants.CHUNK_SIZE;
     }
 
     public int stepHeightAtTarget(int x, int y) {
@@ -349,10 +358,6 @@ public class Player extends Entity {
                     chunk.setLoaded(true);
             }
         }
-    }
-
-    public World getWorld() {
-        return world;
     }
 
 }

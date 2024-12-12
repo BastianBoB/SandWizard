@@ -1,5 +1,6 @@
 package com.basti_bob.sand_wizard.debug;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.player.Player;
@@ -24,7 +25,7 @@ public class LineGraphRenderer extends DebugRenderItem {
         this.valueSupplier = valueSupplier;
         this.maxLength = maxLength;
         this.valueRange = valueRange;
-        this.shapeRenderer = debugScreen.shapeRenderer;
+        this.shapeRenderer = debugScreen.getGuiManager().getShapeRenderer();
         this.connectedLines = connectedLines;
         this.connectThreshold = (valueRange.max - valueRange.min) / 20f;
     }
@@ -41,6 +42,7 @@ public class LineGraphRenderer extends DebugRenderItem {
     @Override
     public void render() {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.WHITE);
         shapeRenderer.line(x, y, x, y - h);
         shapeRenderer.line(x, y - h, x + w, y - h);
         shapeRenderer.line(x, y, x + w, y);

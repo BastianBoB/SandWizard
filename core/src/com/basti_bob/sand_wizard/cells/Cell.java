@@ -13,6 +13,7 @@ import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
+import com.basti_bob.sand_wizard.world.world_rendering.lighting.CellLight;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.ChunkLight;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.Light;
 
@@ -113,7 +114,7 @@ public abstract class Cell {
 
         if (isLightSource) {
             Color lightColor = glowsWithCellColor ? color : cellProperty.lightColor;
-            light = new ChunkLight(getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
+            light = new CellLight(this, getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
             light.placedInChunk(chunk);
         }
 
@@ -605,6 +606,10 @@ public abstract class Cell {
         for (Cell cell : directNeighbourCells) {
             trySetMoving(cell);
         }
+    }
+
+    public boolean isEmittingLight() {
+        return isLightSource();
     }
 
     public PhysicalState getPhysicalState() {

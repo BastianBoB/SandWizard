@@ -17,7 +17,6 @@ public class WorldConstants {
 
     //INVENTORY
     public static final int MAX_ITEM_COUNT = 99;
-    public static final int INVENTORY_SLOT_SIZE = 100;
 
     //GENERAL
     public static final boolean SAVE_CHUNK_DATA = false;

@@ -1,4 +1,4 @@
-package com.basti_bob.sand_wizard.inventory;
+package com.basti_bob.sand_wizard.items.inventory;
 
 import com.basti_bob.sand_wizard.items.ItemStack;
 
@@ -56,5 +56,13 @@ public class ItemStorage {
 
             return false;
         }
+    }
+
+    public void setItemStack(int slotIndex, ItemStack itemStack) {
+        itemStacks.set(slotIndex, itemStack);
+    }
+
+    public int getStorageSize() {
+        return storageSize;
     }
 }

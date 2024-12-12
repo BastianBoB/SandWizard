@@ -129,7 +129,7 @@ public class WorldRenderer {
 
         shader.setUniformi("lightingEnabled", SandWizard.lightingEnabled ? 1 : 0);
 
-        if(SandWizard.lightingEnabled) {
+        if (SandWizard.lightingEnabled) {
             renderWithLights(player, chunks, topLeftChunkPos);
         } else {
             renderWithoutLights(player, chunks, topLeftChunkPos);
@@ -137,7 +137,7 @@ public class WorldRenderer {
 
         Gdx.gl.glDisable(GL_FRAMEBUFFER_SRGB);
 
-        for(Entity entity : world.entities) {
+        for (Entity entity : world.entities) {
             entity.render(camera, shapeRenderer);
         }
 
@@ -148,7 +148,8 @@ public class WorldRenderer {
     private void setWorldLightBuffer(Array2D<Chunk> chunks, int ssbo) {
         worldLightBuffer.clear();
         for (Light light : world.globalLights) {
-            worldLightBuffer.put(light.getData());
+            if (light.isEmittingLight())
+                worldLightBuffer.put(light.getData());
         }
         worldLightBuffer.flip();
 
@@ -162,9 +163,11 @@ public class WorldRenderer {
         int lightArrayIndex = 0;
 
         for (Chunk chunk : chunks.getArray()) {
-            if(chunk == null) continue;
+            if (chunk == null) continue;
 
             for (ChunkLight light : chunk.lightsInChunk) {
+                if(!light.isEmittingLight()) continue;
+
                 light.shaderArrayIndex = lightArrayIndex;
                 chunkLightBuffer.put(light.getData());
 
