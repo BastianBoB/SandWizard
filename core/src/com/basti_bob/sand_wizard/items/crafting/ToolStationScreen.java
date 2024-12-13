@@ -1,11 +1,14 @@
 package com.basti_bob.sand_wizard.items.crafting;
 
 import com.basti_bob.sand_wizard.items.ItemStack;
+import com.basti_bob.sand_wizard.items.inventory.Inventory;
 import com.basti_bob.sand_wizard.items.inventory.InventorySlot;
-import com.basti_bob.sand_wizard.items.inventory.PlayerAndSecondInventoryScreen;
+import com.basti_bob.sand_wizard.items.inventory.InventoryWithPlayerInventoryScreen;
 import com.basti_bob.sand_wizard.rendering.Button;
 
-public class ToolStationScreen extends PlayerAndSecondInventoryScreen {
+import java.util.function.Predicate;
+
+public class ToolStationScreen extends InventoryWithPlayerInventoryScreen {
 
     public ToolStationItemType currentItemType = ToolStationItemType.HANDLE;
 
@@ -36,6 +39,15 @@ public class ToolStationScreen extends PlayerAndSecondInventoryScreen {
         for (Button itemTypeButton : itemTypeButtons) {
             itemTypeButton.render();
         }
+    }
+
+    @Override
+    public boolean quickMoveItemStack(ItemStack itemStack, Inventory inventory) {
+        Predicate<Integer> canInsertPredicate = slotIndex -> canPutItemIntoSlot(inventory.getInventorySlots().get(slotIndex))
+                && (!(inventory.getInventorySlots().get(slotIndex) instanceof ToolStationInventorySlot toolStationSlot)
+                || toolStationSlot.getCurrentItemType() == this.currentItemType);
+
+        return inventory.getItemStorage().receiveItemStack(itemStack, canInsertPredicate);
     }
 
     @Override

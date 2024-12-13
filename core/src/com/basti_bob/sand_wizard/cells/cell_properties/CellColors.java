@@ -82,6 +82,14 @@ public class CellColors {
         return colors.get(i);
     }
 
+    public Color getColorWithModIndex(int i) {
+        return colors.get(i % colors.size());
+    }
+
+    public List<Color> getColors() {
+        return colors;
+    }
+
     public static Color hC(int hex) {
         int r = (hex & 0xFF0000) >> 16;
         int g = (hex & 0xFF00) >> 8;

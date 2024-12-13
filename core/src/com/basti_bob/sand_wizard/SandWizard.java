@@ -13,28 +13,21 @@ import com.basti_bob.sand_wizard.items.ItemStack;
 import com.basti_bob.sand_wizard.items.ItemType;
 import com.basti_bob.sand_wizard.items.crafting.ToolStationInventory;
 import com.basti_bob.sand_wizard.items.crafting.ToolStationScreen;
-import com.basti_bob.sand_wizard.items.inventory.ChestInventory;
-import com.basti_bob.sand_wizard.items.inventory.PlayerAndSecondInventoryScreen;
-import com.basti_bob.sand_wizard.player.OnlyPlayerInventoryScreen;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.registry.RegistryLoader;
 import com.basti_bob.sand_wizard.rendering.GuiManager;
+import com.basti_bob.sand_wizard.rendering.ItemRenderer;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
-import com.basti_bob.sand_wizard.world.explosions.Explosion;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.badlogic.gdx.graphics.GL20.GL_FALSE;
-import static com.badlogic.gdx.graphics.GL20.GL_VERSION;
 
 public class SandWizard extends ApplicationAdapter {
 
     private OrthographicCamera worldCamera;
     public static GuiManager guiManager;
+    public static ItemRenderer itemRenderer;
+    public static InputHandler inputHandler;
 
     public World world;
     public WorldRenderer worldRenderer;
@@ -60,7 +53,6 @@ public class SandWizard extends ApplicationAdapter {
 
     @Override
     public void create() {
-        Gdx.input.setInputProcessor(InputHandler.getInstance());
 
         RegistryLoader.loadRegistries();
 
@@ -71,6 +63,10 @@ public class SandWizard extends ApplicationAdapter {
 
         guiManager = new GuiManager();
         guiManager.update();
+
+        itemRenderer = new ItemRenderer();
+        inputHandler = new InputHandler();
+        Gdx.input.setInputProcessor(inputHandler);
 
         world = new World();
         worldRenderer = new WorldRenderer(world, worldCamera);
@@ -88,7 +84,6 @@ public class SandWizard extends ApplicationAdapter {
 
     @Override
     public void render() {
-
         if (previousTime == -1) previousTime = System.nanoTime();
 
         long currentTime = System.nanoTime();
@@ -96,6 +91,8 @@ public class SandWizard extends ApplicationAdapter {
         previousTime = currentTime;
 
         deltaTimeMs = deltaTime * 1000f;
+
+        inputHandler.update();
 
         float speed = WorldConstants.PLAYER_SPEED;
 

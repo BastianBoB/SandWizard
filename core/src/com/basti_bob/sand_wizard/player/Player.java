@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
-import com.basti_bob.sand_wizard.items.inventory.PlayerAndSecondInventoryScreen;
+import com.basti_bob.sand_wizard.items.inventory.InventoryWithPlayerInventoryScreen;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
@@ -26,8 +26,8 @@ public class Player extends Entity {
     public ChunkPos topLeftChunkPos;
     public ChunkPos bottomRightChunkPos;
     public PlayerInventory inventory;
-    public OnlyPlayerInventoryScreen onlyPlayerInventoryScreen;
-    public PlayerAndSecondInventoryScreen inventoryScreen;
+    public OnlyInventoryWithPlayerInventoryScreen onlyPlayerInventoryScreen;
+    public InventoryWithPlayerInventoryScreen inventoryScreen;
 
     public boolean openedInventoryScreen = false;
 
@@ -48,10 +48,10 @@ public class Player extends Entity {
         this.light.placedInWorld(world);
 
         this.inventory = new PlayerInventory(this);
-        this.onlyPlayerInventoryScreen = new OnlyPlayerInventoryScreen();
+        this.onlyPlayerInventoryScreen = new OnlyInventoryWithPlayerInventoryScreen();
     }
 
-    public void openInventoryScreen(PlayerAndSecondInventoryScreen screen) {
+    public void openInventoryScreen(InventoryWithPlayerInventoryScreen screen) {
         inventoryScreen = screen;
 
         this.openedInventoryScreen = true;

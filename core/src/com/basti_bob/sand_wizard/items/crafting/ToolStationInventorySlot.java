@@ -10,6 +10,7 @@ public class ToolStationInventorySlot extends InventorySlot {
 
     public ToolStationInventorySlot(ItemStorage itemStorage, int slotIndex, float x, float y, float size) {
         super(itemStorage, slotIndex, x, y, size);
+        currentItemType = ToolStationItemType.HANDLE;
     }
 
     public void setItemStack(ItemStack itemStack, ToolStationItemType toolStationItemType) {

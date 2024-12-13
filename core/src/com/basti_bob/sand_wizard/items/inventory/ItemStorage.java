@@ -4,6 +4,7 @@ import com.basti_bob.sand_wizard.items.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class ItemStorage {
 
@@ -23,8 +24,14 @@ public class ItemStorage {
     }
 
     public boolean receiveItemStack(ItemStack receivingStack) {
+        return receiveItemStack(receivingStack, slotIndex -> true);
+    }
+
+    public boolean receiveItemStack(ItemStack receivingStack, Predicate<Integer> canPutIntoSlotIndexPredicate) {
 
         for (int i = 0; i < itemStacks.size(); i++) {
+            if (!canPutIntoSlotIndexPredicate.test(i)) continue;
+
             ItemStack itemStack = itemStacks.get(i);
 
             if (itemStack.isEmpty()) {

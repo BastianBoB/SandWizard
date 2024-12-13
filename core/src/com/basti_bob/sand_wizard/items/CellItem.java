@@ -10,4 +10,8 @@ public class CellItem extends ItemType {
         super(properties);
         this.cellType = cellType;
     }
+
+    public CellType getCellType() {
+        return cellType;
+    }
 }

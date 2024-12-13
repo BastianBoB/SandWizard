@@ -11,21 +11,28 @@ import java.util.List;
 
 public class InputHandler implements InputProcessor {
 
-    private static InputHandler INSTANCE;
 
     private final List<InputElement> inputElements = new ArrayList<>();
+    private float mouseX, mouseY;
 
     public InputHandler() {
     }
 
-    public static InputHandler getInstance() {
-        if (INSTANCE == null) INSTANCE = new InputHandler();
-
-        return INSTANCE;
+    public void update() {
+        this.mouseX = Gdx.input.getX();
+        this.mouseY = getAdjustedScreenY(Gdx.input.getY());
     }
 
     public void addInputElement(InputElement inputElement) {
         inputElements.add(inputElement);
+    }
+
+    public float getMouseX() {
+        return mouseX;
+    }
+
+    public float getMouseY() {
+        return mouseY;
     }
 
     @Override

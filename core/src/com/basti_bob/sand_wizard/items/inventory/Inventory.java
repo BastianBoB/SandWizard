@@ -2,8 +2,10 @@ package com.basti_bob.sand_wizard.items.inventory;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.items.ItemStack;
 import com.basti_bob.sand_wizard.rendering.GuiElement;
 
@@ -15,7 +17,7 @@ public abstract class Inventory extends GuiElement {
     public static final Color DEFAULT_SLOT_COLOR = new Color(0.5f, 0.4f, 0.3f, 1f);
     public static final Color DEFAULT_SLOT_BORDER_COLOR = new Color(0.35f, 0.25f, 0.2f, 1f);
     public static final int DEFAULT_SLOT_SIZE = 60;
-    public static final int DEFAULT_SLOT_BORDER_SIZE = 2;
+    public static final int DEFAULT_SLOT_BORDER_SIZE = 1;
 
     protected final ItemStorage itemStorage;
     protected final Color slotColor;
@@ -52,6 +54,7 @@ public abstract class Inventory extends GuiElement {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < getNumSlots(); i++) {
             renderSlot(i);
+            renderItem(i);
         }
         shapeRenderer.end();
 
@@ -76,18 +79,28 @@ public abstract class Inventory extends GuiElement {
         shapeRenderer.rect(displayX + slotBorderSize, displayY + slotBorderSize, slotSize - slotBorderSize * 2, slotSize - slotBorderSize * 2);
     }
 
+    public void renderItem(int slotIndex) {
+        float displayX = getSlotRenderX(slotIndex);
+        float displayY = getSlotRenderY(slotIndex);
+
+        SandWizard.itemRenderer.renderGuiItem(itemStorage.getItemStack(slotIndex).getItemType(), displayX, displayY, slotSize);
+    }
+
     public void renderSlotLabel(int slotIndex) {
         ItemStack itemStack = itemStorage.getItemStack(slotIndex);
+        if(itemStack.isEmpty()) return;
 
         float displayX = getSlotRenderX(slotIndex);
         float displayY = getSlotRenderY(slotIndex);
 
         BitmapFont font = guiManager.getFont();
         SpriteBatch batch = guiManager.getSpriteBatch();
+        GlyphLayout glyphLayout = guiManager.getGlyphLayout();
+        glyphLayout.setText(font, "" + itemStack.getAmount());
 
         font.setColor(Color.WHITE);
-        font.draw(batch, itemStack.getItemType().getDisplayName(), displayX + 5, displayY + slotSize - 5);
-        font.draw(batch, "" + itemStack.getAmount(), displayX + 5, displayY + 20);
+        font.draw(batch, itemStack.getItemType().getDisplayName(), displayX + 3, displayY + slotSize - 3);
+        font.draw(batch, "" + itemStack.getAmount(), displayX + 3, displayY + 5 + glyphLayout.height);
     }
 
     public int getNumSlots() {

@@ -2,6 +2,8 @@ package com.basti_bob.sand_wizard.items.inventory;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.basti_bob.sand_wizard.SandWizard;
+import com.basti_bob.sand_wizard.input.InputHandler;
 import com.basti_bob.sand_wizard.items.ItemStack;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.player.PlayerInventory;
@@ -11,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerAndSecondInventoryScreen extends Screen {
+public class InventoryWithPlayerInventoryScreen extends Screen {
 
     private final Inventory inventory;
     private PlayerInventory playerInventory;
@@ -21,7 +23,7 @@ public class PlayerAndSecondInventoryScreen extends Screen {
     private InventorySlot selectedSlot = null;
     private boolean isOpen = false;
 
-    public PlayerAndSecondInventoryScreen(@Nullable Inventory inventory) {
+    public InventoryWithPlayerInventoryScreen(@Nullable Inventory inventory) {
         super();
         this.inventory = inventory;
 
@@ -51,12 +53,16 @@ public class PlayerAndSecondInventoryScreen extends Screen {
         isOpen = false;
     }
 
-
     @Override
     public void render() {
         playerInventory.render();
 
         if (inventory != null) inventory.render();
+
+        if (!selectedItemStack.isEmpty()) {
+            InputHandler inputHandler = SandWizard.inputHandler;
+            SandWizard.itemRenderer.renderSingleGuiItemWithLabel(selectedItemStack, inputHandler.getMouseX(), inputHandler.getMouseY());
+        }
     }
 
     public boolean canTakeItemOutOfSlot(InventorySlot inventorySlot) {
@@ -64,12 +70,23 @@ public class PlayerAndSecondInventoryScreen extends Screen {
     }
 
     public boolean canPutItemIntoSlot(InventorySlot inventorySlot) {
-        return true;
+        return !inventorySlot.isExtractOnly();
     }
 
     public void setStackInSlot(InventorySlot inventorySlot, ItemStack itemStack) {
         inventorySlot.setItemStack(itemStack);
     }
+
+    public boolean quickMoveItemStack(ItemStack itemStack, InventorySlot inventorySlot) {
+        Inventory targetInventory = playerInventory.inventorySlots.contains(inventorySlot) ? inventory : playerInventory;
+
+        return quickMoveItemStack(itemStack, targetInventory);
+    }
+
+    public boolean quickMoveItemStack(ItemStack itemStack, Inventory inventory) {
+        return inventory.getItemStorage().receiveItemStack(itemStack);
+    }
+
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -79,16 +96,16 @@ public class PlayerAndSecondInventoryScreen extends Screen {
 
         for (InventorySlot inventorySlot : allSlots) {
 
-            if (!inventorySlot.isMouseOver(screenX, screenY) || !canTakeItemOutOfSlot(inventorySlot)) continue;
+            if (!inventorySlot.isMouseOver(screenX, screenY)) continue;
+
+            if(!canTakeItemOutOfSlot(inventorySlot)) break;
 
             ItemStack stackInSlot = inventorySlot.getItemStack();
 
             if (isShiftPressed && button == Input.Buttons.LEFT) {
-//                    if (!stack.isEmpty()) {
-//                        if (itemStorage.receiveItemStack(stack)) {
-//                            itemStorage.setItemStack(slotIndex, ItemStack.EMPTY_ITEM_STACK);
-//                        }
-//                    }
+                if(quickMoveItemStack(stackInSlot, inventorySlot)) {
+                    setStackInSlot(inventorySlot, ItemStack.EMPTY_ITEM_STACK);
+                }
             }
 
             if (!isShiftPressed && button == Input.Buttons.LEFT) {
@@ -134,18 +151,16 @@ public class PlayerAndSecondInventoryScreen extends Screen {
         boolean droppedAllItems = false;
 
         for (InventorySlot inventorySlot : allSlots) {
-            if (!inventorySlot.isMouseOver(screenX, screenY) || !canPutItemIntoSlot(inventorySlot)) continue;
+            if (!inventorySlot.isMouseOver(screenX, screenY)) continue;
 
-            if (inventorySlot.isExtractOnly()) break;
+            if (!canPutItemIntoSlot(inventorySlot)) break;
 
             ItemStack stackInSlot = inventorySlot.getItemStack();
 
             if (stackInSlot.isEmpty()) {
-                // Drop in empty slot
                 setStackInSlot(inventorySlot, selectedItemStack);
                 droppedAllItems = true;
             } else if (stackInSlot.getItemType() == selectedItemStack.getItemType()) {
-                // Combine stacks
                 if (inventorySlot.tryAddItemStack(selectedItemStack)) {
                     droppedAllItems = true;
                 }

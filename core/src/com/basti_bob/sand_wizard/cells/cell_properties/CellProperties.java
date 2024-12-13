@@ -40,8 +40,8 @@ public class CellProperties {
 
     public static final CellProperties FLOWER_PETAL_GLOW = CellProperties.builder().allBurn(100, 10, 0.5f).glowsWithCellColor(16f, 0.5f).build();
 
-    public static final float r = 31f;
-    public static final float i = 0.4f;
+    private static final float r = 31f;
+    private static final float i = 0.4f;
     public static final CellProperties FLOWER_PETAL_GLOW_RED = CellProperties.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 0.4f, 0.4f, 0)).build();
     public static final CellProperties FLOWER_PETAL_GLOW_YELLOW = CellProperties.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 1f, 0.4f, 0)).build();
     public static final CellProperties FLOWER_PETAL_GLOW_BLUE = CellProperties.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(0.4f, 0.4f, 1f, 0)).build();

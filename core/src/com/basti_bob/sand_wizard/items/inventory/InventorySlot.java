@@ -28,7 +28,7 @@ public class InventorySlot {
 
         if (amountLeft == 0) return false;
 
-        if (addingStack.getAmount() < amountLeft) {
+        if (addingStack.getAmount() <= amountLeft) {
             itemStack.addAmount(addingStack.getAmount());
 
             return true;
