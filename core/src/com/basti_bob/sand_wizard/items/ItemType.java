@@ -10,6 +10,12 @@ public class ItemType {
 
     public static final ItemType EMPTY = ITEM_TYPES.register("empty", new ItemType(ItemProperties.EMPTY));
     public static final ItemType STONE = ITEM_TYPES.register("stone", new CellItem(ItemProperties.STONE, CellType.SOLID.STONE));
+    public static final ItemType WOOD = ITEM_TYPES.register("wood", new CellItem(ItemProperties.WOOD, CellType.SOLID.WOOD));
+    public static final ItemType MARBLE = ITEM_TYPES.register("marble", new CellItem(ItemProperties.MARBLE, CellType.SOLID.MARBLE));
+    public static final ItemType ICE = ITEM_TYPES.register("ice", new CellItem(ItemProperties.ICE, CellType.SOLID.ICE));
+
+
+
     public static final ItemType SWORD = ITEM_TYPES.register("sword", new ItemType(ItemProperties.SWORD));
 
     private final String displayName;

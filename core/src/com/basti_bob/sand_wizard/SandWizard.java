@@ -135,7 +135,10 @@ public class SandWizard extends ApplicationAdapter {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
             player.inventory.getItemStorage().receiveItemStack(new ItemStack(ItemType.SWORD, 1));
-            player.inventory.getItemStorage().receiveItemStack(new ItemStack(ItemType.STONE, 30));
+            player.inventory.getItemStorage().receiveItemStack(new ItemStack(ItemType.MARBLE, 99));
+            player.inventory.getItemStorage().receiveItemStack(new ItemStack(ItemType.WOOD, 99));
+            player.inventory.getItemStorage().receiveItemStack(new ItemStack(ItemType.STONE, 99));
+            player.inventory.getItemStorage().receiveItemStack(new ItemStack(ItemType.ICE, 99));
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {

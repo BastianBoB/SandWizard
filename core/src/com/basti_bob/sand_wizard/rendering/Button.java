@@ -12,9 +12,9 @@ import com.basti_bob.sand_wizard.util.MathUtil;
 
 public class Button extends GuiElement implements InputElement {
 
-    private final Color color = Color.WHITE;
-    private final Color borderColor = Color.GRAY;
-    private final Color textColor = Color.BLACK;
+    private Color color = Color.WHITE;
+    private Color borderColor = Color.GRAY;
+    private Color textColor = Color.BLACK;
     private final int borderSize = 4;
 
     private final float x, y, width, height;
@@ -22,6 +22,7 @@ public class Button extends GuiElement implements InputElement {
     private final Runnable clickAction;
 
     private boolean clickedDown = false;
+    private final float clickShrinkFactor = 0.05f;
 
     public Button(float x, float y, float width, float height, String text, Runnable clickAction) {
         super();
@@ -38,14 +39,17 @@ public class Button extends GuiElement implements InputElement {
         ShapeRenderer shapeRenderer = guiManager.getShapeRenderer();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        float renderWidth = clickedDown ? width * 0.9f : width;
-        float renderHeight = clickedDown ? height * 0.9f : height;
+        float xOff = clickedDown ? width * clickShrinkFactor : 0;
+        float yOff = clickedDown ? height * clickShrinkFactor : 0;
+
+        float renderWidth = width - xOff * 2;
+        float renderHeight = height - yOff * 2;
 
         shapeRenderer.setColor(borderColor);
-        shapeRenderer.rect(x, y, renderWidth, renderHeight);
+        shapeRenderer.rect(x + xOff, y + yOff, renderWidth, renderHeight);
 
         shapeRenderer.setColor(color);
-        shapeRenderer.rect(x + borderSize, y + borderSize, renderWidth - borderSize * 2, renderHeight - borderSize * 2);
+        shapeRenderer.rect(x + xOff + borderSize, y + yOff + borderSize, renderWidth - borderSize * 2, renderHeight - borderSize * 2);
 
         shapeRenderer.end();
 
@@ -57,7 +61,7 @@ public class Button extends GuiElement implements InputElement {
 
         batch.begin();
         font.setColor(textColor);
-        font.draw(batch, text, x + width / 2f, y + height / 2f + textHeight/2f, 0, Align.center, false);
+        font.draw(batch, text, x + width / 2f, y + height / 2f + textHeight / 2f, 0, Align.center, false);
         batch.end();
 
     }
@@ -84,4 +88,16 @@ public class Button extends GuiElement implements InputElement {
         return false;
     }
 
+
+    public void setTextColor(Color textColor) {
+        this.textColor = textColor;
+    }
+
+    public void setBorderColor(Color borderColor) {
+        this.borderColor = borderColor;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
 }

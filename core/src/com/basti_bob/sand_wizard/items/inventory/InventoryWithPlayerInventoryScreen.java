@@ -80,17 +80,12 @@ public class InventoryWithPlayerInventoryScreen extends Screen {
     public boolean quickMoveItemStack(ItemStack itemStack, InventorySlot inventorySlot) {
         Inventory targetInventory = playerInventory.inventorySlots.contains(inventorySlot) ? inventory : playerInventory;
 
-        return quickMoveItemStack(itemStack, targetInventory);
+        return targetInventory.getItemStorage().receiveItemStack(itemStack,
+                slotIndex -> canPutItemIntoSlot(targetInventory.getInventorySlots().get(slotIndex)));
     }
-
-    public boolean quickMoveItemStack(ItemStack itemStack, Inventory inventory) {
-        return inventory.getItemStorage().receiveItemStack(itemStack);
-    }
-
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        super.touchDown(screenX, screenY, pointer, button);
 
         boolean isShiftPressed = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
 
@@ -138,15 +133,14 @@ public class InventoryWithPlayerInventoryScreen extends Screen {
             return true;
         }
 
-        return false;
+        return super.touchDown(screenX, screenY, pointer, button);
     }
 
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        super.touchUp(screenX, screenY, pointer, button);
 
-        if (button != Input.Buttons.LEFT || selectedItemStack.isEmpty()) return false;
+        if (button != Input.Buttons.LEFT || selectedItemStack.isEmpty()) return  super.touchUp(screenX, screenY, pointer, button);;
 
         boolean droppedAllItems = false;
 

@@ -1,5 +1,7 @@
 package com.basti_bob.sand_wizard.debug;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.basti_bob.sand_wizard.player.Player;
 
@@ -25,9 +27,11 @@ public class TextRenderItem extends DebugRenderItem {
 
     @Override
     public void render() {
+        BitmapFont font = debugScreen.getGuiManager().getFont();
         spriteBatch.begin();
-        debugScreen.getGuiManager().getFont().getData().setScale(scale);
-        debugScreen.getGuiManager().getFont().draw(spriteBatch, text, x, y);
+        font.setColor(Color.WHITE);
+        font.getData().setScale(scale);
+        font.draw(spriteBatch, text, x, y);
         spriteBatch.end();
     }
 

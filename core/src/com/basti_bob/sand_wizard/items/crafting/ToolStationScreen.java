@@ -1,5 +1,7 @@
 package com.basti_bob.sand_wizard.items.crafting;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.items.ItemStack;
 import com.basti_bob.sand_wizard.items.inventory.Inventory;
 import com.basti_bob.sand_wizard.items.inventory.InventorySlot;
@@ -18,9 +20,11 @@ public class ToolStationScreen extends InventoryWithPlayerInventoryScreen {
         super(inventory);
 
         float buttonWidth = 200;
-        float buttonHeight = 50;
-        float buttonX = inventory.getCenterX() - inventory.getNumRows() * inventory.getSlotSize() / 2f - buttonWidth - 20;
-        float buttonY = inventory.getCenterY() + inventory.getNumCols() * inventory.getSlotSize() / 2f;
+        float buttonHeight = Inventory.DEFAULT_SLOT_SIZE;
+
+        int referenceSlotIndex = inventory.getNumRows() * (inventory.getNumCols() - 1) + 1;
+        float buttonX = inventory.getSlotRenderX(referenceSlotIndex) - buttonWidth - 20;
+        float buttonY = inventory.getSlotRenderY(referenceSlotIndex);
 
         for (int i = 0; i < ToolStationItemType.values().length; i++) {
             ToolStationItemType toolStationItemType = ToolStationItemType.values()[i];
@@ -41,14 +45,6 @@ public class ToolStationScreen extends InventoryWithPlayerInventoryScreen {
         }
     }
 
-    @Override
-    public boolean quickMoveItemStack(ItemStack itemStack, Inventory inventory) {
-        Predicate<Integer> canInsertPredicate = slotIndex -> canPutItemIntoSlot(inventory.getInventorySlots().get(slotIndex))
-                && (!(inventory.getInventorySlots().get(slotIndex) instanceof ToolStationInventorySlot toolStationSlot)
-                || toolStationSlot.getCurrentItemType() == this.currentItemType);
-
-        return inventory.getItemStorage().receiveItemStack(itemStack, canInsertPredicate);
-    }
 
     @Override
     public void setStackInSlot(InventorySlot inventorySlot, ItemStack itemStack) {
