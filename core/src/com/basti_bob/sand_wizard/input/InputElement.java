@@ -4,23 +4,45 @@ import com.badlogic.gdx.Input;
 
 public interface InputElement {
 
-     boolean keyDown (int keycode);
+    default boolean keyDown(int keycode) {
+        return false;
+    }
 
-     boolean keyUp (int keycode);
+    default boolean keyUp(int keycode) {
+        return false;
+    }
 
-     boolean keyTyped (char character);
+    default boolean keyTyped(char character) {
+        return false;
+    }
 
-     boolean touchDown (int screenX, int screenY, int pointer, int button);
+    default boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
 
-     boolean touchUp (int screenX, int screenY, int pointer, int button);
+    default boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
 
-     boolean touchCancelled (int screenX, int screenY, int pointer, int button);
+    default boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
 
-     boolean touchDragged (int screenX, int screenY, int pointer);
+    default boolean touchDragged(int screenX, int screenY, int pointer) {
+        return false;
+    }
 
-     boolean mouseMoved (int screenX, int screenY);
+    default boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
 
-     boolean scrolled (float amountX, float amountY);
+    default boolean scrolled(float amountX, float amountY) {
+        return false;
+    }
 
-     boolean shouldListenToInput();
+    default boolean shouldListenToInput() {
+        return true;
+    }
+
+    ;
 }

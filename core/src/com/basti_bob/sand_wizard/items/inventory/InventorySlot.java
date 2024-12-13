@@ -1,6 +1,7 @@
 package com.basti_bob.sand_wizard.items.inventory;
 
 import com.basti_bob.sand_wizard.items.ItemStack;
+import com.basti_bob.sand_wizard.util.MathUtil;
 
 public class InventorySlot {
 
@@ -48,7 +49,7 @@ public class InventorySlot {
     }
 
     public boolean isMouseOver(float mouseX, float mouseY) {
-        return mouseX >= x && mouseX <= x + size && mouseY >= y && mouseY <= y + size;
+        return MathUtil.isPointInRect(mouseX, mouseY, x, y, size, size);
     }
 
     public boolean isExtractOnly() {

@@ -1,14 +1,13 @@
 package com.basti_bob.sand_wizard.cells.solids.movable_solids;
 
 import com.badlogic.gdx.math.MathUtils;
-import com.basti_bob.sand_wizard.cells.cell_properties.property_types.MovableSolidProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.MovableSolidProperties;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.liquids.Liquid;
 import com.basti_bob.sand_wizard.cells.util.MoveAlongState;
-import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class MovableSolid extends MovingCell {
@@ -21,7 +20,7 @@ public class MovableSolid extends MovingCell {
         super(cellType);
         this.velocityY = -1;
 
-        MovableSolidProperty cellProperty = (MovableSolidProperty) cellType.getCellProperty();
+        MovableSolidProperties cellProperty = (MovableSolidProperties) cellType.getCellProperty();
 
         this.movingResistance = cellProperty.movingResistance;
         this.sprayFactor = cellProperty.sprayFactor;

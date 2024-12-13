@@ -1,7 +1,7 @@
 package com.basti_bob.sand_wizard.cells.gases;
 
 import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.cells.cell_properties.property_types.GasProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.GasProperties;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;
@@ -24,7 +24,7 @@ public class Gas extends MovingCell {
         super(cellType);
         this.velocityY = 1;
 
-        GasProperty cellProperty = (GasProperty) cellType.getCellProperty();
+        GasProperties cellProperty = (GasProperties) cellType.getCellProperty();
 
         this.dispersionRate = cellProperty.dispersionRate;
         this.density = cellProperty.density;
@@ -34,7 +34,7 @@ public class Gas extends MovingCell {
     public void addedToWorld(World world, Chunk chunk, int posX, int posY) {
         super.addedToWorld(world, chunk, posX, posY);
 
-        GasProperty cellProperty = (GasProperty) cellType.getCellProperty();
+        GasProperties cellProperty = (GasProperties) cellType.getCellProperty();
 
         this.lifeTime = cellProperty.lifeTime.getRandom(world.random);
     }

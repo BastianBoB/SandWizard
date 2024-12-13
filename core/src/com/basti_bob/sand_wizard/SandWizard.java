@@ -12,6 +12,7 @@ import com.basti_bob.sand_wizard.input.InputHandler;
 import com.basti_bob.sand_wizard.items.ItemStack;
 import com.basti_bob.sand_wizard.items.ItemType;
 import com.basti_bob.sand_wizard.items.crafting.ToolStationInventory;
+import com.basti_bob.sand_wizard.items.crafting.ToolStationScreen;
 import com.basti_bob.sand_wizard.items.inventory.ChestInventory;
 import com.basti_bob.sand_wizard.items.inventory.PlayerAndSecondInventoryScreen;
 import com.basti_bob.sand_wizard.player.OnlyPlayerInventoryScreen;
@@ -54,9 +55,8 @@ public class SandWizard extends ApplicationAdapter {
 
     public static long previousTime = -1;
 
-    public static ChestInventory chestInventory;
     public static ToolStationInventory toolStationInventory;
-    public static PlayerAndSecondInventoryScreen chestInventoryScreen;
+    public static ToolStationScreen toolStationScreen;
 
     @Override
     public void create() {
@@ -81,9 +81,8 @@ public class SandWizard extends ApplicationAdapter {
 
         this.debugScreen = new DebugScreen(player);
 
-        chestInventory = new ChestInventory();
         toolStationInventory = new ToolStationInventory();
-        chestInventoryScreen = new PlayerAndSecondInventoryScreen(chestInventory);
+        toolStationScreen = new ToolStationScreen(toolStationInventory);
     }
 
 
@@ -134,7 +133,7 @@ public class SandWizard extends ApplicationAdapter {
             if (player.openedInventoryScreen)
                 player.closeInventoryScreen();
             else
-                chestInventoryScreen.playerOpenedScreen(player);
+                toolStationScreen.playerOpenedScreen(player);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.H)) {
@@ -161,7 +160,6 @@ public class SandWizard extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
             isUpdating = !isUpdating;
         }
-
 
 //        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
 //            world.addExplosion(new Explosion(world, (int) player.getPosition().x, (int) player.getPosition().y, 32, 2000));

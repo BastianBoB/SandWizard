@@ -3,7 +3,7 @@ package com.basti_bob.sand_wizard.cells;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import com.basti_bob.sand_wizard.cells.cell_properties.CellProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.CellProperties;
 import com.basti_bob.sand_wizard.cells.cell_properties.PhysicalState;
 import com.basti_bob.sand_wizard.cells.other.Empty;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
@@ -14,7 +14,6 @@ import com.basti_bob.sand_wizard.world.WorldConstants;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.CellLight;
-import com.basti_bob.sand_wizard.world.world_rendering.lighting.ChunkLight;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.Light;
 
 public abstract class Cell {
@@ -66,32 +65,32 @@ public abstract class Cell {
     public Cell(CellType cellType) {
         this.cellType = cellType;
 
-        CellProperty cellProperty = cellType.getCellProperty();
+        CellProperties cellProperties = cellType.getCellProperty();
 
-        this.friction = cellProperty.friction;
-        this.speedFactor = cellProperty.speedFactor;
-        this.jumpFactor = cellProperty.jumpFactor;
+        this.friction = cellProperties.friction;
+        this.speedFactor = cellProperties.speedFactor;
+        this.jumpFactor = cellProperties.jumpFactor;
 
         this.temperature = WorldConstants.START_TEMPERATURE;
-        this.canBeHeated = cellProperty.canBeHeated;
-        this.canBeCooled = cellProperty.canBeCooled;
-        this.burningTemperature = cellProperty.burningTemperature;
-        this.canBurn = cellProperty.canBurn;
-        this.maxBurningTime = cellProperty.maxBurningTime;
-        this.fireSpreadChance = cellProperty.fireSpreadChance;
+        this.canBeHeated = cellProperties.canBeHeated;
+        this.canBeCooled = cellProperties.canBeCooled;
+        this.burningTemperature = cellProperties.burningTemperature;
+        this.canBurn = cellProperties.canBurn;
+        this.maxBurningTime = cellProperties.maxBurningTime;
+        this.fireSpreadChance = cellProperties.fireSpreadChance;
 
-        this.canCorrode = cellProperty.canCorrode;
-        this.corrosionHealth = cellProperty.corrosionHealth;
-        this.corrosionResistance = cellProperty.corrosionResistance;
+        this.canCorrode = cellProperties.canCorrode;
+        this.corrosionHealth = cellProperties.corrosionHealth;
+        this.corrosionResistance = cellProperties.corrosionResistance;
 
-        this.isLightSource = cellProperty.isLightSource;
-        this.glowsWithCellColor = cellProperty.glowsWithCellColor;
+        this.isLightSource = cellProperties.isLightSource;
+        this.glowsWithCellColor = cellProperties.glowsWithCellColor;
 
-        this.explosionResistance = cellProperty.explosionResistance;
-        this.canExplode = cellProperty.canExplode;
-        this.explosionHealth = cellProperty.explosionHealth;
+        this.explosionResistance = cellProperties.explosionResistance;
+        this.canExplode = cellProperties.canExplode;
+        this.explosionHealth = cellProperties.explosionHealth;
 
-        cellProperty.createdCell(this);
+        cellProperties.createdCell(this);
     }
 
     public void removedFromChunk(Chunk chunk) {
@@ -103,7 +102,7 @@ public abstract class Cell {
     public void addedToWorld(World world, Chunk chunk, int posX, int posY) {
         this.world = world;
 
-        CellProperty cellProperty = cellType.getCellProperty();
+        CellProperties cellProperties = cellType.getCellProperty();
         Color color = cellType.getCellColors().getColor(world);
         this.colorR = color.r;
         this.colorG = color.g;
@@ -113,8 +112,8 @@ public abstract class Cell {
         this.originalColorB = colorB;
 
         if (isLightSource) {
-            Color lightColor = glowsWithCellColor ? color : cellProperty.lightColor;
-            light = new CellLight(this, getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperty.lightRadius, cellProperty.lightIntensity);
+            Color lightColor = glowsWithCellColor ? color : cellProperties.lightColor;
+            light = new CellLight(this, getPosX(), getPosY(), lightColor.r, lightColor.g, lightColor.b, cellProperties.lightRadius, cellProperties.lightIntensity);
             light.placedInChunk(chunk);
         }
 

@@ -1,12 +1,11 @@
 package com.basti_bob.sand_wizard.cells.liquids;
 
-import com.basti_bob.sand_wizard.cells.cell_properties.property_types.LiquidProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.LiquidProperties;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.cells.MovingCell;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.util.MoveAlongState;
-import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 
 public class Liquid extends MovingCell {
@@ -19,7 +18,7 @@ public class Liquid extends MovingCell {
         super(cellType);
         this.velocityY = -1;
 
-        LiquidProperty cellProperty = (LiquidProperty) cellType.getCellProperty();
+        LiquidProperties cellProperty = (LiquidProperties) cellType.getCellProperty();
 
         this.dispersionRate = cellProperty.dispersionRate;
         this.density = cellProperty.density;

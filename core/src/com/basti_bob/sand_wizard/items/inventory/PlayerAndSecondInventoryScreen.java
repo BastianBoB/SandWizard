@@ -59,13 +59,27 @@ public class PlayerAndSecondInventoryScreen extends Screen {
         if (inventory != null) inventory.render();
     }
 
+    public boolean canTakeItemOutOfSlot(InventorySlot inventorySlot) {
+        return true;
+    }
+
+    public boolean canPutItemIntoSlot(InventorySlot inventorySlot) {
+        return true;
+    }
+
+    public void setStackInSlot(InventorySlot inventorySlot, ItemStack itemStack) {
+        inventorySlot.setItemStack(itemStack);
+    }
+
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        super.touchDown(screenX, screenY, pointer, button);
+
         boolean isShiftPressed = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
 
         for (InventorySlot inventorySlot : allSlots) {
 
-            if (!inventorySlot.isMouseOver(screenX, screenY)) continue;
+            if (!inventorySlot.isMouseOver(screenX, screenY) || !canTakeItemOutOfSlot(inventorySlot)) continue;
 
             ItemStack stackInSlot = inventorySlot.getItemStack();
 
@@ -81,7 +95,7 @@ public class PlayerAndSecondInventoryScreen extends Screen {
                 if (selectedItemStack.isEmpty()) {
                     selectedItemStack = stackInSlot;
                     selectedSlot = inventorySlot;
-                    inventorySlot.setItemStack(ItemStack.EMPTY_ITEM_STACK);
+                    setStackInSlot(inventorySlot, ItemStack.EMPTY_ITEM_STACK);
                 }
             }
 
@@ -99,7 +113,7 @@ public class PlayerAndSecondInventoryScreen extends Screen {
                     }
 
                     if (stackInSlot.getAmount() == 0) {
-                        inventorySlot.setItemStack(ItemStack.EMPTY_ITEM_STACK);
+                        setStackInSlot(inventorySlot, ItemStack.EMPTY_ITEM_STACK);
                     }
                 }
             }
@@ -113,12 +127,14 @@ public class PlayerAndSecondInventoryScreen extends Screen {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        super.touchUp(screenX, screenY, pointer, button);
+
         if (button != Input.Buttons.LEFT || selectedItemStack.isEmpty()) return false;
 
         boolean droppedAllItems = false;
 
         for (InventorySlot inventorySlot : allSlots) {
-            if (!inventorySlot.isMouseOver(screenX, screenY)) continue;
+            if (!inventorySlot.isMouseOver(screenX, screenY) || !canPutItemIntoSlot(inventorySlot)) continue;
 
             if (inventorySlot.isExtractOnly()) break;
 
@@ -126,7 +142,7 @@ public class PlayerAndSecondInventoryScreen extends Screen {
 
             if (stackInSlot.isEmpty()) {
                 // Drop in empty slot
-                inventorySlot.setItemStack(selectedItemStack);
+                setStackInSlot(inventorySlot, selectedItemStack);
                 droppedAllItems = true;
             } else if (stackInSlot.getItemType() == selectedItemStack.getItemType()) {
                 // Combine stacks
@@ -136,8 +152,8 @@ public class PlayerAndSecondInventoryScreen extends Screen {
             } else {
                 //Swap stacks
                 ItemStack tempStack = inventorySlot.getItemStack();
-                inventorySlot.setItemStack(selectedItemStack);
-                selectedSlot.setItemStack(tempStack);
+                setStackInSlot(inventorySlot, selectedItemStack);
+                setStackInSlot(selectedSlot, tempStack);
                 droppedAllItems = true;
             }
             break;
@@ -145,45 +161,11 @@ public class PlayerAndSecondInventoryScreen extends Screen {
 
         // Return to original slot if not dropped
         if (!droppedAllItems) {
-            selectedSlot.setItemStack(selectedItemStack);
+            setStackInSlot(selectedSlot, selectedItemStack);
         }
+
         selectedItemStack = ItemStack.EMPTY_ITEM_STACK;
 
         return true;
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(float amountX, float amountY) {
-        return false;
     }
 }

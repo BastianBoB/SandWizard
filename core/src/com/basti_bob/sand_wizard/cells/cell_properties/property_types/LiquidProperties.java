@@ -1,32 +1,28 @@
 package com.basti_bob.sand_wizard.cells.cell_properties.property_types;
 
-import com.basti_bob.sand_wizard.cells.cell_properties.CellProperty;
-import com.basti_bob.sand_wizard.util.range.FloatRange;
-import com.basti_bob.sand_wizard.util.range.IntRange;
+import com.basti_bob.sand_wizard.cells.cell_properties.CellProperties;
 
-public class GasProperty extends CellProperty {
+public class LiquidProperties extends CellProperties {
 
     public final float dispersionRate;
     public final float density;
-    public final IntRange lifeTime;
 
-    public GasProperty(Builder builder) {
+    public LiquidProperties(LiquidProperties.Builder builder) {
         super(builder);
 
         this.dispersionRate = builder.dispersionRate;
         this.density = builder.density;
-        this.lifeTime = builder.lifeTime;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends CellProperty.Builder<Builder> {
+    public static class Builder extends CellProperties.Builder<Builder> {
 
         protected float dispersionRate = 5f;
         protected float density = 1f;
-        protected IntRange lifeTime = new IntRange(100, 200);
+
 
         public Builder dispersionRate(float dispersionRate) {
             this.dispersionRate = dispersionRate;
@@ -38,20 +34,14 @@ public class GasProperty extends CellProperty {
             return this;
         }
 
-        public Builder lifeTime(IntRange lifeTime) {
-            this.lifeTime = lifeTime;
-            return this;
-        }
-
-        public Builder allGas(float dispersionRate, float density, IntRange lifeTime) {
+        public Builder allLiquid(float dispersionRate, float density) {
             this.dispersionRate = dispersionRate;
             this.density = density;
-            this.lifeTime = lifeTime;
             return this;
         }
 
-        public GasProperty build() {
-            return new GasProperty(this);
+        public LiquidProperties build() {
+            return new LiquidProperties(this);
         }
     }
 }

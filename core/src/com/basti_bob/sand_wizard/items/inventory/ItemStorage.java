@@ -27,7 +27,7 @@ public class ItemStorage {
         for (int i = 0; i < itemStacks.size(); i++) {
             ItemStack itemStack = itemStacks.get(i);
 
-            if (itemStack == ItemStack.EMPTY_ITEM_STACK) {
+            if (itemStack.isEmpty()) {
                 itemStacks.set(i, receivingStack);
                 return true;
             }

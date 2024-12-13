@@ -86,7 +86,7 @@ public abstract class Inventory extends GuiElement {
         SpriteBatch batch = guiManager.getSpriteBatch();
 
         font.setColor(Color.WHITE);
-        font.draw(batch, itemStack.getItemType().getName(), displayX + 5, displayY + slotSize - 5);
+        font.draw(batch, itemStack.getItemType().getDisplayName(), displayX + 5, displayY + slotSize - 5);
         font.draw(batch, "" + itemStack.getAmount(), displayX + 5, displayY + 20);
     }
 
@@ -100,5 +100,9 @@ public abstract class Inventory extends GuiElement {
 
     public List<InventorySlot> getInventorySlots() {
         return inventorySlots;
+    }
+
+    public int getSlotSize() {
+        return slotSize;
     }
 }

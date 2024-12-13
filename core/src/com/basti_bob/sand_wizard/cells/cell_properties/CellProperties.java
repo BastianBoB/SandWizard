@@ -1,54 +1,51 @@
 package com.basti_bob.sand_wizard.cells.cell_properties;
 
 import com.badlogic.gdx.graphics.Color;
-import com.basti_bob.sand_wizard.cells.cell_properties.property_types.GasProperty;
-import com.basti_bob.sand_wizard.cells.cell_properties.property_types.LiquidProperty;
-import com.basti_bob.sand_wizard.cells.cell_properties.property_types.MovableSolidProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.GasProperties;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.LiquidProperties;
+import com.basti_bob.sand_wizard.cells.cell_properties.property_types.MovableSolidProperties;
 import com.basti_bob.sand_wizard.cells.Cell;
-import com.basti_bob.sand_wizard.util.range.FloatRange;
 import com.basti_bob.sand_wizard.util.range.IntRange;
 
 import java.util.function.Consumer;
 
-public class CellProperty {
+public class CellProperties {
 
-    public static final CellProperty EMPTY = CellProperty.builder().build();
-    public static final CellProperty STONE = CellProperty.builder().build();
-    public static final CellProperty GRASS = CellProperty.builder().build();
-    public static final CellProperty ICE = CellProperty.builder().friction(0.98f).burningTemperature(100).maxBurningTime(0).build();
-    public static final CellProperty COMPACT_SNOW = CellProperty.builder().burningTemperature(100).maxBurningTime(0).build();
-    public static final CellProperty WOOD = CellProperty.builder().allBurn(500, 400, 0.03f).build();
-    public static final CellProperty LEAF = CellProperty.builder().allBurn(100, 10, 0.3f).build();
+    public static final CellProperties EMPTY = CellProperties.builder().build();
+    public static final CellProperties STONE = CellProperties.builder().build();
+    public static final CellProperties GRASS = CellProperties.builder().build();
+    public static final CellProperties ICE = CellProperties.builder().friction(0.98f).burningTemperature(100).maxBurningTime(0).build();
+    public static final CellProperties COMPACT_SNOW = CellProperties.builder().burningTemperature(100).maxBurningTime(0).build();
+    public static final CellProperties WOOD = CellProperties.builder().allBurn(500, 400, 0.03f).build();
+    public static final CellProperties LEAF = CellProperties.builder().allBurn(100, 10, 0.3f).build();
 
-    public static final MovableSolidProperty SAND = MovableSolidProperty.builder().allMovableSolid(0.1f, 0.6f).build();
-    public static final MovableSolidProperty DIRT = MovableSolidProperty.builder().allMovableSolid(0.3f, 0.3f).build();
-    public static final MovableSolidProperty COAL = MovableSolidProperty.builder().allMovableSolid(0.8f, 0.2f).allBurn(1500, 6000, 0.1f).build();
-    public static final MovableSolidProperty GRAVEL = MovableSolidProperty.builder().allMovableSolid(0.2f, 0.5f).build();
-    public static final MovableSolidProperty POWDER_SNOW = MovableSolidProperty.builder().allMovableSolid(0.05f, 0.8f).burningTemperature(100).maxBurningTime(0).build();
+    public static final MovableSolidProperties SAND = MovableSolidProperties.builder().allMovableSolid(0.1f, 0.6f).build();
+    public static final MovableSolidProperties DIRT = MovableSolidProperties.builder().allMovableSolid(0.3f, 0.3f).build();
+    public static final MovableSolidProperties COAL = MovableSolidProperties.builder().allMovableSolid(0.8f, 0.2f).allBurn(1500, 6000, 0.1f).build();
+    public static final MovableSolidProperties GRAVEL = MovableSolidProperties.builder().allMovableSolid(0.2f, 0.5f).build();
+    public static final MovableSolidProperties POWDER_SNOW = MovableSolidProperties.builder().allMovableSolid(0.05f, 0.8f).burningTemperature(100).maxBurningTime(0).build();
 
-    public static final LiquidProperty WATER = LiquidProperty.builder().allLiquid(6f, 1f).burningTemperature(100).maxBurningTime(0).build();
-    public static final LiquidProperty ACID = LiquidProperty.builder().allLiquid(5f, 0.75f).allLight(8f, 0.5f, Color.LIME).allBurn(100, 120, 0.1f).build();
-    public static final LiquidProperty OIL = LiquidProperty.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
-    public static final LiquidProperty LAVA = LiquidProperty.builder().allLiquid(2f, 5f).allLight(8f, 0.5f, CellColors.c(255, 128, 0)).build();
+    public static final LiquidProperties WATER = LiquidProperties.builder().allLiquid(6f, 1f).burningTemperature(100).maxBurningTime(0).build();
+    public static final LiquidProperties ACID = LiquidProperties.builder().allLiquid(5f, 0.75f).allLight(8f, 0.5f, Color.LIME).allBurn(100, 120, 0.1f).build();
+    public static final LiquidProperties OIL = LiquidProperties.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
+    public static final LiquidProperties LAVA = LiquidProperties.builder().allLiquid(2f, 5f).allLight(8f, 0.5f, CellColors.c(255, 128, 0)).build();
 
-    public static final GasProperty METHANE = GasProperty.builder().allGas(1f, 1f, new IntRange(180, 300)).build();
-    public static final GasProperty STEAM = GasProperty.builder().allGas(1.5f, 0.5f, new IntRange(180, 300)).build();
-    public static final GasProperty FIRE = GasProperty.builder().allGas(1f, 1f, new IntRange(20, 50)).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
-    public static final GasProperty EXPLOSION_SPARK = GasProperty.builder().allGas(1f, 1f, new IntRange(5, 20)).build();
+    public static final GasProperties METHANE = GasProperties.builder().allGas(1f, 1f, new IntRange(180, 300)).build();
+    public static final GasProperties STEAM = GasProperties.builder().allGas(1.5f, 0.5f, new IntRange(180, 300)).build();
+    public static final GasProperties FIRE = GasProperties.builder().allGas(1f, 1f, new IntRange(20, 50)).allLight(14f, 0.8f, CellColors.c(255, 128, 0)).build();
+    public static final GasProperties EXPLOSION_SPARK = GasProperties.builder().allGas(1f, 1f, new IntRange(5, 20)).build();
 
-    public static final CellProperty FLOWER_PETAL = CellProperty.builder().allBurn(100, 10, 0.5f).build();
-    public static final CellProperty GLOWBLOCK = CellProperty.builder().allLight(31f, 2f, Color.YELLOW).build();
+    public static final CellProperties FLOWER_PETAL = CellProperties.builder().allBurn(100, 10, 0.5f).build();
+    public static final CellProperties GLOWBLOCK = CellProperties.builder().allLight(31f, 2f, Color.YELLOW).build();
 
-    public static final CellProperty FLOWER_PETAL_GLOW = CellProperty.builder().allBurn(100, 10, 0.5f).glowsWithCellColor(16f, 0.5f).build();
+    public static final CellProperties FLOWER_PETAL_GLOW = CellProperties.builder().allBurn(100, 10, 0.5f).glowsWithCellColor(16f, 0.5f).build();
 
     public static final float r = 31f;
     public static final float i = 0.4f;
-    public static final CellProperty FLOWER_PETAL_GLOW_RED = CellProperty.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 0.4f, 0.4f, 0)).build();
-    public static final CellProperty FLOWER_PETAL_GLOW_YELLOW = CellProperty.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 1f, 0.4f, 0)).build();
-    public static final CellProperty FLOWER_PETAL_GLOW_BLUE = CellProperty.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(0.4f, 0.4f, 1f, 0)).build();
-    public static final CellProperty FLOWER_PETAL_GLOW_PURPLE = CellProperty.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 0.4f, 1f, 0)).build();
-
-
+    public static final CellProperties FLOWER_PETAL_GLOW_RED = CellProperties.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 0.4f, 0.4f, 0)).build();
+    public static final CellProperties FLOWER_PETAL_GLOW_YELLOW = CellProperties.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 1f, 0.4f, 0)).build();
+    public static final CellProperties FLOWER_PETAL_GLOW_BLUE = CellProperties.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(0.4f, 0.4f, 1f, 0)).build();
+    public static final CellProperties FLOWER_PETAL_GLOW_PURPLE = CellProperties.builder().allBurn(100, 10, 0.5f).allLight(r, i, new Color(1f, 0.4f, 1f, 0)).build();
 
     public final float friction;
     public final float speedFactor;
@@ -77,7 +74,7 @@ public class CellProperty {
 
     public final Consumer<Cell> onCreate;
 
-    public CellProperty(CellProperty.Builder builder) {
+    public CellProperties(CellProperties.Builder builder) {
         this.friction = builder.friction;
         this.speedFactor = builder.speedFactor;
         this.jumpFactor = builder.jumpFactor;
@@ -113,11 +110,11 @@ public class CellProperty {
         onCreate.accept(cell);
     }
 
-    public static CellProperty.Builder builder() {
-        return new CellProperty.Builder();
+    public static CellProperties.Builder builder() {
+        return new CellProperties.Builder();
     }
 
-    public static class Builder<T extends CellProperty.Builder<T>> {
+    public static class Builder<T extends CellProperties.Builder<T>> {
 
         protected float friction = 0.9f;
         protected float speedFactor = 1f;
@@ -265,8 +262,8 @@ public class CellProperty {
             return (T) this;
         }
 
-        public CellProperty build() {
-            return new CellProperty(this);
+        public CellProperties build() {
+            return new CellProperties(this);
         }
     }
 }

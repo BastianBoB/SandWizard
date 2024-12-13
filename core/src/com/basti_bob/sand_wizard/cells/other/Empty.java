@@ -3,7 +3,6 @@ package com.basti_bob.sand_wizard.cells.other;
 import com.badlogic.gdx.graphics.Color;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
-import com.basti_bob.sand_wizard.cells.cell_properties.CellProperty;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 

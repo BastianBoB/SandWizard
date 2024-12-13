@@ -1,13 +1,13 @@
 package com.basti_bob.sand_wizard.cells.cell_properties.property_types;
 
-import com.basti_bob.sand_wizard.cells.cell_properties.CellProperty;
+import com.basti_bob.sand_wizard.cells.cell_properties.CellProperties;
 
-public class MovableSolidProperty extends CellProperty {
+public class MovableSolidProperties extends CellProperties {
 
     public final float movingResistance;
     public final float sprayFactor;
 
-    public MovableSolidProperty(Builder builder) {
+    public MovableSolidProperties(Builder builder) {
         super(builder);
 
         this.movingResistance = builder.movingResistance;
@@ -19,7 +19,7 @@ public class MovableSolidProperty extends CellProperty {
     }
 
 
-    public static class Builder extends CellProperty.Builder<Builder> {
+    public static class Builder extends CellProperties.Builder<Builder> {
 
         protected float movingResistance = 0f;
         protected float sprayFactor = 0f;
@@ -40,8 +40,8 @@ public class MovableSolidProperty extends CellProperty {
             return this;
         }
 
-        public MovableSolidProperty build() {
-            return new MovableSolidProperty(this);
+        public MovableSolidProperties build() {
+            return new MovableSolidProperties(this);
         }
     }
 
