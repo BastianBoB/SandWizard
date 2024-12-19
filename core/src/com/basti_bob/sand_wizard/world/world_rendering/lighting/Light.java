@@ -16,7 +16,7 @@ public abstract class Light {
     private float r, g, b;
     private final float[] data;
 
-    public Light(int posX, int posY, float r, float g, float b, float radius, float intensity) {
+    public Light(float posX, float posY, float r, float g, float b, float radius, float intensity) {
         this.posX = posX;
         this.posY = posY;
         this.r = r;

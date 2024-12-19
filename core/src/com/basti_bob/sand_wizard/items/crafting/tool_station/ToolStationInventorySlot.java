@@ -1,6 +1,5 @@
-package com.basti_bob.sand_wizard.items.crafting;
+package com.basti_bob.sand_wizard.items.crafting.tool_station;
 
-import com.basti_bob.sand_wizard.items.ItemStack;
 import com.basti_bob.sand_wizard.items.inventory.InventorySlot;
 import com.basti_bob.sand_wizard.items.inventory.ItemStorage;
 
@@ -12,13 +11,6 @@ public class ToolStationInventorySlot extends InventorySlot {
         super(itemStorage, slotIndex, x, y, size);
         currentItemType = ToolStationItemType.HANDLE;
     }
-
-    public void setItemStack(ItemStack itemStack, ToolStationItemType toolStationItemType) {
-        super.setItemStack(itemStack);
-
-        this.currentItemType = toolStationItemType;
-    }
-
 
     public ToolStationItemType getCurrentItemType() {
         return currentItemType;

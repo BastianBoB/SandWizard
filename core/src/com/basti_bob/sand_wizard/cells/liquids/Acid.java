@@ -9,6 +9,7 @@ import com.basti_bob.sand_wizard.world.chunk.ChunkAccessor;
 public class Acid extends Liquid {
 
     private boolean didCorrodeInUpdate;
+
     public Acid(CellType cellType) {
         super(cellType);
     }
@@ -25,13 +26,17 @@ public class Acid extends Liquid {
 
             if (cell == null || cell instanceof Empty || cell instanceof Acid) continue;
 
-            if(cell.applyCorrosion(chunkAccessor, world.random.nextFloat()))
+            if(cell.applyCorrosion(chunkAccessor, getCorrosionAmount(world)))
                 didCorrodeInUpdate = true;
 
 //            if(didCorrodeInUpdate) {
 //                cell.taintWithColor(chunkAccessor, this.getColorR(), this.getColorG(), this.getColorB(), 0.01f);
 //            }
         }
+    }
+
+    public float getCorrosionAmount(World world) {
+        return world.random.nextFloat() * 2;
     }
 
     @Override

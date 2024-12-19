@@ -11,7 +11,7 @@ public class ChunkLight extends Light {
     private final int chunkRadius;
     public int shaderArrayIndex;
 
-    public ChunkLight(int cellX, int cellY, float r, float g, float b, float radius, float intensity) {
+    public ChunkLight(float cellX, float cellY, float r, float g, float b, float radius, float intensity) {
       super(cellX, cellY, r, g, b, radius, intensity);
 
         this.chunkRadius = (int) (radius / WorldConstants.CHUNK_SIZE) + 1;

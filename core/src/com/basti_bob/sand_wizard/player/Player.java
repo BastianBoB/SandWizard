@@ -44,7 +44,7 @@ public class Player extends Entity {
         this.setRenderingChunks(World.getChunkPos((int) nx), World.getChunkPos((int) ny));
 
         Color c = new Color(1f, 0.5f, 0f, 1f);
-        this.light = new WorldLight((int) ox, (int) oy, c.r, c.g, c.b, 63f, 0.5f);
+        this.light = new WorldLight((int) ox, (int) oy, c.r, c.g, c.b, 1f, 1f);
         this.light.placedInWorld(world);
 
         this.inventory = new PlayerInventory(this);

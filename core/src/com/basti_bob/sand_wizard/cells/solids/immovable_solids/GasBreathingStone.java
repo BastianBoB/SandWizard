@@ -56,6 +56,7 @@ public class GasBreathingStone extends ImmovableSolid {
     }
 
     public void breatheGas() {
+        if (world.getCell(this.getPosX(), this.getPosY() + 1).getCellType() == CellType.EMPTY) return;
 
         for (int i = 0; i < amount; i++) {
             float a = MathUtil.map(i, 0, amount - 1, angleRange.min, angleRange.max);
@@ -71,7 +72,9 @@ public class GasBreathingStone extends ImmovableSolid {
             gas.velocityX = r * c;
             gas.velocityY = r * s;
             gas.lifeTime = lifeTimeRange.getRandom(world.random);
-            world.setCell(gas, fireX, fireY);
+
+            if (world.getCell(fireX, fireY).getCellType() == CellType.EMPTY)
+                world.setCell(gas, fireX, fireY);
         }
     }
 

@@ -7,10 +7,7 @@ import com.basti_bob.sand_wizard.cells.cell_properties.PhysicalState;
 import com.basti_bob.sand_wizard.cells.gases.Fire;
 import com.basti_bob.sand_wizard.cells.gases.Gas;
 import com.basti_bob.sand_wizard.cells.gases.Steam;
-import com.basti_bob.sand_wizard.cells.liquids.Acid;
-import com.basti_bob.sand_wizard.cells.liquids.Lava;
-import com.basti_bob.sand_wizard.cells.liquids.Liquid;
-import com.basti_bob.sand_wizard.cells.liquids.Water;
+import com.basti_bob.sand_wizard.cells.liquids.*;
 import com.basti_bob.sand_wizard.cells.solids.immovable_solids.*;
 import com.basti_bob.sand_wizard.cells.solids.movable_solids.MovableSolid;
 import com.basti_bob.sand_wizard.cells.other.Empty;
@@ -72,6 +69,7 @@ public class CellType {
         public static final CellType WATER = REGISTRY.register("water", new CellType(PhysicalState.LIQUID, CellProperties.WATER, Water::new, CellColors.WATER));
         public static final CellType OIL = REGISTRY.register("oil", new CellType(PhysicalState.LIQUID, CellProperties.OIL, Liquid::new, CellColors.OIL));
         public static final CellType ACID = REGISTRY.register("acid", new CellType(PhysicalState.LIQUID, CellProperties.ACID, Acid::new, CellColors.ACID));
+        public static final CellType HYPER_ACID = REGISTRY.register("hyper_acid", new CellType(PhysicalState.LIQUID, CellProperties.ACID, HyperAcid::new, CellColors.HYPER_ACID));
         public static final CellType LAVA = REGISTRY.register("lava", new CellType(PhysicalState.LIQUID, CellProperties.LAVA, Lava::new, CellColors.LAVA));
     }
 

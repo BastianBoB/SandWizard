@@ -61,40 +61,6 @@ public class WorldRenderer {
         return new ShaderProgram(vertexShader, fragmentShader);
     }
 
-    public void renderWithLights(Player player, Array2D<Chunk> chunks, ChunkPos topLeftChunkPos) {
-        int worldLightSSBO = Gdx.gl31.glGenBuffer();
-        setWorldLightBuffer(chunks, worldLightSSBO);
-
-        int chunkLightSSBO = Gdx.gl31.glGenBuffer();
-        setChunksLightBuffer(chunks, chunkLightSSBO);
-
-        int chunkLightIndicesSSBO = Gdx.gl31.glGenBuffer();
-        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, chunkLightIndicesSSBO);
-        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, LIGHTS_INDICES_BUFFER_BLOCK_INDEX, chunkLightIndicesSSBO);
-
-        int lastChunkNumLights = 0;
-        for (int i = 0; i < chunks.rows; i++) {
-
-            ChunkColumnData chunkColumnData = world.worldGeneration.chunkColumnDataMap.get(topLeftChunkPos.x + i);
-            if (chunkColumnData == null) continue;
-
-            shader.setUniform1fv("terrainHeights", chunkColumnData.terrainHeights, 0, WorldConstants.CHUNK_SIZE);
-
-            for (int j = 0; j < chunks.cols; j++) {
-                Chunk chunk = chunks.get(i, j);
-                if (chunk == null) continue;
-
-                lastChunkNumLights = setChunkLightIndicesArray(chunk, lastChunkNumLights);
-
-                chunk.mesh.render(shader, GL20.GL_POINTS);
-            }
-        }
-
-        Gdx.gl31.glDeleteBuffer(chunkLightIndicesSSBO);
-        Gdx.gl31.glDeleteBuffer(worldLightSSBO);
-        Gdx.gl31.glDeleteBuffer(chunkLightSSBO);
-    }
-
     public void renderWithoutLights(Player player, Array2D<Chunk> chunks, ChunkPos topLeftChunkPos) {
         for (int i = 0; i < chunks.rows; i++) {
 
@@ -137,7 +103,7 @@ public class WorldRenderer {
 
         Gdx.gl.glDisable(GL_FRAMEBUFFER_SRGB);
 
-        for (Entity entity : world.entities) {
+        for (Entity entity : world.getEntities()) {
             entity.render(camera, shapeRenderer);
         }
 
@@ -145,28 +111,58 @@ public class WorldRenderer {
             chunkActiveDebugSquares(chunks);
     }
 
-    private void setWorldLightBuffer(Array2D<Chunk> chunks, int ssbo) {
-        worldLightBuffer.clear();
-        for (Light light : world.globalLights) {
-            if (light.isEmittingLight())
-                worldLightBuffer.put(light.getData());
-        }
-        worldLightBuffer.flip();
+    public void renderWithLights(Player player, Array2D<Chunk> chunks, ChunkPos topLeftChunkPos) {
 
-        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, ssbo);
-        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, WORLD_LIGHTS_BUFFER_BLOCK_INDEX, ssbo);
-        Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, 0, worldLightBuffer, GL31.GL_DYNAMIC_DRAW);
+        int worldLightSSBO = Gdx.gl31.glGenBuffer();
+        setWorldLightBuffer(chunks, worldLightSSBO);
+
+        int chunkLightSSBO = Gdx.gl31.glGenBuffer();
+        setChunksLightBuffer(chunks, chunkLightSSBO);
+
+        int chunkLightIndicesSSBO = Gdx.gl31.glGenBuffer();
+        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, chunkLightIndicesSSBO);
+        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, LIGHTS_INDICES_BUFFER_BLOCK_INDEX, chunkLightIndicesSSBO);
+
+        IntBuffer dummyBuffer = BufferUtils.newIntBuffer(1);
+        dummyBuffer.put(0);
+        dummyBuffer.flip();
+        Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, 0, dummyBuffer, GL31.GL_DYNAMIC_DRAW);
+        int lastChunkNumLights = 0;
+        for (int i = 0; i < chunks.rows; i++) {
+
+            ChunkColumnData chunkColumnData = world.worldGeneration.chunkColumnDataMap.get(topLeftChunkPos.x + i);
+            if (chunkColumnData == null) continue;
+
+            shader.setUniform1fv("terrainHeights", chunkColumnData.terrainHeights, 0, WorldConstants.CHUNK_SIZE);
+
+            for (int j = 0; j < chunks.cols; j++) {
+                Chunk chunk = chunks.get(i, j);
+                if (chunk == null) continue;
+
+                lastChunkNumLights = setChunkLightIndicesArray(chunk, lastChunkNumLights);
+
+                chunk.mesh.render(shader, GL20.GL_POINTS);
+            }
+        }
+
+        Gdx.gl31.glDeleteBuffer(worldLightSSBO);
+        Gdx.gl31.glDeleteBuffer(chunkLightSSBO);
+        Gdx.gl31.glDeleteBuffer(chunkLightIndicesSSBO);
     }
 
     private void setChunksLightBuffer(Array2D<Chunk> chunks, int ssbo) {
         chunkLightBuffer.clear();
         int lightArrayIndex = 0;
 
+        Set<ChunkLight> alreadyAddedLights = new HashSet<>();
+
         for (Chunk chunk : chunks.getArray()) {
             if (chunk == null) continue;
 
-            for (ChunkLight light : chunk.lightsInChunk) {
-                if(!light.isEmittingLight()) continue;
+            for (ChunkLight light : chunk.affectedLights) {
+                if(light == null || !light.isEmittingLight() || alreadyAddedLights.contains(light)) continue;
+
+                alreadyAddedLights.add(light);
 
                 light.shaderArrayIndex = lightArrayIndex;
                 chunkLightBuffer.put(light.getData());
@@ -185,22 +181,39 @@ public class WorldRenderer {
         List<ChunkLight> lights = chunk.affectedLights;
         int numLights = lights.size();
 
-        if (!(numLights == 0 && lastChunkNumLights == 0)) {
-
-            IntBuffer lightIndicesBuffer = chunkLightIndicesBuffers[numLights];
-            lightIndicesBuffer.clear();
-
-            for (int k = 0; k < numLights; k++) {
-                ChunkLight light = lights.get(k);
-                if (light == null) continue;
-                lightIndicesBuffer.put(light.shaderArrayIndex);
-            }
-            lightIndicesBuffer.flip();
-
-            Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, 0, lightIndicesBuffer, GL31.GL_DYNAMIC_DRAW);
+        if (numLights == 1) {
+            int a = 0;
         }
 
+        if (numLights == 0 && lastChunkNumLights == 0) return numLights;
+
+        IntBuffer lightIndicesBuffer = chunkLightIndicesBuffers[numLights];
+        lightIndicesBuffer.clear();
+
+        for (int k = 0; k < numLights; k++) {
+            ChunkLight light = lights.get(k);
+            if (light == null) continue;
+            lightIndicesBuffer.put(light.shaderArrayIndex);
+        }
+        lightIndicesBuffer.flip();
+
+        Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, 0, lightIndicesBuffer, GL31.GL_DYNAMIC_DRAW);
+
+
         return numLights;
+    }
+
+    private void setWorldLightBuffer(Array2D<Chunk> chunks, int ssbo) {
+        worldLightBuffer.clear();
+        for (Light light : world.globalLights) {
+            if (light.isEmittingLight())
+                worldLightBuffer.put(light.getData());
+        }
+        worldLightBuffer.flip();
+
+        Gdx.gl31.glBindBuffer(GL31.GL_SHADER_STORAGE_BUFFER, ssbo);
+        Gdx.gl31.glBindBufferBase(GL31.GL_SHADER_STORAGE_BUFFER, WORLD_LIGHTS_BUFFER_BLOCK_INDEX, ssbo);
+        Gdx.gl31.glBufferData(GL31.GL_SHADER_STORAGE_BUFFER, 0, worldLightBuffer, GL31.GL_DYNAMIC_DRAW);
     }
 
     private void chunkActiveDebugSquares(Array2D<Chunk> chunks) {
@@ -235,5 +248,7 @@ public class WorldRenderer {
         float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 0;
         shapeRenderer.rect(chunkRenderX, chunkRenderY, rectSize, rectSize);
     }
+
+
 }
 

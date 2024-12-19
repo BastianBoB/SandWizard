@@ -19,14 +19,14 @@ public class SqaureGridInventory extends Inventory {
 
     @Override
     public float getSlotRenderX(int slotIndex) {
-        float rowSize = slotSize * numRows;
+        float rowSize = getSlotSize() * numRows;
 
         return MathUtil.map(slotIndex % numRows, 0, numRows, centerX - rowSize / 2f, centerX + rowSize / 2f);
     }
 
     @Override
     public float getSlotRenderY(int slotIndex) {
-        float columnSize = slotSize * numCols;
+        float columnSize = getSlotSize() * numCols;
 
         return MathUtil.map(slotIndex / numRows, 0, numCols, centerY - columnSize / 2f, centerY + columnSize / 2f);
     }

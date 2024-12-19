@@ -7,8 +7,6 @@ import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.util.Direction;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
-import com.basti_bob.sand_wizard.world.coordinates.CellPos;
-import com.basti_bob.sand_wizard.world.world_rendering.lighting.WorldLight;
 
 public class Entity {
 
@@ -20,6 +18,7 @@ public class Entity {
     protected float ny;
     protected float xVel;
     protected float yVel;
+    private int updateTimes = 0;
 
     public Entity(World world, float x, float y, EntityHitBox hitBox) {
         this.world = world;
@@ -35,6 +34,21 @@ public class Entity {
         applyVelocityFriction();
         updateMoving();
         updatePosition();
+
+        updateTimes++;
+    }
+
+
+    public void addedToWorld(World world) {
+
+    }
+
+    public void removedFromWorld(World world) {
+
+    }
+
+    public void die() {
+        world.removeEntity(this);
     }
 
     protected void applyGravity() {
@@ -42,8 +56,12 @@ public class Entity {
     }
 
     protected void applyVelocityFriction() {
-        this.xVel *= 0.95;
-        this.yVel *= 0.95;
+        this.xVel *= getFriction();
+        this.yVel *= getFriction();
+    }
+
+    public float getFriction() {
+        return 0.97f;
     }
 
     protected void updateMoving() {
@@ -183,5 +201,9 @@ public class Entity {
 
     public void setyVel(float yVel) {
         this.yVel = yVel;
+    }
+
+    public int getUpdateTimes() {
+        return updateTimes;
     }
 }

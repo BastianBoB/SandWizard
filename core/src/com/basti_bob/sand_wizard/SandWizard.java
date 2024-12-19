@@ -3,16 +3,18 @@ package com.basti_bob.sand_wizard;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.debug.DebugScreen;
+import com.basti_bob.sand_wizard.entities.fireworks.BasicRisingLightFireworkEntity;
 import com.basti_bob.sand_wizard.input.InputHandler;
 import com.basti_bob.sand_wizard.items.ItemStack;
 import com.basti_bob.sand_wizard.items.ItemType;
-import com.basti_bob.sand_wizard.items.crafting.ToolStationInventory;
-import com.basti_bob.sand_wizard.items.crafting.ToolStationScreen;
+import com.basti_bob.sand_wizard.items.crafting.tool_station.ToolStationInventory;
+import com.basti_bob.sand_wizard.items.crafting.tool_station.ToolStationScreen;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.registry.RegistryLoader;
 import com.basti_bob.sand_wizard.rendering.GuiManager;
@@ -71,7 +73,7 @@ public class SandWizard extends ApplicationAdapter {
         world = new World();
         worldRenderer = new WorldRenderer(world, worldCamera);
         player = new Player(world, 0, 800);
-        world.entities.add(player);
+        world.addEntity(player);
 
         //world.entities.add(new Spider(world, 0, 800));
 
@@ -170,7 +172,9 @@ public class SandWizard extends ApplicationAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
-            world.test();
+            //world.test()
+
+            world.addEntity(new BasicRisingLightFireworkEntity(world, player.getPosition().x, player.getPosition().y, Color.RED));
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {

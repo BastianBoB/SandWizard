@@ -30,7 +30,7 @@ public class InventorySlot {
 
         if (addingStack.getAmount() <= amountLeft) {
             itemStack.addAmount(addingStack.getAmount());
-
+            addingStack.removeAmount(addingStack.getAmount());
             return true;
         } else {
             itemStack.setToMaxAmount();

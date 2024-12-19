@@ -15,13 +15,15 @@ import com.basti_bob.sand_wizard.items.inventory.Inventory;
 public class ItemRenderer {
 
     private final GuiManager guiManager;
-    private final int singleCellRenderSize = 15;
+    private final int singleCellRenderSize = (int) (Inventory.DEFAULT_SLOT_SIZE * 0.4);
 
     public ItemRenderer() {
         this.guiManager = SandWizard.guiManager;
     }
 
     public void renderSingleGuiItemWithLabel(ItemStack itemStack, float renderX, float renderY) {
+        if(itemStack.isEmpty()) return;
+
         ShapeRenderer shapeRenderer = guiManager.getShapeRenderer();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         renderGuiItem(itemStack.getItemType(), renderX, renderY, 0);
@@ -31,11 +33,11 @@ public class ItemRenderer {
 
         SpriteBatch batch = guiManager.getSpriteBatch();
         batch.begin();
-        renderSlotLabel(itemStack, renderX - Inventory.DEFAULT_SLOT_SIZE/2f, renderY - Inventory.DEFAULT_SLOT_SIZE/2f);
+        renderSlotLabel(itemStack, renderX - Inventory.DEFAULT_SLOT_SIZE/2f, renderY - Inventory.DEFAULT_SLOT_SIZE/2f, Inventory.DEFAULT_SLOT_SIZE);
         batch.end();
     }
 
-    public void renderSlotLabel(ItemStack itemStack, float renderX, float renderY) {
+    public void renderSlotLabel(ItemStack itemStack, float renderX, float renderY, float slotSize) {
         if (itemStack.isEmpty()) return;
 
         BitmapFont font = guiManager.getFont();
@@ -44,8 +46,8 @@ public class ItemRenderer {
         glyphLayout.setText(font, "" + itemStack.getAmount());
 
         font.setColor(Color.WHITE);
-        font.draw(batch, itemStack.getItemType().getDisplayName(), renderX + 3, renderY + Inventory.DEFAULT_SLOT_SIZE - 3);
-        font.draw(batch, "" + itemStack.getAmount(), renderX + 3, renderY + 5 + glyphLayout.height);
+        //font.draw(batch, itemStack.getItemType().getDisplayName(), renderX + 3, renderY + Inventory.DEFAULT_SLOT_SIZE - 3);
+        font.draw(batch, "" + itemStack.getAmount(), renderX + slotSize - glyphLayout.width - 3, renderY + glyphLayout.height + 5);
     }
 
     public void renderGuiItem(ItemType itemType, float renderX, float renderY, float slotSize) {

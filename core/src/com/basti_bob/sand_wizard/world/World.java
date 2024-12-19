@@ -3,6 +3,7 @@ package com.basti_bob.sand_wizard.world;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.cells.solids.immovable_solids.GasBreathingStone;
 import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
@@ -49,7 +50,7 @@ public class World implements ChunkAccessor {
 
     public final List<WorldLight> globalLights = new ArrayList<>();
 
-    public final List<Entity> entities = new ArrayList<>();
+    private final List<Entity> entities = new ArrayList<>();
 
     public World() {
         this.chunkSaver = new ChunkSaver();
@@ -64,7 +65,11 @@ public class World implements ChunkAccessor {
     }
 
     public void test() {
-
+            for(int i = -1000; i < 1000; i++) {
+                for (int j = -1000; j < 1000; j++) {
+                    setCell(CellType.LIQUID.HYPER_ACID, i, j);
+                }
+            }
     }
 
     public void addStructureToPlace(Structure structure) {
@@ -73,6 +78,16 @@ public class World implements ChunkAccessor {
 
     public void addStructureToPlaceAsync(Supplier<Structure> structureSupplier) {
         CompletableFuture.runAsync(() -> unplacedStructures.add(structureSupplier.get()));
+    }
+
+    public void addEntity(Entity entity) {
+        this.entities.add(entity);
+        entity.addedToWorld(this);
+    }
+
+    public void removeEntity(Entity entity) {
+        this.entities.remove(entity);
+        entity.removedFromWorld(this);
     }
 
     public void update() {
@@ -90,7 +105,8 @@ public class World implements ChunkAccessor {
             if (time > 0.1) System.out.println("UPDATE EXPLOSION: " + time);
         }
 
-        for(Entity entity : entities) {
+        for(int i = 0; i < entities.size(); i++) {
+            Entity entity = entities.get(i);
             entity.update();
         }
     }
@@ -320,5 +336,9 @@ public class World implements ChunkAccessor {
         }
 
         chunkProvider.removeChunk(chunk);
+    }
+
+    public List<Entity> getEntities() {
+        return entities;
     }
 }

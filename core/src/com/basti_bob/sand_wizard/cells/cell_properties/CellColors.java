@@ -41,6 +41,7 @@ public class CellColors {
     public static final CellColors WATER = new CellColors(c(30, 125, 200), c(35, 137, 218), c(25, 115, 185));
     public static final CellColors OIL = new CellColors(hC(0x0E0F0E), hC(0x0B0C0B), hC(0x121312));
     public static final CellColors ACID = new CellColors(hC(0x9BE60F), hC(0xBFFF28), hC(0xAffA19));
+    public static final CellColors HYPER_ACID = new CellColors(hC(0x9BE60F).cpy().mul(1.2f), hC(0xBFFF28).cpy().mul(1.2f), hC(0xAffA19).cpy().mul(1.2f));
     public static final CellColors LAVA = new CellColors(c(255, 60, 0), c(255, 80, 0), c(255, 100, 0));
 
     public static final CellColors FIRE = new CellColors(hC(0xFF8800), hC(0xFF2200), hC(0xFFFF00), hC(0xFFFF00), hC(0xFF2200), hC(0xFFFF00), hC(0xFF8800), hC(0xFFFF00), hC(0xFFFFFF));

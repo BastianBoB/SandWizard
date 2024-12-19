@@ -255,4 +255,10 @@ void main() {
         v_color = gammaCorrect(a_vertexColor);
     }
 
+
+//    if(chunkLightIndices.length() >= 1) {
+//        v_color = vec3(1);
+//    } else {
+//        v_color = vec3(0);
+//    }
 }
