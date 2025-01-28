@@ -51,10 +51,9 @@ public class SpeleothemWorldDecorator extends WorldDecorator {
             if (generator.getHeight() <= directionCaveSpace) possibleGenerators.add(pair);
         }
 
-        if (possibleGenerators.size() == 0) return;
+        if (possibleGenerators.isEmpty()) return;
 
         StaticStructureGenerator generator = RandomObjectWithWeights.getObject(possibleGenerators, world.random);
-
         if(generator == null) return;
 
         int testHeight = generator.getHeight();
@@ -65,7 +64,6 @@ public class SpeleothemWorldDecorator extends WorldDecorator {
 
         int rightTestCellPosX = cellX + direction.getYOff() * widthOffset;
         int rightTestCellPosY = cellY + direction.getXOff() * widthOffset;
-
 
         Direction oppositeDirection = direction.getOpposite();
 

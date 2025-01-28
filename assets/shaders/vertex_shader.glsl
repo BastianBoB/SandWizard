@@ -1,4 +1,4 @@
-#version 330 core
+#version 460 core
 
 
 struct Light {
@@ -28,10 +28,10 @@ const vec2 celestialEllipse = vec2(350, 325);
 const float moonRadius = 20;
 const float sunRadius = 20;
 
-attribute vec2 a_position;
-attribute vec3 a_vertexColor;
-attribute float a_empty;
-varying vec3 v_color;
+in vec2 a_position;
+in vec3 a_vertexColor;
+in float a_empty;
+out vec3 v_color;
 
 uniform mat4 u_proj;
 uniform float u_pointSize;
@@ -48,7 +48,7 @@ const vec3 gammaCorrection = vec3(2.2);
 
 const vec3 skyColor1 = vec3(0.91, 0.94, 0.96);
 const vec3 skyColor2 = vec3(0.23, 0.58, 0.82);
-const vec3 unlitBaseLight = vec3(0.03);
+const vec3 unlitBaseLight = vec3(0.06);
 
 #define PI 3.14159265359
 

@@ -36,6 +36,7 @@ public abstract class WorldDecorator {
                 .addStructure(StructureGenerator.PONDS.MEDIUM_ACID, 0.00002f)
                 .addStructure(StructureGenerator.PONDS.MEDIUM_LAVA, 0.00004f)
                 .addStructure(StructureGenerator.PONDS.MEDIUM_WATER, 0.0001f)
+                .addStructure(StructureGenerator.MINESHAFT.TYPE_1, 0.001f)
                 .build());
 
         public static final WorldDecorator BASE_TOP = REGISTRY.register("base_top", StructureWorldDecorator.builder()

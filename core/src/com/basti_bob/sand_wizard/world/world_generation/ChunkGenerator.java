@@ -57,7 +57,7 @@ public class ChunkGenerator {
 
                 ToPlaceStructureCell toPlaceStructureCell = getCellFromMap(i, j, queuedCells);
 
-                if (toPlaceStructureCell != null && !(toPlaceStructureCell.getPlacePriority() == PlacePriority.REPLACE_EMPTY && newCellType != CellType.EMPTY)) {
+                if (toPlaceStructureCell != null && !(toPlaceStructureCell.getPlacePriority() == PlacePriority.REPLACE_EMPTY)) {
                     chunkBuilder.setCell(toPlaceStructureCell.getCell(), cellPosX, cellPosY, i, j);
                 } else {
                     chunkBuilder.setCell(newCellType, cellPosX, cellPosY, i, j);

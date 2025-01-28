@@ -149,7 +149,7 @@ public class World implements ChunkAccessor {
 
     private void placeStructures() {
 
-        if (!unplacedStructures.isEmpty()) {
+        while (!unplacedStructures.isEmpty()) {
             Structure structure = unplacedStructures.pop();
 
             structure.placeInWorld(this);

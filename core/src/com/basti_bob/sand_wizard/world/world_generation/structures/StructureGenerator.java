@@ -4,6 +4,7 @@ import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.util.range.IntRange;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.registry.Registry;
+import com.basti_bob.sand_wizard.world.world_generation.structures.mineshafts.MineShaftGenerator;
 import com.basti_bob.sand_wizard.world.world_generation.structures.ponds.PondGenerator;
 import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.PlacePriority;
 import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
@@ -393,6 +394,10 @@ public abstract class StructureGenerator {
                             () -> new ToPlaceStructureCell(CellType.SOLID.STALACTITE_DARK.createCell(), PlacePriority.REPLACE_EMPTY)
                     }).build();
         }
+    }
+    
+    public static final class MINESHAFT {
+        public static final MineShaftGenerator TYPE_1 = new MineShaftGenerator();
     }
 
     public abstract Structure generate(World world, int startX, int startY);

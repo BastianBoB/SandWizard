@@ -34,8 +34,8 @@ public class WorldConstants {
     public static final int PLAYER_CHUNK_UPDATE_RADIUS_X = 15;
     public static final int PLAYER_CHUNK_UPDATE_RADIUS_Y = 11;
 
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = 21;
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = 17;
+    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = 26;
+    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = 22;
     public static final int PLAYER_CHUNK_UNLOAD_RADIUS_X = 41;
     public static final int PLAYER_CHUNK_UNLOAD_RADIUS_Y = 37;
 

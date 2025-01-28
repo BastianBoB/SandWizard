@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.cells.CellType;
@@ -17,6 +18,7 @@ import com.basti_bob.sand_wizard.items.crafting.tool_station.ToolStationInventor
 import com.basti_bob.sand_wizard.items.crafting.tool_station.ToolStationScreen;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.registry.RegistryLoader;
+import com.basti_bob.sand_wizard.registry.RegistryTreePrint;
 import com.basti_bob.sand_wizard.rendering.GuiManager;
 import com.basti_bob.sand_wizard.rendering.ItemRenderer;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
@@ -58,7 +60,9 @@ public class SandWizard extends ApplicationAdapter {
 
         RegistryLoader.loadRegistries();
 
-        //RegistryTreePrint.printRegistryTree();
+        System.out.println(Gdx.gl.glGetString(GL30.GL_VERSION));
+
+        RegistryTreePrint.printRegistryTree();
 
         worldCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         worldCamera.update();

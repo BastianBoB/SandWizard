@@ -26,11 +26,10 @@ public class CellProperties {
     public static final MovableSolidProperties POWDER_SNOW = MovableSolidProperties.builder().allMovableSolid(0.05f, 0.8f).burningTemperature(100).maxBurningTime(0).build();
 
     public static final LiquidProperties WATER = LiquidProperties.builder().allLiquid(6f, 1f).burningTemperature(100).maxBurningTime(0).build();
-    public static final LiquidProperties ACID = LiquidProperties.builder().allLiquid(5f, 0.75f).allLight(8f, 0.5f, Color.LIME).allBurn(100, 120, 0.1f).build();
-    public static final LiquidProperties HYPER_ACID = LiquidProperties.builder().allLiquid(5f, 0.75f).allLight(8f, 0.5f, Color.LIME.cpy().mul(1.2f)).allBurn(100, 120, 0.1f).build();
-
+    public static final LiquidProperties ACID = LiquidProperties.builder().allLiquid(5f, 0.75f).allLight(25f, 0.1f, Color.LIME).allBurn(100, 120, 0.1f).build();
+    public static final LiquidProperties HYPER_ACID = LiquidProperties.builder().allLiquid(5f, 0.75f).allLight(25f, 0.1f, Color.LIME.cpy().mul(1.2f)).allBurn(100, 120, 0.1f).build();
     public static final LiquidProperties OIL = LiquidProperties.builder().allLiquid(4f, 0.5f).allBurn(100, 5, 0.7f).build();
-    public static final LiquidProperties LAVA = LiquidProperties.builder().allLiquid(2f, 5f).allLight(8f, 0.5f, CellColors.c(255, 128, 0)).build();
+    public static final LiquidProperties LAVA = LiquidProperties.builder().allLiquid(2f, 5f).allLight(31f, 0.05f, CellColors.c(255, 128, 0)).build();
 
     public static final GasProperties METHANE = GasProperties.builder().allGas(1f, 1f, new IntRange(180, 300)).build();
     public static final GasProperties STEAM = GasProperties.builder().allGas(1.5f, 0.5f, new IntRange(180, 300)).build();

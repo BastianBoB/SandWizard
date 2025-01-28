@@ -1,6 +1,7 @@
 package com.basti_bob.sand_wizard.world.world_rendering.lighting;
 
 import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.world.chunk.Chunk;
 
 public class CellLight extends ChunkLight {
 
