@@ -1,12 +1,9 @@
 package com.basti_bob.sand_wizard.world.world_generation.structures;
 
-import com.basti_bob.sand_wizard.cells.Cell;
-import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.coordinates.InChunkPos;
-import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.PlacePriority;
 import com.basti_bob.sand_wizard.world.world_generation.structures.structure_placing.ToPlaceStructureCell;
 
 import java.util.*;
@@ -27,7 +24,7 @@ public class Structure {
         for (Map.Entry<ChunkPos, HashMap<InChunkPos, ToPlaceStructureCell>> entry : chunksWithCells.entrySet()) {
 
             ChunkPos chunkPos = entry.getKey();
-            Chunk chunk = world.chunkProvider.getChunk(chunkPos);
+            Chunk chunk = world.chunkManager.getChunk(chunkPos);
 
             HashMap<InChunkPos, ToPlaceStructureCell> toPlaceCells = entry.getValue();
 
@@ -39,11 +36,10 @@ public class Structure {
             }
         }
 
-        CompletableFuture.runAsync(() -> {
-            for (ChunkPos chunkPos : toLoadChunks) {
-                world.loadChunkAsync(chunkPos.x, chunkPos.y);
-            }
-        });
+
+        for (ChunkPos chunkPos : toLoadChunks) {
+            world.loadChunkAsync(chunkPos.x, chunkPos.y);
+        }
     }
 
     public static Builder builder() {

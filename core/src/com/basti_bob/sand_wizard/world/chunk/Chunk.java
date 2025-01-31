@@ -10,13 +10,14 @@ import com.basti_bob.sand_wizard.cells.util.ChunkBoarderState;
 import com.basti_bob.sand_wizard.util.Array2D;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.ChunkLight;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class Chunk implements Supplier<Chunk> {
+public class Chunk {
 
     public World world;
     public Array2D<Cell> grid;
@@ -27,7 +28,7 @@ public class Chunk implements Supplier<Chunk> {
     private int numActiveFrames;
     public boolean hasBeenModified;
 
-    private boolean loaded;
+    private boolean updating;
 
     public final List<ChunkLight> affectedLights = new ArrayList<>();
     public final List<ChunkLight> lightsInChunk = new ArrayList<>();
@@ -43,7 +44,7 @@ public class Chunk implements Supplier<Chunk> {
     }
 
     public void gotAddedToWorld() {
-        this.numActiveFrames = 5;
+        this.numActiveFrames = 1;
     }
 
     public void gotRemovedFromWorld() {
@@ -206,16 +207,15 @@ public class Chunk implements Supplier<Chunk> {
         return numActiveFrames > 0;
     }
 
-    public boolean isLoaded() {
-        return loaded;
+    public boolean isUpdating() {
+        return updating;
     }
 
-    public void setLoaded(boolean loaded) {
-        this.loaded = loaded;
+    public void setUpdating(boolean updating) {
+        this.updating = updating;
 
-        if(loaded) {
+        if (updating)
             this.activateChunk();
-        }
     }
 
     public void updateActive() {
@@ -226,12 +226,6 @@ public class Chunk implements Supplier<Chunk> {
     public Array2D<Cell> getGrid() {
         return grid;
     }
-
-    @Override
-    public Chunk get() {
-        return this;
-    }
-
 
 //    public void updateLighting() {
 //        lightValues.clear();
@@ -277,6 +271,10 @@ public class Chunk implements Supplier<Chunk> {
 
     public int getPosY() {
         return posY;
+    }
+
+    public ChunkPos getChunkPos() {
+        return new ChunkPos(posX, posY);
     }
 
     public void setPosX(int posX) {

@@ -24,14 +24,8 @@ public class ChunkSaver {
 
     public final String CHUNK_SAVING_LOCATION = "world/chunks/";
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
-
     private String getChunkFileLocation(int chunkX, int chunkY) {
         return CHUNK_SAVING_LOCATION + chunkX + "," + chunkY;
-    }
-
-    public void writeChunkAsync(Chunk chunk) {
-        executorService.submit(() -> writeChunk(chunk));
     }
 
     public void writeChunk(Chunk chunk) {

@@ -63,7 +63,8 @@ public class StructurePlacingManager {
         }
     }
 
-    public void loadedChunk(Chunk chunk, ChunkPos chunkPos) {
+    public void loadedChunk(Chunk chunk) {
+        ChunkPos chunkPos = chunk.getChunkPos();
 
         HashMap<InChunkPos, ToPlaceStructureCell> toPlaceCells = unloadedStructureCells.get(chunkPos);
         if (toPlaceCells != null) {

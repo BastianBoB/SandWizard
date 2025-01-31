@@ -64,10 +64,6 @@ public class ChunkGenerator {
                 }
 
                 decorateChunk(cellPosX, cellPosY, terrainHeight, isCaveBelow, isCave, isCaveAbove, chunkCreationData);
-
-//                if(chunkPosX % 6 == 0 && chunkPosY % 6 == 0) {
-//                    chunkBuilder.setCell(CellType.LIQUID.LAVA, cellPosX, cellPosY, i, j);
-//                }
             }
         }
 

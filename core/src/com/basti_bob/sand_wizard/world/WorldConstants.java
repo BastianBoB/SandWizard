@@ -28,16 +28,31 @@ public class WorldConstants {
     //RENDERING
     public static final boolean RENDER_ENTITY_HITBOX = true;
 
-    public static final int PLAYER_CHUNK_RENDER_RADIUS_X = 11;
-    public static final int PLAYER_CHUNK_RENDER_RADIUS_Y = 7;
 
-    public static final int PLAYER_CHUNK_UPDATE_RADIUS_X = 15;
-    public static final int PLAYER_CHUNK_UPDATE_RADIUS_Y = 11;
+    //Chunks are loaded in an Ellipse (With no Zoom 23 * 15 chunks are visible)
+    public static final class CHUNK_LOADING {
+        private static final int BASE_WIDTH = 23;
+        private static final int BASE_HEIGHT = 15;
 
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_X = 26;
-    public static final int PLAYER_CHUNK_LOAD_RADIUS_Y = 22;
-    public static final int PLAYER_CHUNK_UNLOAD_RADIUS_X = 41;
-    public static final int PLAYER_CHUNK_UNLOAD_RADIUS_Y = 37;
+        private static final int RENDER_RADIUS = 0;
+        private static final int UPDATE_RADIUS = 3;
+        private static final int LOAD_RADIUS = 8;
+        private static final int UNLOAD_RADIUS = 20;
 
-    public static final int CHUNK_POOL_SIZE = (int) (1.2f * (PLAYER_CHUNK_UNLOAD_RADIUS_X * 2 + 1) * (PLAYER_CHUNK_UNLOAD_RADIUS_Y * 2 + 1));
+
+        public static final int RENDER_WIDTH = BASE_WIDTH + RENDER_RADIUS * 2;
+        public static final int RENDER_HEIGHT = BASE_HEIGHT + RENDER_RADIUS * 2;
+
+        public static final int UPDATE_WIDTH = BASE_WIDTH + UPDATE_RADIUS * 2;
+        public static final int UPDATE_HEIGHT = BASE_HEIGHT + UPDATE_RADIUS * 2;
+
+        public static final int LOAD_WIDTH = BASE_WIDTH + LOAD_RADIUS * 2;
+        public static final int LOAD_HEIGHT = BASE_HEIGHT + LOAD_RADIUS * 2;
+
+        public static final int UNLOAD_WIDTH = BASE_WIDTH + UNLOAD_RADIUS * 2;
+        public static final int UNLOAD_HEIGHT = BASE_HEIGHT + UNLOAD_RADIUS * 2;
+
+        public static final int CHUNK_POOL_SIZE = UNLOAD_WIDTH * UNLOAD_HEIGHT;
+
+    }
 }

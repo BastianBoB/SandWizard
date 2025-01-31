@@ -5,8 +5,8 @@ public class MathUtil {
     public static final float PI = (float) Math.PI;
     public static final float TWO_PI = 2 * PI;
 
-    public static boolean isPointInRect(float pointX, float pointY, float rectX, float rectY, float rectWidth, float rectHeight) {
-        return pointX >= rectX && pointX <= rectX + rectWidth && pointY >= rectY && pointY <= rectY + rectHeight;
+    public static boolean isPointInRect(float x, float y, float rectX, float rectY, float width, float height) {
+        return x >= rectX && x <= rectX + width && y >= rectY && y <= rectY + height;
     }
 
     public static float lerp(float v0, float v1, float t) {
@@ -28,6 +28,14 @@ public class MathUtil {
     public static float dist(float x1, float y1, float x2, float y2) {
         return (float) Math.sqrt(distSqr(x1, y1, x2, y2));
     }
+
+    public static boolean isPointInEllipse(float x, float y, float centerX, float centerY, float width, float height) {
+        float dx = centerX - x;
+        float dy = centerY - y;
+
+        return (dx * dx) / (width/2 * width/2) + (dy * dy) / (height/2 * height/2) <= 1;
+    }
+
 
     public static float distSqr(float x1, float y1, float x2, float y2) {
         float dx = x2 - x1;

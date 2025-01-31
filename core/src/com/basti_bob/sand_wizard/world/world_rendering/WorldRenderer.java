@@ -222,6 +222,8 @@ public class WorldRenderer {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
+        System.out.println("DEBUG: " + chunks.getArray().length);
+
         for (int chunkI = 0; chunkI < chunks.rows; chunkI++) {
             for (int chunkJ = 0; chunkJ < chunks.cols; chunkJ++) {
 
@@ -239,13 +241,13 @@ public class WorldRenderer {
 
     private final Color activeColor = new Color(0f, 1f, 0f, 1f);
     private final Color inActiveColor = new Color(1f, 0f, 0f, 1f);
-    private final Color unloadedColor = new Color(0f, 0f, 0f, 1f);
+    private final Color notUpdatingColor = new Color(0f, 0f, 0f, 1f);
 
     public void renderChunkActiveDebugSquare(Chunk chunk, float chunkRenderX, float chunkRenderY) {
 
-        shapeRenderer.setColor(chunk.isLoaded() ? (chunk.isActive() ? activeColor : inActiveColor) : unloadedColor);
+        shapeRenderer.setColor(chunk.isUpdating() ? (chunk.isActive() ? activeColor : inActiveColor) : notUpdatingColor);
 
-        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 0;
+        float rectSize = WorldConstants.CHUNK_SIZE * WorldConstants.CELL_SIZE - 1;
         shapeRenderer.rect(chunkRenderX, chunkRenderY, rectSize, rectSize);
     }
 

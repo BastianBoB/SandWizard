@@ -3,10 +3,8 @@ package com.basti_bob.sand_wizard;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GL30;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.debug.DebugScreen;
@@ -18,13 +16,17 @@ import com.basti_bob.sand_wizard.items.crafting.tool_station.ToolStationInventor
 import com.basti_bob.sand_wizard.items.crafting.tool_station.ToolStationScreen;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.registry.RegistryLoader;
-import com.basti_bob.sand_wizard.registry.RegistryTreePrint;
 import com.basti_bob.sand_wizard.rendering.GuiManager;
 import com.basti_bob.sand_wizard.rendering.ItemRenderer;
 import com.basti_bob.sand_wizard.util.FunctionRunTime;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.world_generation.structures.StructureGenerator;
 import com.basti_bob.sand_wizard.world.world_rendering.WorldRenderer;
+
+import java.awt.*;
+import java.util.List;
+
 
 public class SandWizard extends ApplicationAdapter {
 
@@ -58,11 +60,16 @@ public class SandWizard extends ApplicationAdapter {
     @Override
     public void create() {
 
+        String glVersion = Gdx.gl.glGetString(GL30.GL_VERSION);
+        String glRenderer = Gdx.gl.glGetString(GL30.GL_RENDERER);
+
+        // Print the OpenGL version and renderer
+        System.out.println("OpenGL Version: " + glVersion);
+        System.out.println("OpenGL Renderer: " + glRenderer);
+
         RegistryLoader.loadRegistries();
 
-        System.out.println(Gdx.gl.glGetString(GL30.GL_VERSION));
-
-        RegistryTreePrint.printRegistryTree();
+        //RegistryTreePrint.printRegistryTree();
 
         worldCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         worldCamera.update();
@@ -74,12 +81,17 @@ public class SandWizard extends ApplicationAdapter {
         inputHandler = new InputHandler();
         Gdx.input.setInputProcessor(inputHandler);
 
+        int y = 0;
+
         world = new World();
         worldRenderer = new WorldRenderer(world, worldCamera);
-        player = new Player(world, 0, 800);
+        player = new Player(world, 0, y);
         world.addEntity(player);
 
-        //world.entities.add(new Spider(world, 0, 800));
+        world.addStructureToPlace(StructureGenerator.MINESHAFT.TYPE_1.generate(world, 500, y));
+        world.addStructureToPlace(StructureGenerator.STALACTITES.LARGE.TYPE_1.generate(world, 500, y + 50));
+
+        //world.entities.add(new Spider(world, 0, y));
 
         this.debugScreen = new DebugScreen(player);
 

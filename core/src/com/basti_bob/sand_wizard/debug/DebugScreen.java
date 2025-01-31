@@ -1,22 +1,13 @@
 package com.basti_bob.sand_wizard.debug;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.rendering.GuiElement;
-import com.basti_bob.sand_wizard.rendering.GuiManager;
 import com.basti_bob.sand_wizard.util.range.FloatRange;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.world_generation.biomes.BiomeType;
 
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -47,7 +38,7 @@ public class DebugScreen extends GuiElement {
 
         itemY[0] -= verticalSpace;
 
-        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "generated chunks: " + p.getWorld().chunkProvider.getChunks().size()), true));
+        addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "generated chunks: " + p.getWorld().chunkManager.getChunks().size()), true));
         addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "loaded chunks: " + p.getWorld().loadedChunks), true));
         addDebugRenderItem(itemY, getTextRenderItem(itemX, itemY, (p -> "active chunks: " + p.getWorld().activeChunks), true));
 
