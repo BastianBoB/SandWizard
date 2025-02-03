@@ -27,18 +27,21 @@ public class WorldConstants {
 
     //RENDERING
     public static final boolean RENDER_ENTITY_HITBOX = true;
+    public static final float VISIBLE_CHUNK_BRIGHTNESS = 0.4f;
+    public static final float NOT_VISIBLE_CHUNK_BRIGHTNESS = 0.1f;
 
 
-    //Chunks are loaded in an Ellipse (With no Zoom 23 * 15 chunks are visible)
+    //Chunks are loaded in an Ellipse (With no Zoom 25 * 15 chunks are visible)
     public static final class CHUNK_LOADING {
-        private static final int BASE_WIDTH = 23;
+        private static final int BASE_WIDTH = 25;
         private static final int BASE_HEIGHT = 15;
 
         private static final int RENDER_RADIUS = 0;
-        private static final int UPDATE_RADIUS = 3;
+        private static final int UPDATE_RADIUS = 4;
         private static final int LOAD_RADIUS = 8;
         private static final int UNLOAD_RADIUS = 20;
 
+        private static final int STRUCTURE_GENERATION_RADIUS = 40;
 
         public static final int RENDER_WIDTH = BASE_WIDTH + RENDER_RADIUS * 2;
         public static final int RENDER_HEIGHT = BASE_HEIGHT + RENDER_RADIUS * 2;

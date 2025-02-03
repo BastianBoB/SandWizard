@@ -4,11 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.player.Player;
 import com.basti_bob.sand_wizard.util.Array2D;
+import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.world.world_generation.chunk_data.ChunkColumnData;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
@@ -94,6 +96,8 @@ public class WorldRenderer {
         shader.setUniform2fv("u_cameraPos", new float[]{camera.position.x / WorldConstants.CELL_SIZE, camera.position.y / WorldConstants.CELL_SIZE}, 0, 2);
 
         shader.setUniformi("lightingEnabled", SandWizard.lightingEnabled ? 1 : 0);
+        float unlitBaseLight = WorldConstants.NOT_VISIBLE_CHUNK_BRIGHTNESS;
+        shader.setUniform3fv("u_unlitBaseLight", new float[]{unlitBaseLight, unlitBaseLight, unlitBaseLight}, 0, 3);
 
         if (SandWizard.lightingEnabled) {
             renderWithLights(player, chunks, topLeftChunkPos);
@@ -139,6 +143,11 @@ public class WorldRenderer {
                 Chunk chunk = chunks.get(i, j);
                 if (chunk == null) continue;
 
+                float unlitBaseLight = chunk.isVisibleByPlayer() ? WorldConstants.VISIBLE_CHUNK_BRIGHTNESS : WorldConstants.NOT_VISIBLE_CHUNK_BRIGHTNESS;
+                shader.setUniform3fv("u_unlitBaseLight", new float[]{unlitBaseLight, unlitBaseLight, unlitBaseLight}, 0, 3);
+
+                //if(!chunk.isVisibleByPlayer()) continue;
+
                 lastChunkNumLights = setChunkLightIndicesArray(chunk, lastChunkNumLights);
 
                 chunk.mesh.render(shader, GL20.GL_POINTS);
@@ -181,10 +190,6 @@ public class WorldRenderer {
         List<ChunkLight> lights = chunk.affectedLights;
         int numLights = lights.size();
 
-        if (numLights == 1) {
-            int a = 0;
-        }
-
         if (numLights == 0 && lastChunkNumLights == 0) return numLights;
 
         IntBuffer lightIndicesBuffer = chunkLightIndicesBuffers[numLights];
@@ -222,8 +227,6 @@ public class WorldRenderer {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        System.out.println("DEBUG: " + chunks.getArray().length);
-
         for (int chunkI = 0; chunkI < chunks.rows; chunkI++) {
             for (int chunkJ = 0; chunkJ < chunks.cols; chunkJ++) {
 
@@ -237,6 +240,7 @@ public class WorldRenderer {
             }
         }
         shapeRenderer.end();
+
     }
 
     private final Color activeColor = new Color(0f, 1f, 0f, 1f);

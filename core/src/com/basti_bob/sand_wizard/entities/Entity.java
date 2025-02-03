@@ -7,6 +7,8 @@ import com.basti_bob.sand_wizard.cells.Cell;
 import com.basti_bob.sand_wizard.util.Direction;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.coordinates.CellPos;
+import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 
 public class Entity {
 
@@ -173,6 +175,11 @@ public class Entity {
     public void moveTo(float x, float y) {
         this.nx = x;
         this.ny = y;
+    }
+
+
+    public CellPos getCellPos() {
+        return new CellPos((int) nx, (int) ny);
     }
 
     public void moveBy(float x, float y) {

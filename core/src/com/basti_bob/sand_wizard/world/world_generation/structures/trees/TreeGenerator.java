@@ -2,6 +2,7 @@ package com.basti_bob.sand_wizard.world.world_generation.structures.trees;
 
 import com.badlogic.gdx.math.Vector2;
 import com.basti_bob.sand_wizard.cells.CellType;
+import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 import com.basti_bob.sand_wizard.world.world_generation.structures.Structure;
@@ -56,7 +57,7 @@ public class TreeGenerator extends StructureGenerator {
         Set<CellPos> allBranchPositions = new HashSet<>();
 
         for (Branch branch : branches) {
-            allBranchPositions.addAll(pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
+            allBranchPositions.addAll(MathUtil.pathBetweenPoints(branch.startX, branch.startY, branch.endX, branch.endY, branchThicknessFunction.getBranchThickness(branch.iteration)));
         }
 
         Region branchRegion = getRegionsFromPoints(new ArrayList<>(allBranchPositions));
@@ -152,46 +153,6 @@ public class TreeGenerator extends StructureGenerator {
         }
 
         return branches;
-    }
-
-    public List<CellPos> pathBetweenPoints(float x1, float y1, float x2, float y2, int thickness) {
-        List<CellPos> points = new ArrayList<>();
-
-        int xDistance = (int) Math.abs(x2 - x1);
-        int yDistance = (int) Math.abs(y2 - y1);
-
-        boolean positiveX = (x2 - x1) > 0;
-        boolean positiveY = (y2 - y1) > 0;
-
-        int steps = Math.max(xDistance, yDistance);
-
-        int thickOffMin = -thickness / 2;
-        int thickOffMax = (int) Math.ceil(thickness / 2f);
-
-        if (xDistance > yDistance) {
-            float slope = Math.abs((y2 - y1) / (x2 - x1));
-
-            for (int i = 0; i <= steps; i++) {
-                float x = positiveX ? i : -i;
-                float y = positiveY ? i * slope : -i * slope;
-
-                for (int k = thickOffMin; k < thickOffMax; k++)
-                    points.add(new CellPos((int) (x1 + x), (int) (y1 + y) + k));
-
-            }
-        } else {
-            float slope = Math.abs((x2 - x1) / (y2 - y1));
-
-            for (int i = 0; i <= steps; i++) {
-                float x = positiveX ? i * slope : -i * slope;
-                float y = positiveY ? i : -i;
-
-                for (int k = thickOffMin; k < thickOffMax; k++)
-                    points.add(new CellPos((int) (x1 + x) + k, (int) (y1 + y)));
-            }
-        }
-
-        return points;
     }
 
     private Region getRegionsFromPoints(List<CellPos> points) {

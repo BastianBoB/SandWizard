@@ -32,16 +32,9 @@ public class ChunkManager {
     }
 
     public void addAndRemoveChunks() {
-        if (!chunksToAdd.isEmpty())
-            System.out.println("add: " + chunksToAdd.size());
-
-        if (!chunksToRemove.isEmpty())
-            System.out.println("remove: " + chunksToRemove.size());
-
         while (!chunksToAdd.isEmpty()) {
             addChunk(chunksToAdd.poll());
         }
-
         while (!chunksToRemove.isEmpty()) {
             removeChunk(chunksToRemove.poll());
         }

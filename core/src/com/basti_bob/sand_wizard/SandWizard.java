@@ -81,15 +81,10 @@ public class SandWizard extends ApplicationAdapter {
         inputHandler = new InputHandler();
         Gdx.input.setInputProcessor(inputHandler);
 
-        int y = 0;
-
         world = new World();
         worldRenderer = new WorldRenderer(world, worldCamera);
-        player = new Player(world, 0, y);
+        player = new Player(world, 16, 16);
         world.addEntity(player);
-
-        world.addStructureToPlace(StructureGenerator.MINESHAFT.TYPE_1.generate(world, 500, y));
-        world.addStructureToPlace(StructureGenerator.STALACTITES.LARGE.TYPE_1.generate(world, 500, y + 50));
 
         //world.entities.add(new Spider(world, 0, y));
 

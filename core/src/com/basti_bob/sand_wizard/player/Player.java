@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.basti_bob.sand_wizard.SandWizard;
 import com.basti_bob.sand_wizard.cells.Cell;
+import com.basti_bob.sand_wizard.cells.CellType;
 import com.basti_bob.sand_wizard.entities.Entity;
 import com.basti_bob.sand_wizard.entities.EntityHitBox;
 import com.basti_bob.sand_wizard.items.inventory.InventoryWithPlayerInventoryScreen;
@@ -13,14 +15,15 @@ import com.basti_bob.sand_wizard.util.MathUtil;
 import com.basti_bob.sand_wizard.world.chunk.Chunk;
 import com.basti_bob.sand_wizard.world.World;
 import com.basti_bob.sand_wizard.world.WorldConstants;
+import com.basti_bob.sand_wizard.world.coordinates.CellPos;
 import com.basti_bob.sand_wizard.world.coordinates.ChunkPos;
 import com.basti_bob.sand_wizard.world.world_rendering.lighting.WorldLight;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Player extends Entity {
+
+    List<VisibleChunkRay> visibleChunkRays = new ArrayList<>();
 
     public boolean onGround;
     private int stepUpHeight = 6;
@@ -51,6 +54,20 @@ public class Player extends Entity {
 
         this.inventory = new PlayerInventory(this);
         this.onlyPlayerInventoryScreen = new OnlyInventoryWithPlayerInventoryScreen();
+
+        int chunkSize = WorldConstants.CHUNK_SIZE;
+        int renderHeight = WorldConstants.CHUNK_LOADING.RENDER_HEIGHT;
+        int renderWidth = WorldConstants.CHUNK_LOADING.RENDER_WIDTH;
+        for (int i = -renderWidth / 2; i <= renderWidth / 2; i++) {
+            visibleChunkRays.add(new VisibleChunkRay(i * chunkSize, -renderHeight / 2 * chunkSize));
+            visibleChunkRays.add(new VisibleChunkRay(i * chunkSize, renderHeight / 2 * chunkSize));
+        }
+        for (int j = -(renderHeight / 2 - 1); j <= renderHeight / 2 - 1; j++) {
+            visibleChunkRays.add(new VisibleChunkRay(-renderWidth / 2 * chunkSize, j * chunkSize));
+            visibleChunkRays.add(new VisibleChunkRay(renderWidth / 2 * chunkSize, j * chunkSize));
+        }
+
+        System.out.println(visibleChunkRays.size());
     }
 
     public void openInventoryScreen(InventoryWithPlayerInventoryScreen screen) {
@@ -96,10 +113,6 @@ public class Player extends Entity {
         }
 
         updatePosition();
-
-        int chunkX = World.getChunkPos((int) this.nx);
-        int chunkY = World.getChunkPos((int) this.ny);
-        setRenderingChunks(chunkX, chunkY);
     }
 
     public void jump() {
@@ -111,6 +124,14 @@ public class Player extends Entity {
         super.render(camera, shapeRenderer);
 
         if (openedInventoryScreen) inventoryScreen.render();
+
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+//        shapeRenderer.setColor(Color.ORANGE);
+//        for (VisibleChunkRay ray : visibleChunkRays) {
+//            Vector2 rayTarget = this.getPosition().cpy().add(ray.getEndCellPos().x, ray.getEndCellPos().y);
+//            shapeRenderer.line(this.getPosition().cpy().scl(WorldConstants.CELL_SIZE), rayTarget.scl(WorldConstants.CELL_SIZE));
+//        }
+//        shapeRenderer.end();
     }
 
     public Vector2 getPosition() {
@@ -233,6 +254,7 @@ public class Player extends Entity {
 
 
     private void updatePosition() {
+        if (ox == nx && oy == ny) return;
 
         Chunk previousChunk = world.getChunkFromCellPos((int) ox, (int) oy);
         Chunk newChunk = world.getChunkFromCellPos((int) nx, (int) ny);
@@ -245,6 +267,23 @@ public class Player extends Entity {
         this.oy = ny;
 
         this.light.setNewPosition((int) nx, (int) ny);
+
+        CellPos playerCellPos = this.getCellPos();
+        int count = 0;
+        for (VisibleChunkRay visibleChunkRay : visibleChunkRays) {
+            for (CellPos cellPositionOffset : visibleChunkRay.cellPositionOffsets) {
+                int targetX = playerCellPos.x + cellPositionOffset.x;
+                int targetY = playerCellPos.y + cellPositionOffset.y;
+
+                //  world.setCell(CellType.SOLID.STONE, cellPositionOffset.x, cellPositionOffset.y);
+
+                if (world.getCell(targetX, targetY).isSolid()) break;
+                world.getChunkFromCellPos(targetX, targetY).setVisibleByPlayer(true);
+                count++;
+            }
+        }
+
+        System.out.println("PLAYER RAY WORLD GET CHUNK CALLS: " + count);
     }
 
     private void enteredNewChunk(Chunk previousChunk, Chunk newChunk) {

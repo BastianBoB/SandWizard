@@ -47,10 +47,6 @@ public class Registry<T> {
     }
 
     public List<T> getAllEntries() {
-        if(allEntries.size() == 0) {
-            System.out.println("WARNING: getAllEntries called, but Registry:" + this.nameID + " has no entries yet");
-        }
-
         return allEntries;
     }
 

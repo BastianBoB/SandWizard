@@ -27,7 +27,7 @@ public class Chunk {
     private int posY;
     private int numActiveFrames;
     public boolean hasBeenModified;
-
+    private boolean visibleByPlayer;
     private boolean updating;
 
     public final List<ChunkLight> affectedLights = new ArrayList<>();
@@ -45,6 +45,7 @@ public class Chunk {
 
     public void gotAddedToWorld() {
         this.numActiveFrames = 1;
+        this.setVisibleByPlayer(false);
     }
 
     public void gotRemovedFromWorld() {
@@ -283,5 +284,13 @@ public class Chunk {
 
     public void setPosY(int posY) {
         this.posY = posY;
+    }
+
+    public void setVisibleByPlayer(boolean visibleByPlayer) {
+        this.visibleByPlayer = visibleByPlayer;
+    }
+
+    public boolean isVisibleByPlayer() {
+        return visibleByPlayer;
     }
 }
